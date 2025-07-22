@@ -19,16 +19,6 @@
             font-family: 'Montserrat', sans-serif;
             overflow-x: hidden; /* Zapobiega poziomemu przewijaniu */
         }
-        /* Style dla bąbelka z ceną */
-        .price-bubble {
-            position: absolute;
-            top: -1.5rem;
-            right: -1.5rem;
-            transition: transform 0.3s ease-in-out;
-        }
-        .price-bubble:hover {
-            transform: scale(1.05);
-        }
         /* Style dla przełącznika ramek */
         .toggle-checkbox:checked + .toggle-label .toggle-dot {
             transform: translateX(100%);
@@ -78,83 +68,83 @@
         </header>
 
         <!-- GŁÓWNA TREŚĆ (Siatka z ofertami BOGO) -->
-        <main id="main-content-container" class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 p-2">
+        <main id="main-content-container" class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 p-2">
 
             <!-- KARTA BOGO 1 -->
-            <div id="bogo-card-1" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
-                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
-                    139,75 zł
+            <div id="bogo-card-1" class="bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-[#4a5c44] w-2/3">Peppermint + Wild Orange</h3>
+                    <span class="bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-sm">139,75 zł</span>
                 </div>
-                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Peppermint + Wild Orange</h3>
-                <div class="flex justify-center gap-4 h-40">
+                <div class="flex justify-center items-center gap-4 h-32 mb-4">
                     <img id="bogo1-a-img" src="images/bogo1-a.png" alt="Produkt 1A" class="h-full object-contain rounded-lg">
                     <img id="bogo1-b-img" src="images/bogo1-b.png" alt="Produkt 1B" class="h-full object-contain rounded-lg">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                <div class="bg-gray-50 p-3 rounded-md text-center text-sm text-gray-700 mt-auto">
                     <p>Oszczędność: <span class="font-bold">73,75 zł</span> (34,5%)</p>
                     <p>Wartość PV: <span class="font-bold">29,5</span></p>
                 </div>
             </div>
 
             <!-- KARTA BOGO 2 -->
-            <div id="bogo-card-2" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
-                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
-                    190,00 zł
+            <div id="bogo-card-2" class="bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-[#4a5c44] w-2/3">ZenGest + MetaPWR</h3>
+                    <span class="bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-sm">190,00 zł</span>
                 </div>
-                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">ZenGest + MetaPWR</h3>
-                <div class="flex justify-center gap-4 h-40">
+                <div class="flex justify-center items-center gap-4 h-32 mb-4">
                     <img id="bogo2-a-img" src="images/bogo2-a.png" alt="Produkt 2A" class="h-full object-contain rounded-lg">
                     <img id="bogo2-b-img" src="images/bogo2-b.png" alt="Produkt 2B" class="h-full object-contain rounded-lg">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                <div class="bg-gray-50 p-3 rounded-md text-center text-sm text-gray-700 mt-auto">
                     <p>Oszczędność: <span class="font-bold">153,00 zł</span> (44,6%)</p>
                     <p>Wartość PV: <span class="font-bold">40,5</span></p>
                 </div>
             </div>
 
             <!-- KARTA BOGO 3 -->
-            <div id="bogo-card-3" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
-                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
-                    221,50 zł
+            <div id="bogo-card-3" class="bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-[#4a5c44] w-2/3">Serenity + Eucalyptus</h3>
+                    <span class="bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-sm">221,50 zł</span>
                 </div>
-                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">dōTERRA Serenity + Eucalyptus</h3>
-                <div class="flex justify-center gap-4 h-40">
+                <div class="flex justify-center items-center gap-4 h-32 mb-4">
                     <img id="bogo3-a-img" src="images/bogo3-a.png" alt="Produkt 3A" class="h-full object-contain rounded-lg">
                     <img id="bogo3-b-img" src="images/bogo3-b.png" alt="Produkt 3B" class="h-full object-contain rounded-lg">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                <div class="bg-gray-50 p-3 rounded-md text-center text-sm text-gray-700 mt-auto">
                     <p>Oszczędność: <span class="font-bold">103,75 zł</span> (31,9%)</p>
                     <p>Wartość PV: <span class="font-bold">47,0</span></p>
                 </div>
             </div>
 
             <!-- KARTA BOGO 4 -->
-            <div id="bogo-card-4" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
-                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
-                    609,75 zł
+            <div id="bogo-card-4" class="bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-[#4a5c44] w-2/3">Melissa + Blue Tansy</h3>
+                    <span class="bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-sm">609,75 zł</span>
                 </div>
-                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Melissa (5ml) + Blue Tansy (5ml)</h3>
-                <div class="flex justify-center gap-4 h-40">
+                <div class="flex justify-center items-center gap-4 h-32 mb-4">
                     <img id="bogo4-a-img" src="images/bogo4-a.png" alt="Produkt 4A" class="h-full object-contain rounded-lg">
                     <img id="bogo4-b-img" src="images/bogo4-b.png" alt="Produkt 4B" class="h-full object-contain rounded-lg">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                <div class="bg-gray-50 p-3 rounded-md text-center text-sm text-gray-700 mt-auto">
                     <p>Oszczędność: <span class="font-bold">499,00 zł</span> (45,0%)</p>
                     <p>Wartość PV: <span class="font-bold">116,0</span></p>
                 </div>
             </div>
 
             <!-- KARTA BOGO 5 -->
-            <div id="bogo-card-5" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative md:col-span-2">
-                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
-                    237,25 zł
+            <div id="bogo-card-5" class="bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col md:col-span-2">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-[#4a5c44] w-2/3">Plant Protein: Chocolate + Vanilla</h3>
+                    <span class="bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-sm">237,25 zł</span>
                 </div>
-                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Plant Protein: Chocolate + Vanilla</h3>
-                <div class="flex justify-center gap-4 h-40 sm:h-48">
+                <div class="flex justify-center items-center gap-4 h-40 mb-4">
                     <img id="bogo5-a-img" src="images/bogo5-a.png" alt="Produkt 5A" class="h-full object-contain rounded-lg">
                     <img id="bogo5-b-img" src="images/bogo5-b.png" alt="Produkt 5B" class="h-full object-contain rounded-lg">
                 </div>
-                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                <div class="bg-gray-50 p-3 rounded-md text-center text-sm text-gray-700 mt-auto">
                     <p>Oszczędność: <span class="font-bold">237,25 zł</span> (50,0%)</p>
                     <p>Wartość PV: <span class="font-bold">28,0</span></p>
                 </div>
