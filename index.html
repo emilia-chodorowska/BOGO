@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oferta BOGO - Czerwiec 2025</title>
+    
+    <!-- Dołączamy bibliotekę Tailwind CSS do stylizacji -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Dołączamy czcionkę z Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Dodajemy niestandardową czcionkę do projektu */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden; /* Zapobiega poziomemu przewijaniu */
+        }
+        /* Style dla bąbelka z ceną */
+        .price-bubble {
+            position: absolute;
+            top: -1.5rem;
+            right: -1.5rem;
+            transition: transform 0.3s ease-in-out;
+        }
+        .price-bubble:hover {
+            transform: scale(1.05);
+        }
+        /* Style dla przełącznika ramek */
+        .toggle-checkbox:checked + .toggle-label .toggle-dot {
+            transform: translateX(100%);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #48bb78; /* Zielony kolor po włączeniu */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen py-8">
+
+    <!-- SUWAK DO WŁĄCZANIA/WYŁĄCZANIA RAMEK -->
+    <div class="fixed top-4 left-4 z-50">
+        <label for="toggleBorders" class="flex items-center cursor-pointer">
+            <div class="relative">
+                <input type="checkbox" id="toggleBorders" class="toggle-checkbox sr-only">
+                <div class="toggle-label block bg-gray-600 w-14 h-8 rounded-full transition-colors"></div>
+                <div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+            </div>
+            <div class="ml-3 text-gray-700 font-semibold">Pokaż ramki</div>
+        </label>
+    </div>
+
+    <!-- GŁÓWNY KONTENER STRONY -->
+    <div id="main-container" class="relative container max-w-5xl my-8 p-4 sm:p-8 md:p-12 bg-white shadow-xl">
+
+        <!-- GRAFIKI TŁA (LIŚCIE) -->
+        <img 
+            src="images/liscie-gora.jpg" 
+            alt="Dekoracyjne liście" 
+            class="absolute top-0 left-0 w-1/3 opacity-40 pointer-events-none"
+            onerror="this.style.display='none'"
+        >
+        <img 
+            src="images/liscie-dol.jpg" 
+            alt="Dekoracyjne liście" 
+            class="absolute bottom-0 right-0 w-1/3 opacity-40 pointer-events-none"
+            onerror="this.style.display='none'"
+        >
+
+        <!-- NAGŁÓWEK STRONY -->
+        <header id="header-container" class="text-center mb-12 md:mb-16 relative z-10 p-2">
+            <div class="bg-[#d8e4d3] py-4 rounded-lg shadow">
+                 <h1 class="text-3xl md:text-4xl font-bold text-[#4a5c44]">Promocja BOGO - Czerwiec 2025</h1>
+                 <p class="text-lg text-[#4a5c44] mt-2">Kup jeden produkt, a drugi otrzymasz GRATIS!</p>
+            </div>
+        </header>
+
+        <!-- GŁÓWNA TREŚĆ (Siatka z ofertami BOGO) -->
+        <main id="main-content-container" class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 p-2">
+
+            <!-- KARTA BOGO 1 -->
+            <div id="bogo-card-1" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
+                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
+                    139,75 zł
+                </div>
+                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Peppermint + Wild Orange</h3>
+                <div class="flex justify-center gap-4 h-40">
+                    <img id="bogo1-a-img" src="images/bogo1-a.png" alt="Produkt 1A" class="h-full object-contain rounded-lg">
+                    <img id="bogo1-b-img" src="images/bogo1-b.png" alt="Produkt 1B" class="h-full object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                    <p>Oszczędność: <span class="font-bold">73,75 zł</span> (34,5%)</p>
+                    <p>Wartość PV: <span class="font-bold">29,5</span></p>
+                </div>
+            </div>
+
+            <!-- KARTA BOGO 2 -->
+            <div id="bogo-card-2" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
+                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
+                    190,00 zł
+                </div>
+                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">ZenGest + MetaPWR</h3>
+                <div class="flex justify-center gap-4 h-40">
+                    <img id="bogo2-a-img" src="images/bogo2-a.png" alt="Produkt 2A" class="h-full object-contain rounded-lg">
+                    <img id="bogo2-b-img" src="images/bogo2-b.png" alt="Produkt 2B" class="h-full object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                    <p>Oszczędność: <span class="font-bold">153,00 zł</span> (44,6%)</p>
+                    <p>Wartość PV: <span class="font-bold">40,5</span></p>
+                </div>
+            </div>
+
+            <!-- KARTA BOGO 3 -->
+            <div id="bogo-card-3" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
+                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
+                    221,50 zł
+                </div>
+                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">dōTERRA Serenity + Eucalyptus</h3>
+                <div class="flex justify-center gap-4 h-40">
+                    <img id="bogo3-a-img" src="images/bogo3-a.png" alt="Produkt 3A" class="h-full object-contain rounded-lg">
+                    <img id="bogo3-b-img" src="images/bogo3-b.png" alt="Produkt 3B" class="h-full object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                    <p>Oszczędność: <span class="font-bold">103,75 zł</span> (31,9%)</p>
+                    <p>Wartość PV: <span class="font-bold">47,0</span></p>
+                </div>
+            </div>
+
+            <!-- KARTA BOGO 4 -->
+            <div id="bogo-card-4" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative">
+                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
+                    609,75 zł
+                </div>
+                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Melissa (5ml) + Blue Tansy (5ml)</h3>
+                <div class="flex justify-center gap-4 h-40">
+                    <img id="bogo4-a-img" src="images/bogo4-a.png" alt="Produkt 4A" class="h-full object-contain rounded-lg">
+                    <img id="bogo4-b-img" src="images/bogo4-b.png" alt="Produkt 4B" class="h-full object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                    <p>Oszczędność: <span class="font-bold">499,00 zł</span> (45,0%)</p>
+                    <p>Wartość PV: <span class="font-bold">116,0</span></p>
+                </div>
+            </div>
+
+            <!-- KARTA BOGO 5 -->
+            <div id="bogo-card-5" class="bg-white p-6 rounded-lg shadow-lg border-2 border-transparent flex flex-col space-y-4 relative md:col-span-2">
+                <div class="price-bubble bg-[#cce2d3] text-gray-800 font-bold text-xl w-32 h-32 rounded-full flex items-center justify-center shadow-lg text-center">
+                    237,25 zł
+                </div>
+                <h3 class="text-center text-xl font-semibold text-[#4a5c44] mb-2 mt-8">Plant Protein: Chocolate + Vanilla</h3>
+                <div class="flex justify-center gap-4 h-40 sm:h-48">
+                    <img id="bogo5-a-img" src="images/bogo5-a.png" alt="Produkt 5A" class="h-full object-contain rounded-lg">
+                    <img id="bogo5-b-img" src="images/bogo5-b.png" alt="Produkt 5B" class="h-full object-contain rounded-lg">
+                </div>
+                <div class="bg-gray-50 p-3 rounded-md text-center text-gray-700">
+                    <p>Oszczędność: <span class="font-bold">237,25 zł</span> (50,0%)</p>
+                    <p>Wartość PV: <span class="font-bold">28,0</span></p>
+                </div>
+            </div>
+            
+            <!-- PODSUMOWANIE PROMOCJI -->
+            <div id="summary-container" class="md:col-span-2 mt-8 p-2 hidden">
+                 <div class="bg-[#d8e4d3] text-[#4a5c44] p-6 rounded-lg shadow-md">
+                     <h2 class="text-center text-2xl font-bold mb-4">Łączne podsumowanie promocji BOGO</h2>
+                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                         <div>
+                             <p class="font-semibold text-lg">Łączna cena BOGO</p>
+                             <p class="text-xl font-bold">1 398,25 zł</p>
+                         </div>
+                         <div>
+                             <p class="font-semibold text-lg">Łączne oszczędności</p>
+                             <p class="text-xl font-bold">1 066,75 zł</p>
+                         </div>
+                         <div>
+                             <p class="font-semibold text-lg">Łączny % zniżki</p>
+                             <p class="text-xl font-bold">43,3 %</p>
+                         </div>
+                          <div>
+                             <p class="font-semibold text-lg">Łączny PV</p>
+                             <p class="text-xl font-bold">261,0</p>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const toggleSwitch = document.getElementById('toggleBorders');
+
+        // Mapa elementów i klas ramek, które mają być przełączane
+        const borderMap = {
+            'main-container': ['border-4', 'border-black'],
+            'header-container': ['border-2', 'border-red-500'],
+            'main-content-container': ['border-2', 'border-blue-500'],
+            'summary-container': ['border-2', 'border-lime-500'],
+            'bogo-card-1': ['border-green-500'],
+            'bogo-card-2': ['border-green-500'],
+            'bogo-card-3': ['border-green-500'],
+            'bogo-card-4': ['border-green-500'],
+            'bogo-card-5': ['border-green-500'],
+            // Ramki dla poszczególnych zdjęć
+            'bogo1-a-img': ['border-2', 'border-orange-500'],
+            'bogo1-b-img': ['border-2', 'border-orange-500'],
+            'bogo2-a-img': ['border-2', 'border-orange-500'],
+            'bogo2-b-img': ['border-2', 'border-orange-500'],
+            'bogo3-a-img': ['border-2', 'border-orange-500'],
+            'bogo3-b-img': ['border-2', 'border-orange-500'],
+            'bogo4-a-img': ['border-2', 'border-orange-500'],
+            'bogo4-b-img': ['border-2', 'border-orange-500'],
+            'bogo5-a-img': ['border-2', 'border-orange-500'],
+            'bogo5-b-img': ['border-2', 'border-orange-500'],
+        };
+
+        // Funkcja do przełączania widoczności ramek
+        function toggleBorders() {
+            const show = toggleSwitch.checked;
+            for (const id in borderMap) {
+                const element = document.getElementById(id);
+                if (element) {
+                    const classes = borderMap[id];
+                    if (show) {
+                        element.classList.add(...classes);
+                    } else {
+                        element.classList.remove(...classes);
+                    }
+                }
+            }
+        }
+
+        // Nasłuchiwanie na zmianę stanu przełącznika
+        toggleSwitch.addEventListener('change', toggleBorders);
+
+        // Uruchomienie funkcji raz na starcie, aby ustawić początkowy stan (bez ramek)
+        toggleBorders();
+    </script>
+
+</body>
+</html>
