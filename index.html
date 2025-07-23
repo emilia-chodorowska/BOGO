@@ -101,7 +101,7 @@
                 <img src="" alt="" class="card-img2 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
             </div>
             <div class="flex-grow w-full text-center sm:text-left">
-                <div class="flex flex-col sm:flex-row justify-between items-start">
+                <div class="flex flex-col sm:flex-row justify-between items-center sm:items-start">
                     <h3 class="card-title text-sm font-semibold text-[#4a5c44] mb-2 sm:mb-0">
                         <!-- Treść tytułu będzie wstawiana przez JS -->
                     </h3>
@@ -155,12 +155,14 @@
                 const img1 = cardElement.querySelector('.card-img1');
                 img1.src = data.img1;
                 img1.alt = data.alt1;
-                img1.classList.add(data.spanFull ? 'h-24' : 'h-20');
+                const img1HeightClasses = data.spanFull ? 'h-32 sm:h-24' : 'h-28 sm:h-20';
+                img1.classList.add(...img1HeightClasses.split(' '));
                 
                 const img2 = cardElement.querySelector('.card-img2');
                 img2.src = data.img2;
                 img2.alt = data.alt2;
-                img2.classList.add(data.spanFull ? 'h-24' : 'h-20');
+                const img2HeightClasses = data.spanFull ? 'h-32 sm:h-24' : 'h-28 sm:h-20';
+                img2.classList.add(...img2HeightClasses.split(' '));
 
                 // Wypełnianie treści
                 const titleElement = cardElement.querySelector('.card-title');
