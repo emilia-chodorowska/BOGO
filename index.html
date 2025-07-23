@@ -101,8 +101,8 @@
                 <img src="" alt="" class="card-img2 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
             </div>
             <div class="flex-grow w-full text-center sm:text-left">
-                <div class="flex flex-col sm:flex-row justify-between items-center">
-                    <h3 class="card-title text-sm text-[#4a5c44] mb-2 sm:mb-0 flex flex-col justify-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start">
+                    <h3 class="card-title text-sm font-semibold text-[#4a5c44] mb-2 sm:mb-0">
                         <!-- Treść tytułu będzie wstawiana przez JS -->
                     </h3>
                     <span class="card-price-bubble bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-xs whitespace-nowrap ml-0 sm:ml-2"></span>
@@ -165,10 +165,10 @@
                 // Wypełnianie treści
                 const titleElement = cardElement.querySelector('.card-title');
                 titleElement.innerHTML = data.titleHTML;
-                if (data.isSummary) {
-                    titleElement.classList.remove('h-12'); // Usuwamy stałą wysokość dla dłuższego tekstu podsumowania
-                } else {
-                    titleElement.classList.add('h-12', 'font-semibold');
+
+                // Wymuszenie dwuwierszowej przestrzeni dla tytułów produktów
+                if (!data.isSummary) {
+                    titleElement.classList.add('h-12');
                 }
 
                 cardElement.querySelector('.card-price-bubble').textContent = `${data.price.toFixed(2)} zł`;
@@ -198,7 +198,7 @@
                     alt1: `${buyProduct} - produkt kupowany`,
                     img2: offer.img2,
                     alt2: `${getProduct} - produkt gratisowy`,
-                    titleHTML: `<span>${buyProduct} +</span><span>${getProduct}</span>`,
+                    titleHTML: offer.name,
                     price: offer.price,
                     savings: offer.savings,
                     pv: offer.pv
@@ -217,7 +217,7 @@
                 alt1: 'Zestaw BOGO',
                 img2: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-b.svg',
                 alt2: 'Gratisowy produkt',
-                titleHTML: '<span class="font-semibold">Dodaj Zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z DARMOWĄ bawełnianą czapką dōTERRA</span>',
+                titleHTML: 'Dodaj Zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z DARMOWĄ bawełnianą czapką dōTERRA',
                 price: totalPrice,
                 savings: totalSavings,
                 pv: totalPV
