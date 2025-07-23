@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oferta BOGO - Lipiec 2025</title>
+    <!-- Tytuł i meta tagi będą ustawiane dynamicznie przez JavaScript -->
+    <title></title>
 
     <!-- === META TAGI OPEN GRAPH DLA PODGLĄDU W MEDIACH SPOŁECZNOŚCIOWYCH === -->
-    <meta property="og:title" content="Oferta BOGO - Lipiec 2025">
-    <meta property="og:description" content="Kup jeden produkt, a drugi otrzymasz GRATIS!">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
     <meta property="og:image" content="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview.png">
     <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/">
     <meta property="og:type" content="website">
@@ -87,8 +88,9 @@
         <!-- NAGŁÓWEK STRONY -->
         <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-12 md:mb-16 relative z-10 p-2">
             <div class="bg-[#d8e4d3] py-4 rounded-lg shadow">
-                 <h1 class="text-3xl md:text-4xl font-bold text-[#4a5c44]">Oferta BOGO - Lipiec 2025</h1>
-                 <p class="text-lg text-[#4a5c44] mt-2">Zamów jeden produkt, a drugi otrzymasz GRATIS</p>
+                 <!-- Treść nagłówków zostanie wstawiona przez JavaScript -->
+                 <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]"></h1>
+                 <p id="page-main-description" class="text-lg text-[#4a5c44] mt-2"></p>
             </div>
         </header>
 
@@ -126,6 +128,36 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
+            // --- GŁÓWNA KONFIGURACJA STRONY ---
+            // Zmień teksty tutaj, aby zaktualizować je na całej stronie.
+            const pageConfig = {
+                title: "Oferta BOGO - Lipiec 2025",
+                description: "Zamów jeden produkt, drugi otrzymasz GRATIS",
+            };
+
+            /**
+             * Inicjalizuje metadane i nagłówki strony na podstawie obiektu konfiguracyjnego.
+             */
+            function initializePageContent() {
+                // Ustawianie tytułu dokumentu (<title>)
+                document.title = pageConfig.title;
+
+                // Ustawianie meta tagów Open Graph dla mediów społecznościowych
+                const ogTitle = document.querySelector('meta[property="og:title"]');
+                if (ogTitle) ogTitle.setAttribute('content', pageConfig.title);
+
+                const ogDescription = document.querySelector('meta[property="og:description"]');
+                if (ogDescription) ogDescription.setAttribute('content', pageConfig.description);
+                
+                // Ustawianie nagłówków na stronie (h1 i p)
+                const headerTitle = document.getElementById('page-main-title');
+                if (headerTitle) headerTitle.textContent = pageConfig.title;
+
+                const headerDescription = document.getElementById('page-main-description');
+                if (headerDescription) headerDescription.textContent = pageConfig.description;
+            }
+
+
             // --- BAZA DANYCH OFERT BOGO ---
             const bogoOffers = [
                 { id: 1, name: "Peppermint + Wild Orange", price: 139.75, savings: 73.75, pv: 29.5, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-b.png", spanFull: false },
@@ -146,6 +178,9 @@
             }
 
             // --- GŁÓWNA LOGIKA ---
+            
+            // Wywołanie funkcji inicjalizującej zaraz na początku
+            initializePageContent();
 
             /**
              * Tworzy i dodaje kartę (produktu lub podsumowania) do siatki.
