@@ -15,7 +15,6 @@
     <!-- ======================================================================= -->
     
     <!-- Dołączamy bibliotekę Tailwind CSS do stylizacji -->
-    <!-- UWAGA: W środowisku produkcyjnym zaleca się skompilowanie i usunięcie nieużywanych stylów (purge), aby znacznie zmniejszyć rozmiar pliku CSS. -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Dołączamy czcionkę z Google Fonts -->
@@ -52,7 +51,6 @@
     <div class="fixed top-4 left-4 z-50">
         <label for="toggleBorders" class="flex items-center cursor-pointer">
             <div class="relative">
-                <!-- Optymalizacja dostępności: dodano role="switch" i aria-checked -->
                 <input type="checkbox" id="toggleBorders" class="toggle-checkbox sr-only" role="switch" aria-checked="false">
                 <div class="toggle-label block bg-gray-600 w-14 h-8 rounded-full transition-colors"></div>
                 <div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
@@ -65,7 +63,6 @@
     <div id="main-container" data-debug-border="border-4 border-black" class="relative container max-w-5xl my-8 p-4 sm:p-16 md:p-20 bg-white shadow-xl rounded-lg">
 
         <!-- GRAFIKI TŁA (LIŚCIE) -->
-        <!-- Optymalizacja dostępności: pusty atrybut alt dla obrazów czysto dekoracyjnych -->
         <img 
             src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/liscie-gora.jpg" 
             alt="" 
@@ -93,68 +90,35 @@
         </main>
     </div>
 
-    <!-- === SZABLONY UŻYWANE PRZEZ JAVASCRIPT === -->
-
-    <!-- Szablon pojedynczej karty BOGO (niewidoczny, używany przez JS) -->
-    <template id="bogo-card-template">
+    <!-- === JEDEN WSPÓLNY SZABLON DLA WSZYSTKICH KART === -->
+    <template id="card-template">
         <div 
             class="bogo-card bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col sm:flex-row items-center gap-4"
             data-debug-border="border-green-500"
         >
-            <div class="flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-1/3 mb-4 sm:mb-0">
-                <img 
-                    src="" alt="" 
-                    class="bogo-img1 object-contain"
-                    data-debug-border="border-2 border-orange-500"
-                    onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'"
-                >
-                <img 
-                    src="" alt=""
-                    class="bogo-img2 object-contain"
-                    data-debug-border="border-2 border-orange-500"
-                    onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'"
-                >
+            <div class="card-images flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-1/3 mb-4 sm:mb-0">
+                <img src="" alt="" class="card-img1 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
+                <img src="" alt="" class="card-img2 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
             </div>
             <div class="flex-grow w-full text-center sm:text-left">
-                <div class="flex flex-col sm:flex-row justify-between items-center sm:items-start">
-                    <h3 class="bogo-name text-sm font-semibold text-[#4a5c44] mb-2 sm:mb-0"></h3>
-                    <span class="bogo-price bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-xs whitespace-nowrap ml-0 sm:ml-2"></span>
+                <div class="flex flex-col sm:flex-row justify-between items-center">
+                    <h3 class="card-title text-sm text-[#4a5c44] mb-2 sm:mb-0 flex flex-col justify-center">
+                        <!-- Treść tytułu będzie wstawiana przez JS -->
+                    </h3>
+                    <span class="card-price-bubble bg-[#cce2d3] text-[#4a5c44] font-bold py-1 px-3 rounded-full text-xs whitespace-nowrap ml-0 sm:ml-2"></span>
                 </div>
                 <div class="text-xs text-gray-600 mt-2 border-t pt-2">
-                    <p>Oszczędność: <span class="bogo-savings font-bold"></span> (<span class="bogo-savings-percent"></span>%)</p>
-                    <p>Wartość PV: <span class="bogo-pv font-bold"></span></p>
+                    <p>Oszczędność: <strong class="card-savings-amount font-bold"></strong> <span class="card-savings-percent"></span></p>
+                    <p>Wartość PV: <strong class="card-pv font-bold"></strong></p>
                 </div>
             </div>
         </div>
     </template>
-
-    <!-- Szablon podsumowania (niewidoczny, używany przez JS) -->
-    <template id="summary-template">
-        <div
-            class="lg:col-span-2 bogo-card bg-white p-4 rounded-lg shadow-lg border-2 border-transparent flex flex-col sm:flex-row items-center gap-4"
-            data-debug-border="border-green-500" 
-        >
-            <div class="flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-1/3 mb-4 sm:mb-0">
-                <img src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-a.svg" alt="Zestaw BOGO" class="h-24 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f0f0f0/333?text=Zestaw'">
-                <img src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-b.svg" alt="Gratisowy produkt" class="h-24 object-contain" data-debug-border="border-2 border-orange-500" onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
-            </div>
-            <div class="flex-grow w-full text-center sm:text-left">
-                <h3 class="text-sm font-semibold text-[#4a5c44] mb-2">Dodaj Zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z DARMOWĄ Bawełnianą Czapką dōTERRA</h3>
-                <div class="text-xs text-gray-600 border-t pt-2">
-                     <!-- Poprawka: Usunięto "zł" z HTML, będzie dodane przez JS -->
-                     <p>Cena: <strong id="total-price" class="font-bold"></strong></p>
-                     <p>Wartość PV: <strong id="total-pv" class="font-bold"></strong></p>
-                </div>
-            </div>
-        </div>
-    </template>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- BAZA DANYCH OFERT BOGO ---
-            // Zarządzanie ofertami odbywa się poprzez modyfikację tej tablicy.
             const bogoOffers = [
                 { id: 1, name: "Peppermint + Wild Orange", price: 139.75, savings: 73.75, pv: 29.5, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-b.png", spanFull: false },
                 { id: 2, name: "ZenGest + MetaPWR", price: 190.00, savings: 153.00, pv: 40.5, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-b.png", spanFull: false },
@@ -165,81 +129,105 @@
 
             // --- POBIERANIE ELEMENTÓW DOM ---
             const gridContainer = document.getElementById('bogo-grid-container');
-            const summaryTemplate = document.getElementById('summary-template');
-            const cardTemplate = document.getElementById('bogo-card-template');
+            const cardTemplate = document.getElementById('card-template');
             const toggleSwitch = document.getElementById('toggleBorders');
 
-            // Zabezpieczenie: jeśli kluczowe elementy nie istnieją, zakończ skrypt.
-            if (!gridContainer || !summaryTemplate || !cardTemplate || !toggleSwitch) {
+            if (!gridContainer || !cardTemplate || !toggleSwitch) {
                 console.error("Nie znaleziono kluczowych elementów na stronie. Inicjalizacja przerwana.");
                 return;
             }
 
             // --- GŁÓWNA LOGIKA ---
 
-            // Funkcja do renderowania wszystkich ofert
-            function renderOffers() {
-                // Czyszczenie kontenera przed dodaniem nowych elementów
-                gridContainer.innerHTML = '';
-                
-                bogoOffers.forEach(offer => {
-                    const card = createBogoCard(offer);
-                    gridContainer.appendChild(card);
-                });
-            }
-
-            // Funkcja tworząca pojedynczą kartę BOGO na podstawie szablonu
-            function createBogoCard(offer) {
+            /**
+             * Tworzy i dodaje kartę (produktu lub podsumowania) do siatki.
+             * @param {object} data - Obiekt z danymi karty.
+             */
+            function createAndAppendCard(data) {
                 const cardClone = cardTemplate.content.cloneNode(true);
                 const cardElement = cardClone.querySelector('.bogo-card');
 
-                const totalValue = offer.price + offer.savings;
-                const savingsPercent = totalValue > 0 ? ((offer.savings / totalValue) * 100).toFixed(1) : 0;
-
-                // Ustawienie szerokości karty (pełna lub połówkowa)
-                if (offer.spanFull) {
+                if (data.spanFull) {
                     cardElement.classList.add('lg:col-span-2');
                 }
-                
-                // Wypełnianie danych w szablonie
-                cardElement.querySelector('.bogo-name').textContent = offer.name;
-                cardElement.querySelector('.bogo-price').textContent = `${offer.price.toFixed(2)} zł`;
-                cardElement.querySelector('.bogo-savings').textContent = `${offer.savings.toFixed(2)} zł`;
-                cardElement.querySelector('.bogo-savings-percent').textContent = savingsPercent;
-                cardElement.querySelector('.bogo-pv').textContent = offer.pv.toFixed(1);
 
-                const img1 = cardElement.querySelector('.bogo-img1');
-                img1.src = offer.img1;
-                img1.alt = `${offer.name} - produkt kupowany`;
-                img1.classList.add(offer.spanFull ? 'h-24' : 'h-20');
+                // Wypełnianie obrazków
+                const img1 = cardElement.querySelector('.card-img1');
+                img1.src = data.img1;
+                img1.alt = data.alt1;
+                img1.classList.add(data.spanFull ? 'h-24' : 'h-20');
                 
-                const img2 = cardElement.querySelector('.bogo-img2');
-                img2.src = offer.img2;
-                img2.alt = `${offer.name} - produkt gratisowy`;
-                img2.classList.add(offer.spanFull ? 'h-24' : 'h-20');
+                const img2 = cardElement.querySelector('.card-img2');
+                img2.src = data.img2;
+                img2.alt = data.alt2;
+                img2.classList.add(data.spanFull ? 'h-24' : 'h-20');
 
-                return cardElement;
+                // Wypełnianie treści
+                const titleElement = cardElement.querySelector('.card-title');
+                titleElement.innerHTML = data.titleHTML;
+                if (data.isSummary) {
+                    titleElement.classList.remove('h-12'); // Usuwamy stałą wysokość dla dłuższego tekstu podsumowania
+                } else {
+                    titleElement.classList.add('h-12', 'font-semibold');
+                }
+
+                cardElement.querySelector('.card-price-bubble').textContent = `${data.price.toFixed(2)} zł`;
+                
+                const totalValue = data.price + data.savings;
+                const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
+                
+                // Wypełnianie oszczędności (kwota pogrubiona, procent nie)
+                cardElement.querySelector('.card-savings-amount').textContent = `${data.savings.toFixed(2)} zł`;
+                cardElement.querySelector('.card-savings-percent').textContent = `(${savingsPercent}%)`;
+                
+                cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
+
+                gridContainer.appendChild(cardElement);
             }
 
-            // Funkcja aktualizująca podsumowanie
-            function updateSummary() {
-                const totalPrice = bogoOffers.reduce((sum, offer) => sum + offer.price, 0);
-                const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
+            // 1. Renderowanie kart produktów
+            bogoOffers.forEach(offer => {
+                const nameParts = offer.name.split('+');
+                const buyProduct = nameParts[0] ? nameParts[0].trim() : '';
+                const getProduct = nameParts[1] ? nameParts[1].trim() : '';
 
-                const summaryClone = summaryTemplate.content.cloneNode(true);
-                // Poprawka: Dodajemy "zł" wewnątrz elementu <strong>, aby było pogrubione.
-                summaryClone.querySelector('#total-price').textContent = `${totalPrice.toFixed(2)} zł`;
-                summaryClone.querySelector('#total-pv').textContent = totalPV.toFixed(1);
-                
-                gridContainer.appendChild(summaryClone);
-            }
+                createAndAppendCard({
+                    isSummary: false,
+                    spanFull: offer.spanFull,
+                    img1: offer.img1,
+                    alt1: `${buyProduct} - produkt kupowany`,
+                    img2: offer.img2,
+                    alt2: `${getProduct} - produkt gratisowy`,
+                    titleHTML: `<span>${buyProduct} +</span><span>${getProduct}</span>`,
+                    price: offer.price,
+                    savings: offer.savings,
+                    pv: offer.pv
+                });
+            });
+
+            // 2. Obliczanie i renderowanie podsumowania
+            const totalPrice = bogoOffers.reduce((sum, offer) => sum + offer.price, 0);
+            const totalSavings = bogoOffers.reduce((sum, offer) => sum + offer.savings, 0);
+            const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
+
+            createAndAppendCard({
+                isSummary: true,
+                spanFull: true,
+                img1: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-a.svg',
+                alt1: 'Zestaw BOGO',
+                img2: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-b.svg',
+                alt2: 'Gratisowy produkt',
+                titleHTML: '<span class="font-semibold">Dodaj Zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z DARMOWĄ bawełnianą czapką dōTERRA</span>',
+                price: totalPrice,
+                savings: totalSavings,
+                pv: totalPV
+            });
 
             // --- LOGIKA PRZEŁĄCZNIKA RAMEK (DEBUG) ---
             function toggleBorders() {
                 const show = toggleSwitch.checked;
-                toggleSwitch.setAttribute('aria-checked', show); // Aktualizacja atrybutu dostępności
+                toggleSwitch.setAttribute('aria-checked', show);
                 
-                // Ponownie wyszukujemy elementy, ponieważ są dodawane dynamicznie
                 const debugElements = document.querySelectorAll('[data-debug-border]');
                 debugElements.forEach(element => {
                     const classes = element.getAttribute('data-debug-border').split(' ');
@@ -251,12 +239,8 @@
                 });
             }
 
-            // --- INICJALIZACJA STRONY ---
-            renderOffers();
-            updateSummary();
-            
             toggleSwitch.addEventListener('change', toggleBorders);
-            toggleBorders(); // Ustawienie początkowego stanu ramek
+            toggleBorders();
         });
     </script>
 
