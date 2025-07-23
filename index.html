@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tytuł i meta tagi będą ustawiane dynamicznie przez JavaScript -->
-    <title></title>
+    <!-- Tytuł ustawiony statycznie dla robotów i przeglądarki -->
+    <title>Oferta BOGO - Lipiec 2025</title>
 
-    <!-- === META TAGI OPEN GRAPH DLA PODGLĄDU W MEDIACH SPOŁECZNOŚCIOWYCH === -->
-    <meta property="og:title" content="">
-    <meta property="og:description" content="">
+    <!-- === META TAGI OPEN GRAPH Z TREŚCIĄ WPISANĄ STATYCZNIE === -->
+    <meta property="og:title" content="Oferta BOGO - Lipiec 2025">
+    <meta property="og:description" content="Zamów jeden produkt, a drugi otrzymasz GRATIS!">
     <meta property="og:image" content="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview.png">
     <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/">
     <meta property="og:type" content="website">
@@ -52,6 +52,16 @@
             transform: scale(1.03);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        /* Style dla powiadomienia "toast" */
+        #toast-notification {
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        #toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen py-8">
@@ -88,9 +98,19 @@
         <!-- NAGŁÓWEK STRONY -->
         <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-12 md:mb-16 relative z-10 p-2">
             <div class="bg-[#d8e4d3] py-4 rounded-lg shadow">
-                 <!-- Treść nagłówków zostanie wstawiona przez JavaScript -->
-                 <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]"></h1>
-                 <p id="page-main-description" class="text-lg text-[#4a5c44] mt-2"></p>
+                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                     <div>
+                        <!-- Treść nagłówków zostanie wstawiona przez JavaScript -->
+                        <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]"></h1>
+                        <p id="page-main-description" class="text-lg text-[#4a5c44] mt-2"></p>
+                     </div>
+                     <button id="share-button" class="mt-4 sm:mt-0 bg-[#4a5c44] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#5a6c54] transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
+                            <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
+                        </svg>
+                        Udostępnij
+                     </button>
+                 </div>
             </div>
         </header>
 
@@ -125,31 +145,28 @@
         </div>
     </template>
 
+    <!-- Powiadomienie o skopiowaniu linku -->
+    <div id="toast-notification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-lg shadow-lg">
+        Link skopiowany do schowka!
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- GŁÓWNA KONFIGURACJA STRONY ---
-            // Zmień teksty tutaj, aby zaktualizować je na całej stronie.
+            // Te dane są używane do wypełnienia treści na stronie (h1, p) i dla przycisku udostępniania.
             const pageConfig = {
                 title: "Oferta BOGO - Lipiec 2025",
-                description: "Zamów jeden produkt, drugi otrzymasz GRATIS",
+                description: "Zamów jeden produkt, a drugi otrzymasz GRATIS!",
+                url: "https://emilia-chodorowska.github.io/BOGO/"
             };
 
             /**
-             * Inicjalizuje metadane i nagłówki strony na podstawie obiektu konfiguracyjnego.
+             * Inicjalizuje widoczne na stronie nagłówki (h1, p).
+             * Meta tagi są już ustawione w HTML.
              */
             function initializePageContent() {
-                // Ustawianie tytułu dokumentu (<title>)
-                document.title = pageConfig.title;
-
-                // Ustawianie meta tagów Open Graph dla mediów społecznościowych
-                const ogTitle = document.querySelector('meta[property="og:title"]');
-                if (ogTitle) ogTitle.setAttribute('content', pageConfig.title);
-
-                const ogDescription = document.querySelector('meta[property="og:description"]');
-                if (ogDescription) ogDescription.setAttribute('content', pageConfig.description);
-                
-                // Ustawianie nagłówków na stronie (h1 i p)
                 const headerTitle = document.getElementById('page-main-title');
                 if (headerTitle) headerTitle.textContent = pageConfig.title;
 
@@ -171,20 +188,19 @@
             const gridContainer = document.getElementById('bogo-grid-container');
             const cardTemplate = document.getElementById('card-template');
             const toggleSwitch = document.getElementById('toggleBorders');
+            const shareButton = document.getElementById('share-button');
+            const toast = document.getElementById('toast-notification');
 
-            if (!gridContainer || !cardTemplate || !toggleSwitch) {
+            if (!gridContainer || !cardTemplate || !toggleSwitch || !shareButton || !toast) {
                 console.error("Nie znaleziono kluczowych elementów na stronie. Inicjalizacja przerwana.");
                 return;
             }
 
             // --- GŁÓWNA LOGIKA ---
-            
-            // Wywołanie funkcji inicjalizującej zaraz na początku
             initializePageContent();
 
             /**
              * Tworzy i dodaje kartę (produktu lub podsumowania) do siatki.
-             * @param {object} data - Obiekt z danymi karty.
              */
             function createAndAppendCard(data) {
                 const cardClone = cardTemplate.content.cloneNode(true);
@@ -194,7 +210,6 @@
                     cardElement.classList.add('lg:col-span-2');
                 }
 
-                // Wypełnianie obrazków
                 const img1 = cardElement.querySelector('.card-img1');
                 img1.src = data.img1;
                 img1.alt = data.alt1;
@@ -207,11 +222,9 @@
                 const img2HeightClasses = data.spanFull ? 'h-32 sm:h-24' : 'h-28 sm:h-20';
                 img2.classList.add(...img2HeightClasses.split(' '));
 
-                // Wypełnianie treści
                 const titleElement = cardElement.querySelector('.card-title');
                 titleElement.innerHTML = data.titleHTML;
 
-                // Wymuszenie dwuwierszowej przestrzeni dla tytułów produktów
                 if (!data.isSummary) {
                     titleElement.classList.add('h-12');
                 }
@@ -221,7 +234,6 @@
                 const totalValue = data.price + data.savings;
                 const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
                 
-                // Wypełnianie oszczędności (kwota pogrubiona, procent nie)
                 cardElement.querySelector('.card-savings-amount').textContent = `${data.savings.toFixed(2)} zł`;
                 cardElement.querySelector('.card-savings-percent').textContent = `(${savingsPercent}%)`;
                 
@@ -283,9 +295,31 @@
                     }
                 });
             }
-
             toggleSwitch.addEventListener('change', toggleBorders);
             toggleBorders();
+
+            // --- LOGIKA PRZYCISKU UDOSTĘPNIANIA ---
+            shareButton.addEventListener('click', () => {
+                navigator.clipboard.writeText(pageConfig.url).then(() => {
+                    // Pokaż powiadomienie
+                    toast.classList.add('show');
+                    
+                    // Zmień tekst przycisku
+                    const originalButtonHTML = shareButton.innerHTML;
+                    shareButton.innerHTML = 'Skopiowano!';
+                    shareButton.disabled = true;
+
+                    // Ukryj powiadomienie i przywróć przycisk po 2 sekundach
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        shareButton.innerHTML = originalButtonHTML;
+                        shareButton.disabled = false;
+                    }, 2000);
+
+                }).catch(err => {
+                    console.error('Nie udało się skopiować linku: ', err);
+                });
+            });
         });
     </script>
 
