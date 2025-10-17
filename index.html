@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Tytuł ustawiony statycznie dla robotów i przeglądarki -->
-    <title>Oferta BOGO | Lipiec 2025</title>
+    <title>Oferta BOGO | 21–27 Października 2025</title>
 
     <!-- === META TAGI OPEN GRAPH Z TREŚCIĄ WPISANĄ STATYCZNIE === -->
-    <meta property="og:title" content="Oferta BOGO | Lipiec 2025">
+    <meta property="og:title" content="Oferta BOGO | 21–27 Października 2025">
     <meta property="og:description" content="Zamów jeden produkt, a drugi otrzymasz GRATIS">
     <meta property="og:image" content="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview.png">
     <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/">
@@ -88,12 +88,12 @@
         <!-- NAGŁÓWEK STRONY -->
         <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-12 md:mb-16 relative z-10 p-2">
             <div class="bg-[#d8e4d3] py-4 rounded-lg shadow">
-                 <div>
-                    <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]">Oferta BOGO - Lipiec 2025</h1>
+                  <div>
+                    <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]">Oferta BOGO — 21–27 Października 2025</h1>
                     <p id="page-main-description" class="text-lg text-[#4a5c44] mt-2">Zamów jeden produkt, a drugi otrzymasz GRATIS</p>
-                 </div>
-            </div>
-        </header>
+                  </div>
+             </div>
+         </header>
 
         <!-- GŁÓWNA TREŚĆ (Siatka z ofertami BOGO i podsumowaniem) -->
         <main id="bogo-grid-container" data-debug-border="border-2 border-blue-500" class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 p-2">
@@ -131,11 +131,13 @@
 
             // --- BAZA DANYCH OFERT BOGO ---
             const bogoOffers = [
-                { id: 1, name: "Peppermint + Wild Orange", price: 139.75, savings: 73.75, pv: 29.5, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-b.png", spanFull: false },
-                { id: 2, name: "ZenGest + MetaPWR", price: 190.00, savings: 153.00, pv: 40.5, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-b.png", spanFull: false },
-                { id: 3, name: "Serenity + Eucalyptus", price: 221.50, savings: 103.75, pv: 47.0, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo3-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo3-b.png", spanFull: false },
-                { id: 4, name: "Melissa + Blue Tansy", price: 609.75, savings: 499.00, pv: 116.0, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo4-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo4-b.png", spanFull: false },
-                { id: 5, name: "Plant Protein: Chocolate + Vanilla", price: 237.25, savings: 237.25, pv: 28.0, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5-b.png", spanFull: true }
+                // Lista par BOGO (21–27.10), uporządkowana rosnąco według ceny
+                // savings = wartość gratisowego produktu(ów) w PLN
+                { id: 1, name: "Siberian Fir + Cedarwood", price: 110.75, savings: 87.00, pv: 23.50, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo1-b.png", spanFull: false },
+                { id: 2, name: "Oregano + Majeranek", price: 162.50, savings: 126.50, pv: 34.50, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo2-b.png", spanFull: false },
+                { id: 3, name: "On Guard + Stronger Touch", price: 205.75, savings: 94.25, pv: 43.50, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo3-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo3-b.png", spanFull: false },
+                { id: 4, name: "Vetiver Touch + Guaiac Wood 15 ml + Balsam Fir 5 ml", price: 221.50, savings: 186.75, pv: 47.00, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo4-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo4-b.png", spanFull: false },
+                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img1: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5-a.png", img2: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5-b.png", spanFull: true }
             ];
 
             // --- POBIERANIE ELEMENTÓW DOM ---
@@ -223,7 +225,7 @@
                 alt1: 'Zestaw BOGO',
                 img2: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-budle-b.svg',
                 alt2: 'Gratisowy produkt',
-                titleHTML: 'Dodaj Zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z DARMOWĄ bawełnianą czapką dōTERRA',
+                titleHTML: 'Dodaj Zestaw BOGO (21–27.10) do koszyka — Gratis do całej promocji: Kminek 5 ml',
                 price: totalPrice,
                 savings: totalSavings,
                 pv: totalPV
