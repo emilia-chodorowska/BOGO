@@ -191,9 +191,9 @@
                 titleElement.innerHTML = data.titleHTML;
                 // jeśli karta wymaga 3 wierszy tytułu (pierwsze 4 karty) — dajemy wyższą wysokość
                 if (data.threeRows) {
-                    titleElement.classList.add('h-16', 'leading-tight');
+                    titleElement.classList.add('h-16', 'leading-tight', 'flex', 'flex-col', 'justify-end');
                 } else if (!data.isSummary) {
-                    titleElement.classList.add('h-12');
+                    titleElement.classList.add('h-12', 'flex', 'items-end'); // dodano flex i items-end
                 }
 
                 // bąbelek z ceną został usunięty — nie ustawiamy już tekstu ceny tutaj
