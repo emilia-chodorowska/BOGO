@@ -105,13 +105,10 @@
         >
 
         <!-- NAGŁÓWEK STRONY -->
-        <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-12 md:mb-16 relative z-10 p-2">
-            <div class="bg-[#d8e4d3] py-4 rounded-lg shadow">
-                  <div>
-                    <h1 id="page-main-title" class="text-3xl md:text-4xl font-bold text-[#4a5c44]">Oferta BOGO — 21–27 Października 2025</h1>
-                    <p id="page-main-description" class="text-lg text-[#4a5c44] mt-2">Zamów jeden produkt, a drugi otrzymasz GRATIS</p>
-                  </div>
-             </div>
+        <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-8 md:mb-12 relative z-10 p-2">
+            <div>
+                <h1 id="page-main-title" class="text-4xl md:text-5xl font-semibold leading-tight text-slate-800">Oferta BOGO<br>21–27 Października 2025</h1>
+            </div>
          </header>
 
         <!-- GŁÓWNA TREŚĆ (Siatka z ofertami BOGO i podsumowaniem) -->
@@ -132,11 +129,11 @@
         </div>
         <div class="flex-grow w-full text-center sm:text-left">
             <div class="flex flex-col sm:flex-row justify-start items-center sm:items-start">
-                <h3 class="card-title text-sm font-semibold text-[#4a5c44] mb-1 sm:mb-0">
+                <h3 class="card-title text-sm font-semibold text-slate-800 mb-1 sm:mb-0">
                     <!-- Treść tytułu będzie wstawiana przez JS -->
                 </h3>
             </div>
-            <div class="text-xs text-gray-600 mt-1 border-t pt-1">
+            <div class="text-xs text-slate-600 mt-1 border-t pt-1">
                 <p>Oszczędność: <strong class="card-savings-amount font-bold"></strong> <span class="card-savings-percent"></span></p>
                 <p>Wartość PV: <strong class="card-pv font-bold"></strong></p>
             </div>
@@ -252,9 +249,9 @@
             createAndAppendCard({
                 isSummary: true,
                 spanFull: true,
-                img: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-bundle.svg',
+                img: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-bundle.png',
                 alt: 'Zestaw BOGO',
-                titleHTML: 'Dodaj Zestaw BOGO (21–27.10) do koszyka — Gratis do całej promocji: Kminek',
+                titleHTML: 'Dodaj cały zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z dodatkowym darmowym olejkiem Caraway 5ml',
                 price: totalPrice,
                 savings: totalSavings,
                 pv: totalPV
