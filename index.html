@@ -121,10 +121,10 @@
     <template id="card-template">
     <div class="bogo-card bg-white py-2 px-3 rounded-lg shadow-lg border-2 border-transparent flex flex-col sm:flex-row items-center gap-3"
         data-debug-border="border-green-500">
-        <!-- Zmodyfikowany kontener na obrazek -->
-        <div class="card-images flex-shrink-0 flex items-center justify-center w-full sm:w-1/2 min-h-[120px] sm:min-h-[140px] md:min-h-[160px] mb-2 sm:mb-0">
-            <img src="" alt="" class="card-img h-full w-auto object-cover object-center" 
-                data-debug-border="border-2 border-orange-500" 
+        <!-- Kontener na obrazek -->
+        <div class="card-images flex-shrink-0 w-full sm:w-1/2 h-[140px] sm:h-[160px] mb-2 sm:mb-0 overflow-hidden flex items-center justify-center">
+            <img src="" alt="" class="card-img h-full w-auto object-cover object-center"
+                data-debug-border="border-2 border-orange-500"
                 onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
         </div>
         <div class="flex-grow w-full text-center sm:text-left">
@@ -173,17 +173,18 @@
                 const cardElement = cardClone.querySelector('.bogo-card');
 
                 if (data.spanFull) {
-                    // zajmij pełen span kolumn i rozciągnij na 2 wiersze na dużych ekranach
-                    cardElement.classList.add('lg:col-span-2', 'lg:row-span-2', 'h-full');
+                    // zajmij pełen span kolumn na dużych ekranach (1 wiersz)
+                    cardElement.classList.add('lg:col-span-2');
+
+                    // zwiększ wysokość kontenera grafiki dla kart spanFull (1.7x)
+                    const imgContainer = cardElement.querySelector('.card-images');
+                    imgContainer.classList.remove('h-[140px]', 'sm:h-[160px]');
+                    imgContainer.classList.add('h-[238px]', 'sm:h-[272px]');
                 }
 
                 const img = cardElement.querySelector('.card-img');
                 img.src = data.img;
                 img.alt = data.alt;
-                // dla kart "pełnych" i zwykłych przypisujemy większe wysokości obrazków
-                // non-span: kompaktowo większy kontener; spanFull: znacznie wyższy
-                const imgHeightClasses = data.spanFull ? 'h-40 sm:h-32 lg:h-56' : 'h-36 sm:h-28 lg:h-44';
-                img.classList.add(...imgHeightClasses.split(' '));
 
                 const titleElement = cardElement.querySelector('.card-title');
                 titleElement.innerHTML = data.titleHTML;
@@ -191,17 +192,15 @@
                 if (data.threeRows) {
                     titleElement.classList.add('h-16', 'leading-tight', 'flex', 'flex-col', 'justify-end');
                 } else if (!data.isSummary) {
-                    titleElement.classList.add('h-12', 'flex', 'items-end'); // dodano flex i items-end
+                    titleElement.classList.add('h-12', 'flex', 'items-end');
                 }
 
-                // bąbelek z ceną został usunięty — nie ustawiamy już tekstu ceny tutaj
-                
                 const totalValue = data.price + data.savings;
                 const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
-                
+
                 cardElement.querySelector('.card-savings-amount').textContent = `${data.savings.toFixed(2)} zł`;
                 cardElement.querySelector('.card-savings-percent').textContent = `(${savingsPercent}%)`;
-                
+
                 cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
 
                 gridContainer.appendChild(cardElement);
