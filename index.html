@@ -316,7 +316,7 @@
 
                 cardElement.querySelector('.card-price').textContent = `${data.price.toFixed(2)} zł`;
                 cardElement.querySelector('.card-total-value').textContent = `${totalValue.toFixed(2)} zł`;
-                cardElement.querySelector('.card-savings-combined').textContent = `–${savingsPercent}%`;
+                cardElement.querySelector('.card-savings-combined').textContent = `${savingsPercent}%`;
                 cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
 
                 gridContainer.appendChild(cardElement);
