@@ -234,7 +234,7 @@
                 { id: 2, name: "Oregano + Majeranek", price: 162.50, savings: 126.50, pv: 34.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/2.png", spanFull: false },
                 { id: 3, name: "On Guard + Stronger Touch", price: 205.75, savings: 94.25, pv: 43.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/3.png", spanFull: false },
                 { id: 4, name: "Vetiver Touch + Guaiac Wood + Balsam Fir", price: 221.50, savings: 186.75, pv: 47.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/4.png", spanFull: false },
-                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5.png", spanFull: true }
+                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5.png", imgMobile: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5_centered.png", spanFull: true }
             ];
 
             // --- POBIERANIE ELEMENTÓW DOM ---
@@ -256,16 +256,47 @@
 
                 if (data.spanFull) {
                     // zajmij pełen span kolumn na dużych ekranach (1 wiersz)
-                    cardElement.classList.add('lg:col-span-2');
+                    cardElement.classList.add('lg:col-span-2', 'lg:gap-0');
 
                     // zwiększ wysokość kontenera grafiki dla kart spanFull (1.7x)
                     const imgContainer = cardElement.querySelector('.card-images');
                     imgContainer.classList.remove('h-[140px]', 'sm:h-[160px]');
-                    imgContainer.classList.add('h-[238px]', 'sm:h-[272px]');
+                    imgContainer.classList.add('h-[238px]', 'sm:h-[272px]', 'lg:w-1/2', 'lg:flex', 'lg:justify-end', 'lg:items-center', 'lg:pr-8');
+
+                    // wyrównaj kontener tekstowy symetrycznie względem osi pionowej
+                    const textContainer = cardElement.querySelector('.flex-grow');
+                    textContainer.classList.add('lg:w-1/2', 'lg:pl-8');
                 }
 
                 const img = cardElement.querySelector('.card-img');
-                img.src = data.img;
+
+                // Dla karty spanFull: responsywna grafika (mobile vs desktop)
+                if (data.spanFull && data.imgMobile) {
+                    // Przechowuj oba URLe jako atrybuty data
+                    img.dataset.imgDesktop = data.img;
+                    img.dataset.imgMobile = data.imgMobile;
+
+                    // Media query dla Tailwind lg breakpoint (1024px)
+                    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
+                    // Funkcja do ustawiania właściwego obrazka
+                    const updateImage = () => {
+                        const isLargeScreen = mediaQuery.matches;
+                        const newSrc = isLargeScreen ? img.dataset.imgDesktop : img.dataset.imgMobile;
+                        if (img.src !== newSrc) {
+                            img.src = newSrc;
+                        }
+                    };
+
+                    // Ustaw obrazek przy tworzeniu karty
+                    updateImage();
+
+                    // Nasłuchuj zmian media query (lepsze niż resize)
+                    mediaQuery.addEventListener('change', updateImage);
+                } else {
+                    img.src = data.img;
+                }
+
                 img.alt = data.alt;
 
                 const titleElement = cardElement.querySelector('.card-title');
@@ -273,6 +304,9 @@
                 // jeśli karta wymaga 3 wierszy tytułu (pierwsze 4 karty) — dajemy wyższą wysokość
                 if (data.threeRows) {
                     titleElement.classList.add('h-16', 'leading-tight', 'flex', 'flex-col', 'justify-end');
+                } else if (data.twoRows) {
+                    // dla karty 5 - 2 wiersze w pionie
+                    titleElement.classList.add('h-12', 'leading-tight', 'flex', 'flex-col', 'justify-end');
                 } else if (!data.isSummary) {
                     titleElement.classList.add('h-12', 'flex', 'items-end');
                 }
@@ -293,6 +327,7 @@
                 // dla pierwszych 4 ofert przygotowujemy tytuł w 3 wierszach z plusem tam gdzie był
                 let titleHTML = offer.name;
                 let threeRows = false;
+                let twoRows = false;
                 if (offer.id <= 4) {
                     threeRows = true;
                     const parts = offer.name.split('+').map(p => p.trim());
@@ -307,15 +342,31 @@
                         return `<div>${line}${hasNextNonEmpty ? ' +' : ''}</div>`;
                     });
                     titleHTML = titleLines.join('');
+                } else if (offer.id === 5) {
+                    // dla karty 5 również rozdzielamy po znaku +
+                    twoRows = true;
+                    const parts = offer.name.split('+').map(p => p.trim());
+                    const lines = [
+                        parts[0] || '',
+                        parts[1] || ''
+                    ];
+                    const titleLines = lines.map((line, idx) => {
+                        if (!line) return '<div></div>';
+                        const hasNextNonEmpty = lines.slice(idx + 1).some(l => l && l.trim() !== '');
+                        return `<div>${line}${hasNextNonEmpty ? ' +' : ''}</div>`;
+                    });
+                    titleHTML = titleLines.join('');
                 }
 
                 createAndAppendCard({
                     isSummary: false,
                     spanFull: offer.spanFull,
                     img: offer.img,
+                    imgMobile: offer.imgMobile,
                     alt: offer.name,
                     titleHTML,
                     threeRows,
+                    twoRows,
                     price: offer.price,
                     savings: offer.savings,
                     pv: offer.pv
