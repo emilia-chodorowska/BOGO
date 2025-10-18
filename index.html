@@ -134,7 +134,9 @@
                 </h3>
             </div>
             <div class="text-xs text-slate-600 mt-1 border-t pt-1">
-                <p>Oszczędność: <strong class="card-savings-amount font-bold"></strong> <span class="card-savings-percent"></span></p>
+                <p>Cena zestawu: <strong class="card-price font-bold"></strong> <strong class="font-bold">zł</strong></p>
+                <p>Oszczędzasz: <strong class="card-savings-amount font-bold"></strong> <strong class="font-bold">zł</strong></p>
+                <p>Zyskujesz: <strong class="card-savings-percent font-bold"></strong></p>
                 <p>Wartość PV: <strong class="card-pv font-bold"></strong></p>
             </div>
         </div>
@@ -198,8 +200,9 @@
                 const totalValue = data.price + data.savings;
                 const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
 
-                cardElement.querySelector('.card-savings-amount').textContent = `${data.savings.toFixed(2)} zł`;
-                cardElement.querySelector('.card-savings-percent').textContent = `(${savingsPercent}%)`;
+                cardElement.querySelector('.card-price').textContent = data.price.toFixed(2);
+                cardElement.querySelector('.card-savings-amount').textContent = data.savings.toFixed(2);
+                cardElement.querySelector('.card-savings-percent').textContent = `${savingsPercent}%`;
 
                 cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
 
@@ -241,20 +244,20 @@
             });
 
             // 2. Obliczanie i renderowanie podsumowania
-            const totalPrice = bogoOffers.reduce((sum, offer) => sum + offer.price, 0);
-            const totalSavings = bogoOffers.reduce((sum, offer) => sum + offer.savings, 0);
-            const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
+            // const totalPrice = bogoOffers.reduce((sum, offer) => sum + offer.price, 0);
+            // const totalSavings = bogoOffers.reduce((sum, offer) => sum + offer.savings, 0);
+            // const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
 
-            createAndAppendCard({
-                isSummary: true,
-                spanFull: true,
-                img: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-bundle.png',
-                alt: 'Zestaw BOGO',
-                titleHTML: 'Dodaj cały zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z dodatkowym darmowym olejkiem Caraway 5ml',
-                price: totalPrice,
-                savings: totalSavings,
-                pv: totalPV
-            });
+            // createAndAppendCard({
+            //     isSummary: true,
+            //     spanFull: true,
+            //     img: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-bundle.png',
+            //     alt: 'Zestaw BOGO',
+            //     titleHTML: 'Dodaj cały zestaw BOGO do koszyka, aby otrzymać wszystkie pary wraz z dodatkowym darmowym olejkiem Caraway 5ml',
+            //     price: totalPrice,
+            //     savings: totalSavings,
+            //     pv: totalPV
+            // });
 
             // --- LOGIKA PRZEŁĄCZNIKA RAMEK (DEBUG) ---
             // Zmodyfikowana funkcja toggleBorders
