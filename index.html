@@ -192,11 +192,16 @@
                             <td class="py-3 px-4 border-b text-right">184,50</td>
                             <td class="py-3 px-4 border-b text-right font-semibold">110,09</td>
                         </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-3 px-4 border-b">Caraway</td>
+                            <td class="py-3 px-4 border-b text-right">88,15</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">0,00</td>
+                        </tr>
                     </tbody>
                     <tfoot>
                         <tr class="bg-gray-100 text-slate-800">
                             <td class="py-4 px-4 font-bold">Suma</td>
-                            <td class="py-4 px-4 text-right font-normal">1652,50</td>
+                            <td class="py-4 px-4 text-right font-normal">1740,65</td>
                             <td class="py-4 px-4 text-right font-bold">973,50</td>
                         </tr>
                     </tfoot>
@@ -391,6 +396,10 @@
             const totalSavings = bogoOffers.reduce((sum, offer) => sum + offer.savings, 0);
             const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
 
+            // Dodaj wartość GRATIS Caraway do oszczędności
+            const carawayValue = 88.15;
+            const totalSavingsWithCaraway = totalSavings + carawayValue;
+
             createAndAppendCard({
                 isSummary: true,
                 spanFull: true,
@@ -399,7 +408,7 @@
                 alt: 'Zestaw BOGO',
                 titleHTML: '<div>Pakiet BOGO +</div><div>GRATIS olejek z kminku (5 ml)</div>',
                 price: totalPrice,
-                savings: totalSavings,
+                savings: totalSavingsWithCaraway,
                 pv: totalPV
             });
 
