@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tytuł ustawiony statycznie dla robotów i przeglądarki -->
+    <title>Oferta BOGO | 21–27 Października 2025</title>
+
+    <!-- === META TAGI OPEN GRAPH Z TREŚCI WPISANĄ STATYCZNIE === -->
+    <meta property="og:title" content="Oferta BOGO | 21–27 Października 2025">
+    <meta property="og:description" content="Zamów jeden produkt, a drugi otrzymasz GRATIS">
+    <meta property="og:image" content="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview.png">
+    <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- ======================================================================= -->
+
+    <!-- Kolor paska adresu na urządzeniach mobilnych -->
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Dołączamy bibliotekę Tailwind CSS do stylizacji -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Dołączamy czcionkę z Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- === FAVICON === -->
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/favicon.ico">
+    <link rel="icon" sizes="192x192" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/android-chrome-192x192.png">
+    <link rel="icon" sizes="512x512" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/android-chrome-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/favicon-16x16.png">
+
+    
+    <style>
+        /* Dodajemy niestandardową czcionkę do projektu */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden; /* Zapobiega poziomemu przewijaniu */
+        }
+        /* Style dla przełącznika ramek */
+        .toggle-checkbox:checked + .toggle-label .toggle-dot {
+            transform: translateX(100%);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #48bb78; /* Zielony kolor po włączeniu */
+        }
+        /* Dodajemy płynne przejście dla efektu hover na kartach */
+        .bogo-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .bogo-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Style dla elementów z ramkami debugowania */
+        [data-debug-border] {
+            transition: border-color 0.3s ease-in-out;
+        }
+        
+        /* Style dla przełącznika */
+        .toggle-label {
+            transition: background-color 0.3s ease-in-out;
+        }
+        .toggle-dot {
+            transition: transform 0.3s ease-in-out;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #48bb78;
+        }
+        .toggle-checkbox:checked + .toggle-label .toggle-dot {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen py-8">
+
+    <!-- SUWAK DO WŁĄCZANIA/WYŁĄCZANIA RAMEK (DEBUGOWANIE) -->
+    <div class="fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg hidden">
+        <label for="toggleBorders" class="flex items-center cursor-pointer">
+            <div class="relative">
+                <input type="checkbox" id="toggleBorders" class="toggle-checkbox sr-only" role="switch" aria-checked="false">
+                <div class="toggle-label block bg-gray-600 w-14 h-8 rounded-full transition-colors"></div>
+                <div class="toggle-dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform"></div>
+            </div>
+            <div class="ml-3 text-gray-700 font-semibold text-sm">Pokaż kontenery</div>
+        </label>
+    </div>
+
+    <!-- GŁÓWNY KONTENER STRONY -->
+    <div id="main-container" data-debug-border="border-4 border-black" class="relative container max-w-5xl my-8 p-4 sm:p-16 md:p-20 bg-white shadow-xl rounded-lg">
+
+        <!-- GRAFIKI TŁA (LIŚCIE) -->
+        <img 
+            src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/liscie-gora.jpg" 
+            alt="" 
+            class="absolute top-0 left-0 w-1/3 opacity-30 pointer-events-none z-0"
+            onerror="this.style.display='none'"
+        >
+        <img
+            src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/liscie-dol.jpg"
+            alt=""
+            class="absolute bottom-0 right-0 w-1/3 opacity-30 pointer-events-none z-0"
+            onerror="this.style.display='none'"
+        >
+
+        <!-- LOGO BOGO -->
+        <img
+            src="https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/logobogo.png"
+            alt="Logo BOGO doTERRA"
+            class="relative z-20 mx-auto mb-4 w-32 md:w-40"
+            onerror="this.style.display='none'"
+        >
+
+        <!-- NAGŁÓWEK STRONY -->
+        <header id="header-container" data-debug-border="border-2 border-red-500" class="text-center mb-2 md:mb-3 relative z-10 p-2">
+            <div>
+                <h1 id="page-main-title" class="text-4xl md:text-5xl font-semibold leading-tight text-slate-800">Oferta BOGO<br>21–27 Października 2025</h1>
+            </div>
+         </header>
+
+        <!-- GŁÓWNA TREŚĆ (Siatka z ofertami BOGO i podsumowaniem) -->
+        <main id="bogo-grid-container" data-debug-border="border-2 border-blue-500" class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 p-2" style="grid-auto-rows: minmax(160px, auto);">
+            <!-- Karty BOGO i podsumowanie zostaną wstawione tutaj przez JavaScript -->
+        </main>
+
+        <!-- SZCZEGÓŁOWA KALKULACJA -->
+        <section class="relative z-10 mt-16">
+            <h2 class="text-2xl md:text-3xl font-semibold text-slate-800 text-center mb-6">Szczegółowa kalkulacja</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="py-3 px-4 border-b text-left text-sm font-semibold text-slate-600">PRODUKT</th>
+                            <th class="py-3 px-4 border-b text-right text-sm font-semibold text-slate-600">POZA ZESTAWEM (PLN)</th>
+                            <th class="py-3 px-4 border-b text-right text-sm font-semibold text-slate-600">W ZESTAWIE (PLN)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-700">
+                        <tr>
+                            <td class="py-3 px-4 border-b">Siberian Fir</td>
+                            <td class="py-3 px-4 border-b text-right">110,75</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">62,02</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Cedarwood</td>
+                            <td class="py-3 px-4 border-b text-right">87,00</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">48,73</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Oregano</td>
+                            <td class="py-3 px-4 border-b text-right">162,50</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">91,37</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Majeranek</td>
+                            <td class="py-3 px-4 border-b text-right">126,50</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">71,13</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">On Guard</td>
+                            <td class="py-3 px-4 border-b text-right">205,75</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">141,11</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Stronger Touch</td>
+                            <td class="py-3 px-4 border-b text-right">94,25</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">64,64</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Vetiver Touch</td>
+                            <td class="py-3 px-4 border-b text-right">221,50</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">120,18</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Guaiacwood</td>
+                            <td class="py-3 px-4 border-b text-right">112,00</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">60,76</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Balsam Fir</td>
+                            <td class="py-3 px-4 border-b text-right">74,75</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">40,56</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Myrrh Touch</td>
+                            <td class="py-3 px-4 border-b text-right">273,00</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">162,91</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 border-b">Brightening Gel</td>
+                            <td class="py-3 px-4 border-b text-right">184,50</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">110,09</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-3 px-4 border-b">Caraway</td>
+                            <td class="py-3 px-4 border-b text-right">88,15</td>
+                            <td class="py-3 px-4 border-b text-right font-semibold">0,00</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-gray-100 text-slate-800">
+                            <td class="py-4 px-4 font-bold">Suma</td>
+                            <td class="py-4 px-4 text-right font-normal">1740,65</td>
+                            <td class="py-4 px-4 text-right font-bold">973,50</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEKCJA JAK ZAMÓWIĆ -->
+        <section class="relative z-10 mt-16">
+            <h2 class="text-2xl md:text-3xl font-semibold text-slate-800 mb-6">Jak zamówić</h2>
+
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Dodawanie produktów BOGO z poziomu zamówienia lojalnościowego (LRP)</h3>
+
+                <ol class="list-decimal list-inside space-y-3 text-slate-700 mb-6">
+                    <li>Zaloguj się na swoje konto i kliknij ikonę <strong>„Konto"</strong> na górnym pasku strony.</li>
+                    <li>Z menu wybierz <strong>„Moje zamówienia lojalnościowe (LRP)"</strong>.</li>
+                    <li>Kliknij <strong>„Zarządzaj zamówieniem"</strong>, aby otworzyć edycję swojego LRP.</li>
+                    <li>Wyszukaj interesujące Cię produkty BOGO – możesz skorzystać z wyszukiwarki lub przycisku <strong>„Przeglądaj"</strong>, aby przejrzeć dostępne oferty.</li>
+                    <li>Dodaj wybrane produkty do koszyka i kliknij <strong>„Kolejny krok"</strong>, aby kontynuować składanie zamówienia.</li>
+                </ol>
+
+                <div class="space-y-3 text-sm text-slate-600 bg-gray-50 p-4 rounded border-l-4 border-slate-400">
+                    <p><strong>Pamiętaj:</strong> jeśli dodajesz artykuły BOGO do swojego zamówienia lojalnościowego, <strong>musisz złożyć to zamówienie natychmiast</strong>, by mieć pewność, że skorzystasz z oferty BOGO.</p>
+                    <p><strong>Pamiętaj:</strong> jeśli wybierasz cały pakiet BOGO, musisz w swoim szablonie LRP dodać przynajmniej <strong>jeden produkt ze standardowej oferty</strong>, aby zamówienie mogło zostać przetworzone.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- === JEDEN WSPÓLNY SZABLON DLA WSZYSTKICH KART === -->
+    <template id="card-template">
+    <div class="bogo-card bg-white py-2 px-3 rounded-lg shadow-lg border-2 border-transparent flex flex-col sm:flex-row items-center gap-3"
+        data-debug-border="border-green-500">
+        <!-- Kontener na obrazek -->
+        <div class="card-images flex-shrink-0 w-full sm:w-1/2 h-[140px] sm:h-[160px] mb-2 sm:mb-0 overflow-hidden flex items-center justify-center">
+            <img src="" alt="" class="card-img h-full w-auto object-cover object-center"
+                data-debug-border="border-2 border-orange-500"
+                onerror="this.src='https://placehold.co/150x150/f8d7da/d9534f?text=Błąd'">
+        </div>
+        <div class="flex-grow w-full text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row justify-start items-center sm:items-start">
+                <h3 class="card-title text-xl font-semibold text-slate-800 mb-1 sm:mb-0">
+                    <!-- Treść tytułu będzie wstawiana przez JS -->
+                </h3>
+            </div>
+            <div class="text-[10px] text-slate-600 mt-1 border-t pt-1 text-center sm:text-left">
+                <p>Cena zestawu: <span class="card-price font-bold"></span></p>
+                <p>Wartość: <span class="card-total-value font-bold"></span></p>
+                <p>Cena niższa o: <span class="card-savings-combined font-bold"></span></p>
+                <p>PV: <span class="card-pv font-bold"></span></p>
+            </div>
+            <!-- Informacja o warunkach gratisu (tylko dla karty podsumowującej) -->
+            <div class="card-disclaimer hidden text-[9px] text-gray-500 italic mt-6 leading-relaxed text-center space-y-1">
+                <p>Aby dostać darmowy produkt, koniecznie wybierz pakiet BOGO - nie dodawaj ofert do koszyka pojedynczo.</p>
+                <p>Pakiet BOGO i darmowy upominek będą dostępne tylko do momentu, aż wyprzeda się choć jeden z zestawów BOGO.</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- BAZA DANYCH OFERT BOGO ---
+            const bogoOffers = [
+                // Lista par BOGO (21–27.10), uporządkowana rosnąco według ceny
+                // savings = wartość gratisowego produktu(ów) w PLN
+                { id: 1, name: "Siberian Fir + Cedarwood", price: 110.75, savings: 87.00, pv: 23.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/1.png", spanFull: false },
+                { id: 2, name: "Oregano + Majeranek", price: 162.50, savings: 126.50, pv: 34.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/2.png", spanFull: false },
+                { id: 3, name: "On Guard + Stronger Touch", price: 205.75, savings: 94.25, pv: 43.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/3.png", spanFull: false },
+                { id: 4, name: "Vetiver Touch + Guaiacwood + Balsam Fir", price: 221.50, savings: 186.75, pv: 47.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/4.png", spanFull: false },
+                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5.png", imgMobile: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5_centered.png", spanFull: true }
+            ];
+
+            // --- POBIERANIE ELEMENTÓW DOM ---
+            const gridContainer = document.getElementById('bogo-grid-container');
+            const cardTemplate = document.getElementById('card-template');
+            const toggleSwitch = document.getElementById('toggleBorders');
+
+            if (!gridContainer || !cardTemplate || !toggleSwitch) {
+                console.error("Nie znaleziono kluczowych elementów na stronie. Inicjalizacja przerwana.");
+                return;
+            }
+
+            /**
+             * Tworzy i dodaje kartę (produktu lub podsumowania) do siatki.
+             */
+            function createAndAppendCard(data) {
+                const cardClone = cardTemplate.content.cloneNode(true);
+                const cardElement = cardClone.querySelector('.bogo-card');
+
+                if (data.spanFull) {
+                    // zajmij pełen span kolumn na dużych ekranach (1 wiersz)
+                    cardElement.classList.add('lg:col-span-2', 'lg:gap-0');
+
+                    // sprawdź czy karta ma zajmować 2 wiersze (2x2)
+                    if (data.spanTwoRows) {
+                        cardElement.classList.add('lg:row-span-2');
+                    }
+
+                    // zwiększ wysokość kontenera grafiki dla kart spanFull (1.7x)
+                    const imgContainer = cardElement.querySelector('.card-images');
+                    imgContainer.classList.remove('h-[140px]', 'sm:h-[160px]');
+                    imgContainer.classList.add('h-[238px]', 'sm:h-[272px]', 'lg:w-1/2', 'lg:flex', 'lg:justify-end', 'lg:items-center', 'lg:pr-8');
+
+                    // wyrównaj kontener tekstowy symetrycznie względem osi pionowej
+                    const textContainer = cardElement.querySelector('.flex-grow');
+                    textContainer.classList.add('lg:w-1/2', 'lg:pl-8');
+                }
+
+                const img = cardElement.querySelector('.card-img');
+
+                // Dla karty spanFull: responsywna grafika (mobile vs desktop)
+                if (data.spanFull && data.imgMobile) {
+                    // Przechowuj oba URLe jako atrybuty data
+                    img.dataset.imgDesktop = data.img;
+                    img.dataset.imgMobile = data.imgMobile;
+
+                    // Media query dla Tailwind lg breakpoint (1024px)
+                    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
+                    // Funkcja do ustawiania właściwego obrazka
+                    const updateImage = () => {
+                        const isLargeScreen = mediaQuery.matches;
+                        const newSrc = isLargeScreen ? img.dataset.imgDesktop : img.dataset.imgMobile;
+                        if (img.src !== newSrc) {
+                            img.src = newSrc;
+                        }
+                    };
+
+                    // Ustaw obrazek przy tworzeniu karty
+                    updateImage();
+
+                    // Nasłuchuj zmian media query (lepsze niż resize)
+                    mediaQuery.addEventListener('change', updateImage);
+                } else {
+                    img.src = data.img;
+                }
+
+                img.alt = data.alt;
+
+                const titleElement = cardElement.querySelector('.card-title');
+                titleElement.innerHTML = data.titleHTML;
+                // jeśli karta wymaga 3 wierszy tytułu (pierwsze 4 karty) — dajemy wyższą wysokość
+                if (data.threeRows) {
+                    titleElement.classList.add('h-16', 'leading-tight', 'flex', 'flex-col', 'justify-end');
+                } else if (data.twoRows) {
+                    // dla karty 5 - 2 wiersze w pionie
+                    titleElement.classList.add('h-12', 'leading-tight', 'flex', 'flex-col', 'justify-end');
+                } else if (!data.isSummary) {
+                    titleElement.classList.add('h-12', 'flex', 'items-end');
+                }
+
+                const totalValue = data.price + data.savings;
+                const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
+
+                cardElement.querySelector('.card-price').textContent = `${data.price.toFixed(2)} zł`;
+                cardElement.querySelector('.card-total-value').textContent = `${totalValue.toFixed(2)} zł`;
+                cardElement.querySelector('.card-savings-combined').textContent = `${savingsPercent}%`;
+                cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
+
+                // Pokaż disclaimer tylko dla karty podsumowującej
+                if (data.isSummary) {
+                    const disclaimer = cardElement.querySelector('.card-disclaimer');
+                    if (disclaimer) {
+                        disclaimer.classList.remove('hidden');
+                    }
+                }
+
+                gridContainer.appendChild(cardElement);
+            }
+
+            // 1. Renderowanie kart produktów
+            bogoOffers.forEach(offer => {
+                // dla pierwszych 4 ofert przygotowujemy tytuł w 3 wierszach z plusem tam gdzie był
+                let titleHTML = offer.name;
+                let threeRows = false;
+                let twoRows = false;
+                if (offer.id <= 4) {
+                    threeRows = true;
+                    const parts = offer.name.split('+').map(p => p.trim());
+                    const lines = [
+                        parts[0] || '',
+                        parts[1] || '',
+                        parts[2] || ''
+                    ];
+                    const titleLines = lines.map((line, idx) => {
+                        if (!line) return '<div></div>';
+                        const hasNextNonEmpty = lines.slice(idx + 1).some(l => l && l.trim() !== '');
+                        return `<div>${line}${hasNextNonEmpty ? ' +' : ''}</div>`;
+                    });
+                    titleHTML = titleLines.join('');
+                } else if (offer.id === 5) {
+                    // dla karty 5 również rozdzielamy po znaku +
+                    twoRows = true;
+                    const parts = offer.name.split('+').map(p => p.trim());
+                    const lines = [
+                        parts[0] || '',
+                        parts[1] || ''
+                    ];
+                    const titleLines = lines.map((line, idx) => {
+                        if (!line) return '<div></div>';
+                        const hasNextNonEmpty = lines.slice(idx + 1).some(l => l && l.trim() !== '');
+                        return `<div>${line}${hasNextNonEmpty ? ' +' : ''}</div>`;
+                    });
+                    titleHTML = titleLines.join('');
+                }
+
+                createAndAppendCard({
+                    isSummary: false,
+                    spanFull: offer.spanFull,
+                    img: offer.img,
+                    imgMobile: offer.imgMobile,
+                    alt: offer.name,
+                    titleHTML,
+                    threeRows,
+                    twoRows,
+                    price: offer.price,
+                    savings: offer.savings,
+                    pv: offer.pv
+                });
+            });
+
+            // 2. Obliczanie i renderowanie podsumowania
+            const totalPrice = bogoOffers.reduce((sum, offer) => sum + offer.price, 0);
+            const totalSavings = bogoOffers.reduce((sum, offer) => sum + offer.savings, 0);
+            const totalPV = bogoOffers.reduce((sum, offer) => sum + offer.pv, 0);
+
+            // Dodaj wartość GRATIS Caraway do oszczędności
+            const carawayValue = 88.15;
+            const totalSavingsWithCaraway = totalSavings + carawayValue;
+
+            createAndAppendCard({
+                isSummary: true,
+                spanFull: true,
+                spanTwoRows: true,
+                img: 'https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-bundle.png',
+                alt: 'Zestaw BOGO',
+                titleHTML: '<div>Pakiet BOGO +</div><div>GRATIS olejek z kminku (5 ml)</div>',
+                price: totalPrice,
+                savings: totalSavingsWithCaraway,
+                pv: totalPV
+            });
+
+            // --- LOGIKA PRZEŁĄCZNIKA RAMEK (DEBUG) ---
+            // Zmodyfikowana funkcja toggleBorders
+            function toggleBorders() {
+                const show = toggleSwitch.checked;
+                toggleSwitch.setAttribute('aria-checked', show);
+                
+                const debugElements = document.querySelectorAll('[data-debug-border]');
+                debugElements.forEach(element => {
+                    const classes = element.getAttribute('data-debug-border').split(' ');
+                    if (show) {
+                        element.classList.add(...classes);
+                        // Dodaj animację
+                        element.style.transition = 'border-color 0.3s ease-in-out';
+                    } else {
+                        element.classList.remove(...classes);
+                    }
+                });
+            }
+
+            // Dodaj obsługę klawiatury dla dostępności
+            toggleSwitch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleSwitch.checked = !toggleSwitch.checked;
+                    toggleBorders();
+                }
+            });
+
+            toggleSwitch.addEventListener('change', toggleBorders);
+            toggleBorders();
+        });
+    </script>
+
+</body>
+</html>
