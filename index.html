@@ -75,6 +75,149 @@
         .toggle-checkbox:checked + .toggle-label .toggle-dot {
             transform: translateX(100%);
         }
+
+        /* Style dla wyprzedanych produktów */
+        .sold-out {
+            position: relative;
+        }
+
+        .sold-out:hover {
+            transform: none !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .sold-out-badge {
+            background-color: #fce7e9;
+            color: #db6f78;
+            border: 1px solid #f5c2c7;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            display: block;
+            margin-top: 0.35rem;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.1;
+            height: auto;
+            width: fit-content;
+            text-align: center;
+        }
+
+        /* Na desktop badge wyrównany do lewej */
+        @media (min-width: 640px) {
+            .sold-out-badge {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Stała wysokość dla obszaru tytułu - zawsze 4 linie (tytuł 3 linie + badge 1 linia) */
+        .card-title {
+            font-size: 1rem !important; /* Zmniejszona czcionka z 1.25rem (text-xl) do 1rem */
+            line-height: 1.3 !important;
+            min-height: 80px; /* Zarezerwowane miejsce na 4 linie */
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-end !important; /* Wypełnia od DOŁU */
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Na desktop tytuly mogą być trochę większe */
+        @media (min-width: 1024px) {
+            .card-title {
+                font-size: 1.1rem !important;
+                min-height: 85px;
+            }
+        }
+
+        /* === NOWY SYSTEM DLA KART SPANFULL === */
+
+        /* Bazowe style dla wszystkich kart spanFull */
+        .bogo-card-spanfull {
+            /* Na mobile domyślnie pionowy układ */
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bogo-card-spanfull .card-images {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .bogo-card-spanfull .flex-grow {
+            width: 100%;
+            text-align: center;
+            padding: 0;
+        }
+
+        /* Od 640px (tablet) - układ poziomy */
+        @media (min-width: 640px) {
+            .bogo-card-spanfull {
+                flex-direction: row;
+            }
+
+            .bogo-card-spanfull .card-images {
+                width: 50%;
+                height: 220px;
+                margin-bottom: 0;
+            }
+
+            .bogo-card-spanfull .flex-grow {
+                width: 50%;
+                text-align: left;
+            }
+        }
+
+        /* Od 1024px (desktop) - specjalny układ dla spanFull */
+        @media (min-width: 1024px) {
+            .bogo-card-spanfull .card-images {
+                width: 50%;
+                height: 272px;
+                justify-content: flex-end;
+                padding-right: 2rem;
+            }
+
+            .bogo-card-spanfull .flex-grow {
+                width: 50%;
+                padding-left: 2rem;
+            }
+        }
+
+        /* === DEBUG: POKAŻ WSZYSTKIE OBRAMOWANIA === */
+        .debug-borders #main-container {
+            border: 4px solid red !important;
+        }
+
+        .debug-borders .bogo-card {
+            border: 3px solid blue !important;
+        }
+
+        .debug-borders .bogo-card-spanfull {
+            border: 3px solid purple !important;
+        }
+
+        .debug-borders .card-images {
+            border: 2px solid orange !important;
+        }
+
+        .debug-borders .flex-grow {
+            border: 2px solid green !important;
+        }
+
+        .debug-borders .card-title {
+            border: 1px solid pink !important;
+        }
+
+        .debug-borders section {
+            border: 2px solid brown !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 flex items-center justify-center min-h-screen py-8">
@@ -274,11 +417,11 @@
             const bogoOffers = [
                 // Lista par BOGO (21–27.10), uporządkowana rosnąco według ceny
                 // savings = wartość gratisowego produktu(ów) w PLN
-                { id: 1, name: "Siberian Fir + Cedarwood", price: 110.75, savings: 87.00, pv: 23.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/1.png", spanFull: false },
-                { id: 2, name: "Oregano + Majeranek", price: 162.50, savings: 126.50, pv: 34.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/2.png", spanFull: false },
-                { id: 3, name: "On Guard + Stronger Touch", price: 205.75, savings: 94.25, pv: 43.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/3.png", spanFull: false },
-                { id: 4, name: "Vetiver Touch + Guaiacwood + Balsam Fir", price: 221.50, savings: 186.75, pv: 47.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/4.png", spanFull: false },
-                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5.png", imgMobile: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5_centered.png", spanFull: true }
+                { id: 1, name: "Siberian Fir + Cedarwood", price: 110.75, savings: 87.00, pv: 23.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/1.png", spanFull: false, soldOut: false },
+                { id: 2, name: "Oregano + Majeranek", price: 162.50, savings: 126.50, pv: 34.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/2.png", spanFull: false, soldOut: false },
+                { id: 3, name: "On Guard + Stronger Touch", price: 205.75, savings: 94.25, pv: 43.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/3.png", spanFull: false, soldOut: true },
+                { id: 4, name: "Vetiver Touch + Guaiacwood + Balsam Fir", price: 221.50, savings: 186.75, pv: 47.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/4.png", spanFull: false, soldOut: false },
+                { id: 5, name: "Myrrh Touch + Brightening Gel", price: 273.00, savings: 184.50, pv: 58.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5.png", imgMobile: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo5_centered.png", spanFull: true, soldOut: true }
             ];
 
             // --- POBIERANIE ELEMENTÓW DOM ---
@@ -299,22 +442,17 @@
                 const cardElement = cardClone.querySelector('.bogo-card');
 
                 if (data.spanFull) {
-                    // zajmij pełen span kolumn na dużych ekranach (1 wiersz)
-                    cardElement.classList.add('lg:col-span-2', 'lg:gap-0');
+                    // Dodaj nową prostą klasę dla kart spanFull
+                    cardElement.classList.add('bogo-card-spanfull', 'lg:col-span-2');
 
                     // sprawdź czy karta ma zajmować 2 wiersze (2x2)
                     if (data.spanTwoRows) {
                         cardElement.classList.add('lg:row-span-2');
                     }
 
-                    // zwiększ wysokość kontenera grafiki dla kart spanFull (1.7x)
+                    // Usuń domyślne klasy wysokości z szablonu - nowy CSS to obsłuży
                     const imgContainer = cardElement.querySelector('.card-images');
                     imgContainer.classList.remove('h-[140px]', 'sm:h-[160px]');
-                    imgContainer.classList.add('h-[238px]', 'sm:h-[272px]', 'lg:w-1/2', 'lg:flex', 'lg:justify-end', 'lg:items-center', 'lg:pr-8');
-
-                    // wyrównaj kontener tekstowy symetrycznie względem osi pionowej
-                    const textContainer = cardElement.querySelector('.flex-grow');
-                    textContainer.classList.add('lg:w-1/2', 'lg:pl-8');
                 }
 
                 const img = cardElement.querySelector('.card-img');
@@ -350,15 +488,8 @@
 
                 const titleElement = cardElement.querySelector('.card-title');
                 titleElement.innerHTML = data.titleHTML;
-                // jeśli karta wymaga 3 wierszy tytułu (pierwsze 4 karty) — dajemy wyższą wysokość
-                if (data.threeRows) {
-                    titleElement.classList.add('h-16', 'leading-tight', 'flex', 'flex-col', 'justify-end');
-                } else if (data.twoRows) {
-                    // dla karty 5 - 2 wiersze w pionie
-                    titleElement.classList.add('h-12', 'leading-tight', 'flex', 'flex-col', 'justify-end');
-                } else if (!data.isSummary) {
-                    titleElement.classList.add('h-12', 'flex', 'items-end');
-                }
+                // Usunięte stare klasy wysokości - teraz CSS kontroluje wysokość tytułów
+                // Wszystkie tytuly mają stałą min-height: 80px z CSS
 
                 const totalValue = data.price + data.savings;
                 const savingsPercent = totalValue > 0 ? ((data.savings / totalValue) * 100).toFixed(1) : 0;
@@ -367,6 +498,17 @@
                 cardElement.querySelector('.card-total-value').textContent = `${totalValue.toFixed(2)} zł`;
                 cardElement.querySelector('.card-savings-combined').textContent = `${savingsPercent}%`;
                 cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
+
+                // Obsługa wyprzedanych produktów
+                if (data.soldOut) {
+                    cardElement.classList.add('sold-out');
+
+                    // Dodaj badge "Już niedostępne" do tytułu
+                    const soldOutBadge = document.createElement('span');
+                    soldOutBadge.className = 'sold-out-badge';
+                    soldOutBadge.textContent = 'Już niedostępne';
+                    titleElement.appendChild(soldOutBadge);
+                }
 
                 // Pokaż disclaimer tylko dla karty podsumowującej
                 if (data.isSummary) {
@@ -426,7 +568,8 @@
                     twoRows,
                     price: offer.price,
                     savings: offer.savings,
-                    pv: offer.pv
+                    pv: offer.pv,
+                    soldOut: offer.soldOut
                 });
             });
 
@@ -448,7 +591,8 @@
                 titleHTML: '<div>Pakiet BOGO +</div><div>GRATIS olejek z kminku (5 ml)</div>',
                 price: totalPrice,
                 savings: totalSavingsWithCaraway,
-                pv: totalPV
+                pv: totalPV,
+                soldOut: true
             });
 
             // --- LOGIKA PRZEŁĄCZNIKA RAMEK (DEBUG) ---
