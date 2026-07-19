@@ -440,7 +440,7 @@
                 // savings: null = produkt bez ceny katalogowej (oferta ograniczona czasowo)
                 { id: 1, name: "Siberian Fir + Wild Orange", price: 113.75, savings: 76.25, pv: 24.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para1-siberian-fir-wild-orange.jpg", spanFull: false, soldOut: false },
                 { id: 2, name: "Lavender + Bergamot Mint", price: 168.25, savings: null, pv: 36.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para2-lavender-bergamot-mint.jpg", spanFull: false, soldOut: false },
-                { id: 3, name: "sun: spray po opalaniu + balsam mineralny SPF", price: 175.00, savings: 162.50, pv: 29.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para3-sun-after-sun-lotion.jpg", spanFull: false, soldOut: false },
+                { id: 3, name: "sun: spray po opalaniu + balsam SPF", price: 175.00, savings: 162.50, pv: 29.00, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para3-sun-after-sun-lotion.jpg", spanFull: false, soldOut: false },
                 { id: 4, name: "Adaptiv + Balance", price: 232.00, savings: 137.50, pv: 49.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para4-adaptiv-balance.jpg", spanFull: false, soldOut: false },
                 { id: 5, name: "Neroli Touch + Magnolia Touch", price: 288.75, savings: 158.01, pv: 61.50, img: "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/para5-neroli-magnolia.jpg", spanFull: true, soldOut: false }
             ];
@@ -519,14 +519,17 @@
                     ? ((data.savings / totalValue) * 100).toFixed(1)
                     : null;
 
-                cardElement.querySelector('.card-price').textContent = `${data.price.toFixed(2)} zł`;
+                // kwoty po polsku: przecinek dziesiętny
+                const zl = (v) => `${v.toFixed(2).replace('.', ',')} zł`;
+
+                cardElement.querySelector('.card-price').textContent = zl(data.price);
                 cardElement.querySelector('.card-total-value').textContent = hasKnownSavings
-                    ? `${totalValue.toFixed(2)} zł`
-                    : `${totalValue.toFixed(2)} zł + gratis bez ceny katalogowej`;
+                    ? zl(totalValue)
+                    : `${zl(totalValue)} + gratis`;
                 cardElement.querySelector('.card-savings-combined').textContent = savingsPercent !== null
-                    ? `${savingsPercent}%`
-                    : 'produkt spoza cennika';
-                cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1);
+                    ? `${savingsPercent.replace('.', ',')}%`
+                    : 'gratis bez ceny katalogowej';
+                cardElement.querySelector('.card-pv').textContent = data.pv.toFixed(1).replace('.', ',');
 
                 // Obsługa wyprzedanych produktów
                 if (data.soldOut) {
