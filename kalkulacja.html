@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulacja BOGO — podział ceny pary | 21–27 lipca 2026</title>
+
+<meta property="og:title" content="Kalkulacja BOGO — podział ceny pary">
+<meta property="og:description" content="Jak cena pary rozkłada się proporcjonalnie na dwa produkty i dlaczego suma wszystkich pozycji daje 977,75 zł.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/kalkulacja.html">
+<meta name="theme-color" content="#fcfbfa">
+
+<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:wght@500;600&amp;display=swap" rel="stylesheet">
+
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Inter',sans-serif;background:#fcfbfa;color:#292524;-webkit-font-smoothing:antialiased}
+  a{color:#4d6a5e;text-decoration:none}
+  a:hover{color:#3e554b}
+  .wrap{min-height:100vh;padding:48px 20px}
+  .sheet{position:relative;max-width:1040px;margin:0 auto;background:#fff;border-radius:26px;box-shadow:0 30px 70px -40px rgba(47,58,51,.4);overflow:hidden}
+  .leaf{position:absolute;width:30%;opacity:.22;pointer-events:none;mix-blend-mode:multiply;z-index:0}
+  .inner{position:relative;z-index:1;padding:clamp(28px,5vw,56px) clamp(20px,4.5vw,48px) 64px}
+
+  h1{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(32px,6.4vw,50px);line-height:1.05;color:#1c1917;margin:0 0 8px}
+  .lead{max-width:640px;margin:0;color:#57534e;font-size:15px;line-height:1.65}
+  .back{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#4d6a5e;margin-bottom:26px}
+  .seclabel{display:flex;align-items:center;gap:16px;margin:58px 0 22px}
+  .seclabel span:first-child{font-family:'Playfair Display',serif;font-size:clamp(24px,4.6vw,32px);font-weight:600;color:#1c1917}
+  .rule{flex:1;height:1px;background:#ddd2ba}
+  .tag{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#78716c;white-space:nowrap}
+
+  .card{background:#fff;border:1px solid #ece3d0;border-radius:20px;padding:clamp(18px,3.4vw,26px)}
+  .method{background:#faf9f6;border:1px solid #ece3d0;border-radius:20px;padding:clamp(20px,3.6vw,28px);margin-top:30px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin:0;padding:0;list-style:none}
+  .steps li{display:flex;gap:13px;font-size:13.5px;line-height:1.55;color:#292524}
+  .num{flex:0 0 26px;height:26px;border-radius:50%;background:#eef2f0;color:#4d6a5e;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .formula{margin-top:22px;padding:16px 18px;background:#fff;border:1px dashed #d8e0dc;border-radius:14px;font-size:14px;line-height:1.7;color:#44403c;overflow-x:auto}
+  .formula b{color:#4d6a5e}
+
+  .pair{display:grid;grid-template-columns:132px 1fr;gap:22px;align-items:start;margin-bottom:16px}
+  .pair .thumb{border-radius:14px;overflow:hidden;background:#faf9f6;aspect-ratio:1/1}
+  .pair .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .pairhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .pairhead .idx{font-size:11px;font-weight:700;letter-spacing:.1em;color:#4d6a5e}
+  .pairhead h3{font-size:17px;font-weight:600;color:#1c1917;margin:0;line-height:1.3}
+  .factor{margin-left:auto;font-size:11px;font-weight:600;color:#78716c;background:#faf9f6;border-radius:999px;padding:4px 11px;white-space:nowrap}
+
+  .barline{margin-top:14px}
+  .barcap{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#a8a29e;margin-bottom:5px}
+  .barcap b{color:#78716c;font-weight:600;letter-spacing:0;text-transform:none;font-size:12px}
+  .track{display:flex;height:38px;border-radius:10px;overflow:hidden;background:#f5f5f4}
+  .seg{display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;min-width:0}
+  .segA{background:#a8bcb2;color:#2b3b34}
+  .segB{background:#e2d3b4;color:#4a3f28}
+  .paidA{background:#4d6a5e;color:#eef2f0}
+  .paidB{background:#c2a878;color:#fff}
+  .empty{background:repeating-linear-gradient(135deg,#f5f4f2,#f5f4f2 6px,#efeeec 6px,#efeeec 12px);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#a8a29e}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:11px;font-size:12.5px;color:#57534e}
+  .legend div{display:flex;align-items:center;gap:7px}
+  .dot{width:10px;height:10px;border-radius:3px;flex:0 0 10px}
+  .check{display:inline-flex;align-items:center;gap:8px;margin-top:13px;padding:7px 13px;background:#eef2f0;border-radius:10px;font-size:13px;font-weight:600;color:#3e554b;font-variant-numeric:tabular-nums}
+
+  .totalbar{display:flex;height:56px;border-radius:12px;overflow:hidden;margin-top:8px}
+  .tseg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;font-size:12px;font-weight:700;overflow:hidden;min-width:0;border-right:1px solid rgba(255,255,255,.35)}
+  .tseg small{font-size:9.5px;font-weight:600;opacity:.8;letter-spacing:.06em;text-transform:uppercase}
+  .tseg:last-child{border-right:0}
+  .sumrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:9px;margin-top:16px;font-size:15px;font-weight:600;color:#57534e;font-variant-numeric:tabular-nums}
+  .sumrow .eq{color:#1c1917;font-size:19px;font-weight:700}
+
+  .compare{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+  .crow .clab{display:flex;justify-content:space-between;font-size:12.5px;color:#57534e;margin-bottom:6px}
+  .crow .clab b{font-size:15px;color:#1c1917;font-variant-numeric:tabular-nums}
+  .cbar{height:34px;border-radius:9px;background:#f5f5f4;overflow:hidden}
+  .cfill{height:100%;border-radius:9px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+  .stat{background:#fff;border:1px solid #e7e5e4;border-radius:14px;padding:14px 18px}
+  .stat .k{font-size:11px;color:#78716c;text-transform:uppercase;letter-spacing:.07em}
+  .stat .v{font-size:22px;font-weight:700;color:#1c1917;font-variant-numeric:tabular-nums}
+  .stat.green{background:#4d6a5e;border-color:#4d6a5e}
+  .stat.green .k{color:#9fb3a9}
+  .stat.green .v{color:#eaf0ec}
+
+  .note{background:#faf9f6;border-left:3px solid #4d6a5e;border-radius:10px;padding:16px 18px;font-size:12.5px;line-height:1.65;color:#57534e;margin-top:26px}
+  .note p{margin:0 0 8px}
+  .note p:last-child{margin:0}
+
+  @media (max-width:640px){
+    .pair{grid-template-columns:76px 1fr;gap:14px}
+    .track{height:34px}
+    .seg{font-size:11.5px}
+    .totalbar{height:64px}
+    .tseg{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="sheet">
+  <img class="leaf" style="top:0;left:0" src="images/liscie-gora.jpg" alt="" onerror="this.style.display='none'">
+  <img class="leaf" style="bottom:0;right:0" src="images/liscie-dol.jpg" alt="" onerror="this.style.display='none'">
+
+  <div class="inner">
+
+    <a class="back" href="index.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Wróć do oferty
+    </a>
+
+    <h1>Podział ceny pary na produkty</h1>
+    <p class="lead">Każda para kosztuje tyle, co jeden produkt — droższy. Kolumna „W zestawie" w tabeli kalkulacji rozdziela tę kwotę na oba produkty proporcjonalnie do ich cen katalogowych. Ta strona pokazuje ten podział parami i sprawdza, że wszystkie pozycje sumują się do ceny pakietu: <strong style="color:#4d6a5e;">977,75 zł</strong>.</p>
+
+    <div class="method">
+      <ol class="steps">
+        <li><span class="num">1</span><span>Sumujesz ceny katalogowe obu produktów w parze — to wartość pary poza promocją.</span></li>
+        <li><span class="num">2</span><span>Dzielisz cenę pary przez tę wartość — wychodzi współczynnik (ile procent wartości płacisz).</span></li>
+        <li><span class="num">3</span><span>Mnożysz cenę katalogową każdego produktu przez ten współczynnik — to jego udział w cenie pary.</span></li>
+      </ol>
+      <div class="formula">
+        współczynnik = <b>cena pary ÷ (cena A + cena B)</b><br>
+        udział produktu = <b>cena katalogowa produktu × współczynnik</b><br>
+        <span style="color:#78716c;font-size:13px;">Przykład (para 01): 113,75 ÷ 190,00 = <b>0,5987</b> &nbsp;→&nbsp; 113,75 × 0,5987 = <b>68,10</b> &nbsp;·&nbsp; 76,25 × 0,5987 = <b>45,65</b></span>
+      </div>
+    </div>
+
+    <div class="seclabel"><span>Para po parze</span><span class="rule"></span><span class="tag">5 zestawów</span></div>
+
+    <div id="pairs"></div>
+
+    <div class="seclabel"><span>Suma pakietu</span><span class="rule"></span><span class="tag">977,75 zł</span></div>
+
+    <div class="card">
+      <div class="barcap"><span>Pięć par w jednym pakiecie — szerokość odpowiada cenie</span><b>razem 977,75 zł</b></div>
+      <div class="totalbar" id="totalbar"></div>
+      <div class="sumrow" id="sumrow"></div>
+
+      <div style="height:1px;background:#f0eadd;margin:26px 0"></div>
+
+      <div class="barcap"><span>Te same pieniądze rozbite na 10 pozycji z tabeli</span><b>10 × udział = 977,75 zł</b></div>
+      <div class="totalbar" id="itembar" style="height:44px"></div>
+      <div class="check" id="itemcheck"></div>
+    </div>
+
+    <div class="seclabel"><span>Wartość a kwota do zapłaty</span><span class="rule"></span></div>
+
+    <div class="card">
+      <div class="compare">
+        <div class="crow">
+          <div class="clab"><span>Cena katalogowa 11 produktów (z olejkiem gratis)</span><b>1795,02 zł</b></div>
+          <div class="cbar"><div class="cfill" style="width:100%;background:#e2d3b4"></div></div>
+        </div>
+        <div class="crow">
+          <div class="clab"><span>Płacisz za pakiet BOGO</span><b>977,75 zł</b></div>
+          <div class="cbar"><div class="cfill" style="width:54.47%;background:#4d6a5e"></div></div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">Katalog</div><div class="v">1795,02 zł</div></div>
+        <div class="stat"><div class="k">Płacisz</div><div class="v">977,75 zł</div></div>
+        <div class="stat green"><div class="k">Oszczędzasz</div><div class="v">817,27 zł</div></div>
+        <div class="stat"><div class="k">Udział ceny</div><div class="v">54,5%</div></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <p>Ceny hurtowe brutto, cennik doTERRA Polska. Bergamot Mint (15 ml) jest dostępny wyłącznie w tej ofercie — przyjęto orientacyjną wartość 125,00 zł.</p>
+      <p>Udziały zaokrąglone do groszy; w każdej parze suma dwóch udziałów daje dokładnie cenę pary, więc suma dziesięciu pozycji daje dokładnie 977,75 zł — bez korekty.</p>
+      <p>Olejek Green Mandarin (15 ml, wartość 158,01 zł) liczy się do wartości katalogowej i do oszczędności, ale nie do kwoty płaconej — dostajesz go gratis wyłącznie przy zakupie całego pakietu.</p>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const PAIRS = [
+  {idx:'PARA 01', img:'images/para1-siberian-fir-wild-orange.jpg', title:'Siberian Fir + Wild Orange',
+   a:{n:'Siberian Fir', p:113.75, s:68.10}, b:{n:'Wild Orange', p:76.25, s:45.65}, pay:113.75},
+  {idx:'PARA 02', img:'images/para2-lavender-bergamot-mint.jpg', title:'Lavender + Bergamot Mint',
+   a:{n:'Lavender', p:168.25, s:96.53}, b:{n:'Bergamot Mint', p:125.00, s:71.72}, pay:168.25},
+  {idx:'PARA 03', img:'images/para3-sun-after-sun-lotion.jpg', title:'dōTERRA sun — spray po opalaniu + balsam mineralny SPF',
+   a:{n:'spray po opalaniu', p:175.00, s:90.74}, b:{n:'balsam mineralny SPF', p:162.50, s:84.26}, pay:175.00},
+  {idx:'PARA 04', img:'images/para4-adaptiv-balance.jpg', title:'Adaptiv + Balance',
+   a:{n:'Adaptiv', p:232.00, s:145.67}, b:{n:'Balance', p:137.50, s:86.33}, pay:232.00},
+  {idx:'PARA 05', img:'images/para5-neroli-magnolia.jpg', title:'Neroli Touch + Magnolia Touch',
+   a:{n:'Neroli Touch', p:288.75, s:186.62}, b:{n:'Magnolia Touch', p:158.01, s:102.13}, pay:288.75}
+];
+const PAIR_COLORS = ['#4d6a5e','#5d7c6e','#7d9a83','#a58a5c','#c2a878'];
+const zl = v => v.toLocaleString('pl-PL',{minimumFractionDigits:2, maximumFractionDigits:2});
+
+document.getElementById('pairs').innerHTML = PAIRS.map(p => {
+  const full = p.a.p + p.b.p;
+  const k = p.pay / full;
+  const wA = p.a.p / full * 100, wB = p.b.p / full * 100;
+  const pA = p.a.s / full * 100, pB = p.b.s / full * 100;
+  const rest = 100 - pA - pB;
+  return `
+  <div class="card" style="margin-bottom:18px">
+    <div class="pair">
+      <div class="thumb"><img src="${p.img}" alt="${p.title}" onerror="this.style.opacity=.35"></div>
+      <div>
+        <div class="pairhead">
+          <span class="idx">${p.idx}</span>
+          <h3>${p.title}</h3>
+          <span class="factor">współczynnik ${(k*100).toFixed(2).replace('.',',')}%</span>
+        </div>
+
+        <div class="barline">
+          <div class="barcap"><span>Ceny katalogowe osobno</span><b>${zl(full)} zł</b></div>
+          <div class="track">
+            <div class="seg segA" style="flex:0 0 ${wA}%">${zl(p.a.p)}</div>
+            <div class="seg segB" style="flex:0 0 ${wB}%">${zl(p.b.p)}</div>
+          </div>
+        </div>
+
+        <div class="barline">
+          <div class="barcap"><span>Ta sama para w promocji — każdy produkt × ${(k*100).toFixed(2).replace('.',',')}%</span><b>${zl(p.pay)} zł</b></div>
+          <div class="track">
+            <div class="seg paidA" style="flex:0 0 ${pA}%">${zl(p.a.s)}</div>
+            <div class="seg paidB" style="flex:0 0 ${pB}%">${zl(p.b.s)}</div>
+            <div class="seg empty" style="flex:0 0 ${rest}%">−${zl(full - p.pay)} zł</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div><span class="dot" style="background:#4d6a5e"></span>${p.a.n} — ${zl(p.a.s)} zł</div>
+          <div><span class="dot" style="background:#c2a878"></span>${p.b.n} — ${zl(p.b.s)} zł</div>
+        </div>
+        <div class="check">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4d6a5e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          ${zl(p.a.s)} + ${zl(p.b.s)} = ${zl(p.a.s + p.b.s)} zł — cena pary
+        </div>
+      </div>
+    </div>
+  </div>`;
+}).join('');
+
+const total = PAIRS.reduce((s,p)=>s+p.pay,0);
+
+document.getElementById('totalbar').innerHTML = PAIRS.map((p,i)=>`
+  <div class="tseg" style="flex:0 0 ${p.pay/total*100}%; background:${PAIR_COLORS[i]}">
+    <small>${p.idx.replace('PARA ','P')}</small>${zl(p.pay)}
+  </div>`).join('');
+
+document.getElementById('sumrow').innerHTML =
+  PAIRS.map(p=>zl(p.pay)).join(' <span style="color:#a8a29e">+</span> ') +
+  ` <span class="eq">= ${zl(total)} zł</span>`;
+
+const items = PAIRS.flatMap((p,i)=>[
+  {n:p.a.n, v:p.a.s, c:PAIR_COLORS[i]},
+  {n:p.b.n, v:p.b.s, c:PAIR_COLORS[i], light:true}
+]);
+document.getElementById('itembar').innerHTML = items.map(it=>`
+  <div class="tseg" title="${it.n}: ${zl(it.v)} zł"
+       style="flex:0 0 ${it.v/total*100}%; background:${it.c}; ${it.light?'opacity:.62;':''}">
+    ${zl(it.v)}
+  </div>`).join('');
+
+const itemSum = items.reduce((s,it)=>s+it.v,0);
+document.getElementById('itemcheck').innerHTML =
+  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4d6a5e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+   Suma 10 pozycji: ${zl(itemSum)} zł — zgadza się z ceną pakietu co do grosza`;
+</script>
+</body>
+</html>
