@@ -34,6 +34,18 @@
       body { margin: 0; font-family: 'Inter', sans-serif; background: #fcfbfa; -webkit-font-smoothing: antialiased; }
       a { color: #4d6a5e; text-decoration: none; }
       a:hover { color: #3e554b; }
+  /* Karty par na waskim ekranie: obie ceny obok siebie, pigulka oszczednosci pelna szerokosc */
+  @media (max-width: 560px) {
+    .cena-row { gap: 12px 20px; }
+    .cena-strzalka { display: none; }
+    .cena-pill { margin-left: 0; flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+    .cena-pill > div:last-child { font-size: 17px; white-space: nowrap; }
+    /* Tabela kalkulacji: ciasniejsze marginesy, zeby nazwy produktow nie lamaly sie na 5 linii */
+    .kalk { font-size: 12.5px; }
+    .kalk th, .kalk td { padding: 11px 10px !important; }
+    .kalk tbody td:first-child { padding-left: 18px !important; }
+    .kalk thead th:first-child, .kalk tfoot td:first-child { padding-left: 12px !important; }
+  }
     </style>
 </head>
 <body>
@@ -73,26 +85,26 @@
 
       <!-- CARD 1 -->
       <article style="display:flex; gap:26px; background:#ffffff; border:1px solid #ece3d0; border-radius:20px; padding:20px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:0 0 190px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
+        <div style="flex:1 1 190px; min-width:170px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
           <img src="images/para1-siberian-fir-wild-orange.jpg" alt="Siberian Fir + Wild Orange" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
-        <div style="flex:1 1 340px; min-width:280px;">
+        <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
             <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">PARA 01</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· 24,0 PV</span>
           </div>
           <h3 style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 14px; line-height:1.25;">Siberian Fir <span style="color:#4d6a5e; font-weight:600;">+</span> Wild Orange</h3>
-          <div style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
+          <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary przed</div>
               <div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">190,00 zł</div>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary BOGO</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">113,75 <span style="font-size:15px; font-weight:600;">zł</span></div>
             </div>
-            <div style="margin-left:auto; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
+            <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
               <div style="font-size:20px; font-weight:700; color:#4d6a5e;">76,25 zł · 40%</div>
             </div>
@@ -102,26 +114,26 @@
 
       <!-- CARD 2 -->
       <article style="display:flex; gap:26px; background:#ffffff; border:1px solid #ece3d0; border-radius:20px; padding:20px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:0 0 190px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
+        <div style="flex:1 1 190px; min-width:170px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
           <img src="images/para2-lavender-bergamot-mint.jpg" alt="Lavender + Bergamot Mint" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
-        <div style="flex:1 1 340px; min-width:280px;">
+        <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
             <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">PARA 02</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· 36,0 PV</span>
           </div>
           <h3 style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 14px; line-height:1.25;">Lavender <span style="color:#4d6a5e; font-weight:600;">+</span> Bergamot Mint</h3>
-          <div style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
+          <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary przed</div>
               <div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">293,25 zł</div>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary BOGO</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">168,25 <span style="font-size:15px; font-weight:600;">zł</span></div>
             </div>
-            <div style="margin-left:auto; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
+            <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
               <div style="font-size:20px; font-weight:700; color:#4d6a5e;">125,00 zł · 43%</div>
             </div>
@@ -131,26 +143,26 @@
 
       <!-- CARD 3 -->
       <article style="display:flex; gap:26px; background:#ffffff; border:1px solid #ece3d0; border-radius:20px; padding:20px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:0 0 190px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
+        <div style="flex:1 1 190px; min-width:170px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
           <img src="images/para3-sun-after-sun-lotion.jpg" alt="dōTERRA sun" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
-        <div style="flex:1 1 340px; min-width:280px;">
+        <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
             <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">PARA 03</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· 29,0 PV</span>
           </div>
           <h3 style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 14px; line-height:1.25;">dōTERRA sun — spray po opalaniu <span style="color:#4d6a5e; font-weight:600;">+</span> balsam mineralny SPF 30</h3>
-          <div style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
+          <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary przed</div>
               <div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">337,50 zł</div>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary BOGO</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">175,00 <span style="font-size:15px; font-weight:600;">zł</span></div>
             </div>
-            <div style="margin-left:auto; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
+            <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
               <div style="font-size:20px; font-weight:700; color:#4d6a5e;">162,50 zł · 48%</div>
             </div>
@@ -160,26 +172,26 @@
 
       <!-- CARD 4 -->
       <article style="display:flex; gap:26px; background:#ffffff; border:1px solid #ece3d0; border-radius:20px; padding:20px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:0 0 190px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
+        <div style="flex:1 1 190px; min-width:170px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
           <img src="images/para4-adaptiv-balance.jpg" alt="Adaptiv + Balance" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
-        <div style="flex:1 1 340px; min-width:280px;">
+        <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
             <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">PARA 04</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· 49,5 PV</span>
           </div>
           <h3 style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 14px; line-height:1.25;">Adaptiv <span style="color:#4d6a5e; font-weight:600;">+</span> Balance</h3>
-          <div style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
+          <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary przed</div>
               <div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">369,50 zł</div>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary BOGO</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">232,00 <span style="font-size:15px; font-weight:600;">zł</span></div>
             </div>
-            <div style="margin-left:auto; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
+            <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
               <div style="font-size:20px; font-weight:700; color:#4d6a5e;">137,50 zł · 37%</div>
             </div>
@@ -189,26 +201,26 @@
 
       <!-- CARD 5 -->
       <article style="display:flex; gap:26px; background:#ffffff; border:1px solid #ece3d0; border-radius:20px; padding:20px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:0 0 190px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
+        <div style="flex:1 1 190px; min-width:170px; height:170px; border-radius:14px; overflow:hidden; background:#faf9f6; display:flex; align-items:center; justify-content:center;">
           <img src="images/para5-neroli-magnolia.jpg" alt="Neroli Touch + Magnolia Touch" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
-        <div style="flex:1 1 340px; min-width:280px;">
+        <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
             <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">PARA 05</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· 61,5 PV</span>
           </div>
           <h3 style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 14px; line-height:1.25;">Neroli Touch <span style="color:#4d6a5e; font-weight:600;">+</span> Magnolia Touch</h3>
-          <div style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
+          <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary przed</div>
               <div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">446,76 zł</div>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena pary BOGO</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">288,75 <span style="font-size:15px; font-weight:600;">zł</span></div>
             </div>
-            <div style="margin-left:auto; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
+            <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
               <div style="font-size:20px; font-weight:700; color:#4d6a5e;">158,01 zł · 35%</div>
             </div>
@@ -266,8 +278,8 @@
       <span style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; color:#1c1917;">Szczegółowa kalkulacja</span>
       <span style="flex:1; height:1px; background:#ddd2ba;"></span>
     </div>
-    <div style="border:1px solid #ece3d0; border-radius:18px; overflow:hidden; margin-bottom:16px; background:#fff;">
-      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <div style="border:1px solid #ece3d0; border-radius:18px; overflow-x:auto; margin-bottom:16px; background:#fff;">
+      <table class="kalk" style="width:100%; border-collapse:collapse; font-size:14px;">
         <thead>
           <tr style="background:#faf9f6;">
             <th style="text-align:left; padding:15px 20px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#78716c;">Produkt</th>
@@ -294,7 +306,7 @@
           <tr style="border-top:1px solid #ddd2ba; background:#eef2f0;"><td style="padding:13px 20px;">Green Mandarin — <strong style="color:#4d6a5e;">gratis do pakietu</strong></td><td style="padding:13px 16px; text-align:right; color:#78716c;">158,01</td><td style="padding:13px 20px; text-align:right; font-weight:700; color:#4d6a5e;">0,00</td></tr>
         </tbody>
         <tfoot>
-          <tr style="background:#a8bcb2; color:#1c1917;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">Suma</td><td style="padding:18px 16px; text-align:right; color:#5a6b61; text-decoration:line-through;">1795,02</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px; color:#1c1917;">977,75 zł</td></tr>
+          <tr style="background:#4d6a5e; color:#f3efe4;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">Suma</td><td style="padding:18px 16px; text-align:right; color:#cdd6c9; text-decoration:line-through;">1795,02</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px;">977,75 zł</td></tr>
         </tfoot>
       </table>
     </div>
@@ -303,7 +315,7 @@
     </div>
 
     <!-- TERMS + HOW TO ORDER: two column on wide -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:26px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr)); gap:26px;">
 
       <!-- TERMS -->
       <section style="display:flex; flex-direction:column;">
