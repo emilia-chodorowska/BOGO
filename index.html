@@ -36,9 +36,9 @@
       a:hover { color: #3e554b; }
   /* Karty par na waskim ekranie: obie ceny obok siebie, pigulka oszczednosci pelna szerokosc */
   @media (max-width: 560px) {
-    .cena-row { gap: 12px 20px; }
+    .cena-row { display: grid !important; grid-template-columns: auto auto; justify-content: start; column-gap: 26px; row-gap: 14px; align-items: start; }
     .cena-strzalka { display: none; }
-    .cena-pill { margin-left: 0; flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+    .cena-pill { margin-left: 0; grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
     .cena-pill > div:last-child { font-size: 17px; white-space: nowrap; }
     /* Zdjecie pary na telefonie: pelna szerokosc karty, na desktopie zostaje kwadratem 190x170 */
     .para-foto { flex: 1 1 100% !important; height: 200px !important; }
