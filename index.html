@@ -42,6 +42,13 @@
     .cena-pill > div:last-child { font-size: 17px; white-space: nowrap; }
     /* Zdjecie pary na telefonie: pelna szerokosc karty, na desktopie zostaje kwadratem 190x170 */
     .para-foto { flex: 1 1 100% !important; height: 200px !important; }
+    /* Pakiet BOGO na telefonie: Placisz na calej szerokosci, ponizej dwa mniejsze kafle */
+    .pakiet-kafle { display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pakiet-kafle > div:first-child { grid-column: 1 / -1; }
+    .pakiet-kafle > div { padding: 12px 16px !important; }
+    /* Karta gratisu: zdjecie na cala szerokosc, wartosc jako osobny wiersz etykieta-kwota */
+    .gratis-foto { flex: 1 1 100% !important; height: 170px !important; }
+    .gratis-wartosc { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; text-align: left !important; padding-right: 0 !important; border-top: 1px solid #f0eadd; padding-top: 12px; }
     /* Tabela kalkulacji: ciasniejsze marginesy, zeby nazwy produktow nie lamaly sie na 5 linii */
     .kalk { font-size: 12.5px; }
     .kalk th, .kalk td { padding: 11px 10px !important; }
@@ -241,7 +248,7 @@
           <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 15px; background:#4d6a5e; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#dbe4df; margin-bottom:14px;">Najkorzystniejsza opcja</div>
           <h3 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; margin:0 0 6px; line-height:1.12; color:#1c1917;">Pakiet BOGO</h3>
           <p style="margin:0 0 20px; color:#57534e; font-size:14px; line-height:1.5;">Wszystkie 5 par w jednym zamówieniu, a do tego <strong style="color:#4d6a5e;">GRATIS</strong> olejek z zielonej mandarynki (15 ml).</p>
-          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div class="pakiet-kafle" style="display:flex; gap:12px; flex-wrap:wrap;">
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Płacisz</div>
               <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#1c1917;">977,75 zł</div>
@@ -260,7 +267,7 @@
 
       <!-- GRATIS -->
       <div style="display:flex; gap:18px; align-items:center; margin-top:22px; padding:16px; background:#ffffff; border:1px dashed #d8e0dc; border-radius:16px; flex-wrap:wrap;">
-        <div style="flex:0 0 108px; height:108px; border-radius:12px; overflow:hidden; background:#faf9f6;">
+        <div class="gratis-foto" style="flex:0 0 108px; height:108px; border-radius:12px; overflow:hidden; background:#faf9f6;">
           <img src="images/gratis-green-mandarin.jpg" alt="Olejek z zielonej mandarynki gratis" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
         <div style="flex:1 1 240px; min-width:220px;">
@@ -268,7 +275,7 @@
           <div style="font-size:16px; font-weight:700; color:#4d6a5e; line-height:1.25; margin-bottom:5px;">Olejek z zielonej mandarynki (15 ml)</div>
           <p style="margin:0; font-size:12px; color:#78716c; line-height:1.5;">Dostajesz go wyłącznie wybierając cały pakiet BOGO — nie przy dodawaniu par pojedynczo. Pakiet i gratis są dostępne, dopóki nie wyprzeda się choć jeden z pięciu zestawów.</p>
         </div>
-        <div style="text-align:right; padding-right:6px;">
+        <div class="gratis-wartosc" style="text-align:right; padding-right:6px;">
           <div style="font-size:10px; color:#a8a29e; text-transform:uppercase; letter-spacing:.06em;">Wartość</div>
           <div style="font-size:16px; font-weight:700; color:#4d6a5e;">158,01 zł</div>
         </div>
