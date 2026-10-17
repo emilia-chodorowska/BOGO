@@ -11,7 +11,7 @@ from pathlib import Path
 
 OKRES = "20–27 października 2026"
 OKRES_KROTKO = "20–27.10.2026"
-KONIEC = "27 października, 22:59 (CET)"
+KONIEC = "27 października"
 DATA_CEN = "17.10.2026"
 
 # (nazwa, rozmiar, cena hurtowa brutto PLN albo None, PV, ilość)
@@ -350,7 +350,7 @@ html = f'''<!DOCTYPE html>
         </div>
         <div style="background:#fff; border:1px solid #ece3d0; border-radius:18px; padding:26px; flex:1;">
           <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;">
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Promocja trwa od 20 do 27 października 2026 r., do godziny <strong style="color:#4d6a5e;">22:59 czasu polskiego</strong>.</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Promocja trwa od <strong style="color:#4d6a5e;">20 do 27 października 2026 r.</strong></span></li>
             <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Oferta obowiązuje <strong style="color:#4d6a5e;">do wyczerpania zapasów</strong> — może się skończyć wcześniej.</span></li>
             <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Limit: maksymalnie <strong style="color:#4d6a5e;">5 zamówień na każdy zestaw</strong> oraz <strong style="color:#4d6a5e;">5 pakietów BOGO</strong> na jedno konto.</span></li>
             <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Olejek z daglezji zielonej (5 ml) gratis dostajesz <strong style="color:#4d6a5e;">wyłącznie przy zakupie pakietu BOGO</strong>, nie przy kupowaniu zestawów pojedynczo.</span></li>
