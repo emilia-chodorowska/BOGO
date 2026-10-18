@@ -1,69 +1,104 @@
 #!/usr/bin/env python3
-"""Generator strony BOGO (index.html) z danych na górze pliku.
+"""Generator stron BOGO z danych na górze pliku: index.html (PLN) i index-eur.html (EUR).
 
-Ceny: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
+Ceny PLN: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
+Ceny EUR: „EK-Preis” z kart produktów sklepu DE (shop.doterra.com/DE/de_DE/shop/<slug>/), czytane przez ego.
 Cena i PV zestawu = cena i PV produktu kupowanego (tak liczy doTERRA, sprawdzone na lipcu 2026).
 Brakująca cena (None) → strona pokazuje „brak ceny” zamiast zgadywać.
 Cena szacunkowa (nazwa w SZACUNKOWE) → kwoty z gwiazdką i przypis „cena przybliżona”.
 
-Uruchomienie: python3 generuj.py  → nadpisuje index.html
+Uruchomienie: python3 generuj.py  → nadpisuje obie strony (albo: python3 generuj.py pln|eur)
 """
+import subprocess
+import sys
 from pathlib import Path
+
+if len(sys.argv) < 2:
+    for w in ("pln", "eur"):
+        subprocess.run([sys.executable, __file__, w], check=True)
+    sys.exit()
+WALUTA = sys.argv[1]
 
 OKRES = "20–27 października 2026"
 OKRES_KROTKO = "20–27.10.2026"
 KONIEC = "27 października"
-DATA_CEN = "17.10.2026"
+DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}[WALUTA]
+ZRODLO_CEN = {"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA]
 
-# (nazwa, rozmiar, cena hurtowa brutto PLN albo None, PV, ilość)
+# ceny hurtowe brutto: PLN (sklep PL) i EUR (sklep DE, EK-Preis)
+CENY = {
+    "Kozłek lekarski (waleriana)": (290.00, 63.75),
+    "dōTERRA Serenity™": (221.74, 48.75),
+    "On Guard™": (205.75, 45.26),
+    "Oregano": (162.50, 35.75),
+    "Air-X™": (179.75, 39.50),
+    "Eukaliptus": (107.00, 23.50),
+    "Rumianek rzymski": (273.99, 60.25),
+    "Olejek do kąpieli dōTERRA Adaptiv™": (115.00, 25.29),  # szacunek, EUR = 115 zł / 4,547
+    "Sandałowiec": (489.00, 107.50),
+    "Grejpfrut": (105.76, 23.25),
+    "dōTERRA SuperMint™": (168.25, 37.00),
+    "dōTERRA Shinrin-Yoku™ Touch": (119.49, 26.25),
+    "Daglezja zielona (Douglas Fir)": (129.49, 28.50),
+}
+
+
+def c(nazwa):
+    return CENY[nazwa][0 if WALUTA == "pln" else 1]
+
+# (nazwa, rozmiar, cena hurtowa brutto albo None, PV, ilość)
 ZESTAWY = [
     {
         "foto": "images/2026-10-zestaw1-waleriana-serenity.jpg",
-        "kup": ("Kozłek lekarski (waleriana)", "15 ml", 290.00, 56.0, 1),
-        "gratis": [("dōTERRA Serenity™", "15 ml", 221.74, 47.0, 1)],
+        "kup": ("Kozłek lekarski (waleriana)", "15 ml", c("Kozłek lekarski (waleriana)"), 56.0, 1),
+        "gratis": [("dōTERRA Serenity™", "15 ml", c("dōTERRA Serenity™"), 47.0, 1)],
         "tytul": "Waleriana <span>+</span> dōTERRA Serenity™",
     },
     {
         "foto": "images/2026-10-zestaw2-onguard-oregano.jpg",
-        "kup": ("On Guard™", "15 ml", 205.75, 43.5, 1),
-        "gratis": [("Oregano", "15 ml", 162.50, 34.5, 1)],
+        "kup": ("On Guard™", "15 ml", c("On Guard™"), 43.5, 1),
+        "gratis": [("Oregano", "15 ml", c("Oregano"), 34.5, 1)],
         "tytul": "On Guard™ <span>+</span> Oregano",
     },
     {
         "foto": "images/2026-10-zestaw3-airx-eukaliptus.jpg",
-        "kup": ("Air-X™", "15 ml", 179.75, 38.0, 1),
-        "gratis": [("Eukaliptus", "15 ml", 107.00, 22.5, 1)],
+        "kup": ("Air-X™", "15 ml", c("Air-X™"), 38.0, 1),
+        "gratis": [("Eukaliptus", "15 ml", c("Eukaliptus"), 22.5, 1)],
         "tytul": "Air-X™ <span>+</span> Eukaliptus",
     },
     {
         "foto": "images/2026-10-zestaw4-rumianek-adaptiv-kapiel.jpg",
-        "kup": ("Rumianek rzymski", "5 ml", 273.99, 58.0, 1),
-        "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", 115.00, None, 2)],
+        "kup": ("Rumianek rzymski", "5 ml", c("Rumianek rzymski"), 58.0, 1),
+        "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", c("Olejek do kąpieli dōTERRA Adaptiv™"), None, 2)],
         "tytul": "Rumianek rzymski <span>+</span> 2 × olejek do kąpieli Adaptiv™",
         "krotko": "2 × olejek do kąpieli Adaptiv",
     },
     {
         "foto": "images/2026-10-zestaw5-sandalowiec.jpg",
-        "kup": ("Sandałowiec", "5 ml", 489.00, 97.0, 1),
+        "kup": ("Sandałowiec", "5 ml", c("Sandałowiec"), 97.0, 1),
         "gratis": [
-            ("Grejpfrut", "15 ml", 105.76, 22.5, 1),
-            ("dōTERRA SuperMint™", "15 ml", 168.25, 36.0, 1),
-            ("dōTERRA Shinrin-Yoku™ Touch", "10 ml", 119.49, 25.5, 1),
+            ("Grejpfrut", "15 ml", c("Grejpfrut"), 22.5, 1),
+            ("dōTERRA SuperMint™", "15 ml", c("dōTERRA SuperMint™"), 36.0, 1),
+            ("dōTERRA Shinrin-Yoku™ Touch", "10 ml", c("dōTERRA Shinrin-Yoku™ Touch"), 25.5, 1),
         ],
         "tytul": "Sandałowiec <span>+</span> Grejpfrut, SuperMint™, Shinrin-Yoku™ Touch",
     },
 ]
 # ceny przyjęte szacunkowo (produktu nie ma jeszcze w cenniku PL)
 SZACUNKOWE = {"Olejek do kąpieli dōTERRA Adaptiv™"}
-PREZENT = ("Daglezja zielona (Douglas Fir)", "5 ml", 129.49)
+PREZENT = ("Daglezja zielona (Douglas Fir)", "5 ml", c("Daglezja zielona (Douglas Fir)"))
 FOTO_PAKIET = "images/2026-10-pakiet.jpg"
 FOTO_PREZENT = "images/2026-10-gratis-daglezja.jpg"
 OG_IMAGE = "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview-2026-10.jpg"
 
 
+PLIK = "index.html" if WALUTA == "pln" else "index-eur.html"
+SYMBOL = "zł" if WALUTA == "pln" else "€"
+
+
 def zl(x, waluta=True):
     s = f"{x:,.2f}".replace(",", " ").replace(".", ",").replace(" ", "")
-    return f"{s} zł" if waluta else s
+    return f"{s} {SYMBOL}" if waluta else s
 
 
 def pv(x):
@@ -150,7 +185,7 @@ for i, z in enumerate(ZESTAWY, 1):
             <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
               <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena zestawu BOGO</div>
-              <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">{zl(cena, False)} <span style="font-size:15px; font-weight:600;">zł</span></div>
+              <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">{zl(cena, False)} <span style="font-size:15px; font-weight:600;">{SYMBOL}</span></div>
             </div>
             <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
               <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
@@ -177,10 +212,10 @@ wiersze.append(f'''          <tr style="border-top:1px solid #ddd2ba; background
 dopisek_brak = (" + " + ", ".join(brakuje_przed)) if brakuje_przed else ""
 oszcz_pakiet = round(suma_przed - suma_bogo, 2)
 
-nota = "Ceny hurtowe brutto z cennika doTERRA Polska z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty."
+nota = "Ceny hurtowe brutto z " + ZRODLO_CEN + " z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty."
 gp = "*" if szac_pakiet else ""
 if szac_pakiet:
-    nota += "<br>* Cena przybliżona: olejku do kąpieli Adaptiv nie ma jeszcze w cenniku doTERRA, przyjęto ok. 115 zł za sztukę."
+    nota += "<br>* Cena przybliżona: olejku do kąpieli Adaptiv nie ma jeszcze w cenniku doTERRA, przyjęto ok. " + zl(c("Olejek do kąpieli dōTERRA Adaptiv™")) + " za sztukę."
 if brakuje_przed:
     nota += " Olejku do kąpieli Adaptiv nie ma jeszcze w cenniku — sumy „przed” i oszczędność nie zawierają jego wartości."
 
@@ -197,7 +232,7 @@ html = f'''<!DOCTYPE html>
     <meta property="og:image" content="{OG_IMAGE}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/">
+    <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/{PLIK if WALUTA == "eur" else ""}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Oferta BOGO | {OKRES}">
@@ -390,7 +425,7 @@ html = f'''<!DOCTYPE html>
       </section>
     </div>
 
-    <p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">Poprzednia oferta: <a href="2026-07/">BOGO lipiec 2026</a></p>
+    <p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">Poprzednia oferta: <a href="2026-07/{PLIK if WALUTA == "eur" else ""}">BOGO lipiec 2026</a></p>
 
   </div>
 </div>
@@ -399,5 +434,5 @@ html = f'''<!DOCTYPE html>
 </html>
 '''
 
-Path(__file__).with_name("index.html").write_text(html, encoding="utf-8")
-print(f"index.html: pakiet {zl(suma_bogo)}, przed {zl(suma_przed)}{dopisek_brak}, PV {pv(suma_pv)}")
+Path(__file__).with_name(PLIK).write_text(html, encoding="utf-8")
+print(f"{PLIK}: pakiet {zl(suma_bogo)}, przed {zl(suma_przed)}{dopisek_brak}, PV {pv(suma_pv)}")
