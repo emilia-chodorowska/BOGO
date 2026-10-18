@@ -21,6 +21,13 @@ WALUTA = sys.argv[1]
 
 OKRES = "20–27 października 2026"
 OKRES_KROTKO = "20–27.10.2026"
+OKRES_WARUNKI = "20 do 27 października 2026 r."
+POPRZEDNIA = ("2026-07", "BOGO lipiec 2026")  # (folder archiwum, podpis linku w stopce)
+PREZENT_NAZWA = "olejek z daglezji zielonej"  # mianownik, małą literą
+# dodatkowe punkty w „Warunkach promocji” (np. produkty z oferty ograniczonej czasowo)
+WARUNKI_EXTRA = ["Waleriana (15 ml) i olejek do kąpieli Adaptiv to produkty z oferty ograniczonej czasowo."]
+# przypis do cen szacunkowych: dopełniacz nazwy produktu („… nie ma jeszcze w cenniku”)
+SZACUNEK_DOPELNIACZ = "olejku do kąpieli Adaptiv"
 KONIEC = "27 października"
 DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}[WALUTA]
 ZRODLO_CEN = {"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA]
@@ -212,10 +219,12 @@ wiersze.append(f'''          <tr style="border-top:1px solid #ddd2ba; background
 dopisek_brak = (" + " + ", ".join(brakuje_przed)) if brakuje_przed else ""
 oszcz_pakiet = round(suma_przed - suma_bogo, 2)
 
+WARUNKI_HTML = "\n".join('            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{w}</span></li>'.format(w=w) for w in WARUNKI_EXTRA)
+
 nota = "Ceny hurtowe brutto z " + ZRODLO_CEN + " z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty."
 gp = "*" if szac_pakiet else ""
 if szac_pakiet:
-    nota += "<br>* Cena przybliżona: olejku do kąpieli Adaptiv nie ma jeszcze w cenniku doTERRA, przyjęto ok. " + zl(c("Olejek do kąpieli dōTERRA Adaptiv™")) + " za sztukę."
+    nota += "<br>* Cena przybliżona: " + SZACUNEK_DOPELNIACZ + " nie ma jeszcze w cenniku doTERRA, przyjęto ok. " + zl(c(next(iter(SZACUNKOWE)))) + " za sztukę."
 if brakuje_przed:
     nota += " Olejku do kąpieli Adaptiv nie ma jeszcze w cenniku — sumy „przed” i oszczędność nie zawierają jego wartości."
 
@@ -228,7 +237,7 @@ html = f'''<!DOCTYPE html>
 
     <!-- === META TAGI OPEN GRAPH === -->
     <meta property="og:title" content="Oferta BOGO | {OKRES}">
-    <meta property="og:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO dodatkowo z olejkiem z daglezji zielonej (5 ml).">
+    <meta property="og:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO: dodatkowo gratis {PREZENT_NAZWA} ({PREZENT[1]}).">
     <meta property="og:image" content="{OG_IMAGE}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -236,7 +245,7 @@ html = f'''<!DOCTYPE html>
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Oferta BOGO | {OKRES}">
-    <meta name="twitter:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO dodatkowo z olejkiem z daglezji zielonej (5 ml).">
+    <meta name="twitter:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO: dodatkowo gratis {PREZENT_NAZWA} ({PREZENT[1]}).">
     <meta name="twitter:image" content="{OG_IMAGE}">
 
     <meta name="theme-color" content="#fcfbfa">
@@ -296,7 +305,7 @@ html = f'''<!DOCTYPE html>
       </div>
       <h1 style="font-family:'Playfair Display',serif; font-weight:600; font-size:clamp(40px,8vw,64px); line-height:1.02; color:#1c1917; margin:0 0 6px; letter-spacing:.01em;">Oferta BOGO</h1>
       <p style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:500; color:#4d6a5e; margin:0 0 20px;">{OKRES}</p>
-      <p style="max-width:520px; margin:0 auto; color:#57534e; font-size:15px; line-height:1.6;">Kupujesz jeden produkt, drugi dostajesz <strong style="color:#4d6a5e;">gratis</strong>. Do całego pakietu BOGO dochodzi olejek z daglezji zielonej (5 ml).</p>
+      <p style="max-width:520px; margin:0 auto; color:#57534e; font-size:15px; line-height:1.6;">Kupujesz jeden produkt, drugi dostajesz <strong style="color:#4d6a5e;">gratis</strong>. Do całego pakietu BOGO dochodzi {PREZENT_NAZWA} ({PREZENT[1]}).</p>
       <div style="display:inline-flex; align-items:center; gap:10px; margin-top:24px; padding:12px 22px; background:#faf9f6; border-radius:14px; color:#57534e; font-size:13px; line-height:1.4;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4d6a5e" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
         Oferta kończy się <strong style="color:#4d6a5e; margin:0 4px;">{KONIEC}</strong> lub gdy zabraknie zapasów
@@ -324,7 +333,7 @@ html = f'''<!DOCTYPE html>
         <div style="flex:2 1 320px; min-width:260px;">
           <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 15px; background:#4d6a5e; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#dbe4df; margin-bottom:14px;">Wszystkie zestawy + gratis</div>
           <h3 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; margin:0 0 6px; line-height:1.12; color:#1c1917;">Pakiet BOGO</h3>
-          <p style="margin:0 0 20px; color:#57534e; font-size:14px; line-height:1.5;">Wszystkie 5 zestawów w jednym zamówieniu, a do tego <strong style="color:#4d6a5e;">GRATIS</strong> olejek z daglezji zielonej (5 ml).</p>
+          <p style="margin:0 0 20px; color:#57534e; font-size:14px; line-height:1.5;">Wszystkie 5 zestawów w jednym zamówieniu, a do tego <strong style="color:#4d6a5e;">GRATIS</strong> {PREZENT_NAZWA} ({PREZENT[1]}).</p>
           <div class="pakiet-kafle" style="display:flex; gap:12px; flex-wrap:wrap;">
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Płacisz</div>
@@ -346,11 +355,11 @@ html = f'''<!DOCTYPE html>
       <!-- GRATIS -->
       <div style="display:flex; gap:18px; align-items:center; margin-top:22px; padding:16px; background:#ffffff; border:1px dashed #d8e0dc; border-radius:16px; flex-wrap:wrap;">
         <div class="gratis-foto" style="flex:0 0 108px; height:108px; border-radius:12px; overflow:hidden; background:#faf9f6;">
-          <img src="{FOTO_PREZENT}" alt="Olejek z daglezji zielonej gratis" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
+          <img src="{FOTO_PREZENT}" alt="{PREZENT_NAZWA.capitalize()} gratis" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
         <div style="flex:1 1 240px; min-width:220px;">
           <div style="display:inline-block; padding:3px 11px; background:#eef2f0; color:#4d6a5e; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; margin-bottom:7px;">Gratis do pakietu</div>
-          <div style="font-size:16px; font-weight:700; color:#4d6a5e; line-height:1.25; margin-bottom:5px;">Olejek z daglezji zielonej</div>
+          <div style="font-size:16px; font-weight:700; color:#4d6a5e; line-height:1.25; margin-bottom:5px;">{PREZENT_NAZWA.capitalize()}</div>
           <p style="margin:0; font-size:12px; color:#78716c; line-height:1.5;">Tylko przy zakupie całego pakietu BOGO, nie przy zestawach kupowanych pojedynczo.</p>
         </div>
         <div class="gratis-wartosc" style="text-align:right; padding-right:6px;">
@@ -395,11 +404,11 @@ html = f'''<!DOCTYPE html>
         </div>
         <div style="background:#fff; border:1px solid #ece3d0; border-radius:18px; padding:26px; flex:1;">
           <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;">
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Promocja trwa od <strong style="color:#4d6a5e;">20 do 27 października 2026 r.</strong></span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Promocja trwa od <strong style="color:#4d6a5e;">{OKRES_WARUNKI}</strong></span></li>
             <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Oferta obowiązuje <strong style="color:#4d6a5e;">do wyczerpania zapasów</strong> — może się skończyć wcześniej.</span></li>
             <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Limit: maksymalnie <strong style="color:#4d6a5e;">5 zamówień na każdy zestaw</strong> oraz <strong style="color:#4d6a5e;">5 pakietów BOGO</strong> na jedno konto.</span></li>
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Olejek z daglezji zielonej (5 ml) gratis dostajesz <strong style="color:#4d6a5e;">wyłącznie przy zakupie pakietu BOGO</strong>, nie przy kupowaniu zestawów pojedynczo.</span></li>
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Waleriana (15 ml) i olejek do kąpieli Adaptiv to produkty z oferty ograniczonej czasowo.</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{PREZENT_NAZWA.capitalize()} ({PREZENT[1]}) gratis dostajesz <strong style="color:#4d6a5e;">wyłącznie przy zakupie pakietu BOGO</strong>, nie przy kupowaniu zestawów pojedynczo.</span></li>
+{WARUNKI_HTML}
           </ul>
         </div>
       </section>
@@ -425,7 +434,7 @@ html = f'''<!DOCTYPE html>
       </section>
     </div>
 
-    <p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">Poprzednia oferta: <a href="2026-07/{PLIK if WALUTA == "eur" else ""}">BOGO lipiec 2026</a></p>
+    <p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">Poprzednia oferta: <a href="{POPRZEDNIA[0]}/{PLIK if WALUTA == "eur" else ""}">{POPRZEDNIA[1]}</a></p>
 
   </div>
 </div>
