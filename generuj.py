@@ -4,6 +4,7 @@
 Ceny: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
 Cena i PV zestawu = cena i PV produktu kupowanego (tak liczy doTERRA, sprawdzone na lipcu 2026).
 Brakująca cena (None) → strona pokazuje „brak ceny” zamiast zgadywać.
+Cena szacunkowa (nazwa w SZACUNKOWE) → kwoty z gwiazdką i przypis „cena przybliżona”.
 
 Uruchomienie: python3 generuj.py  → nadpisuje index.html
 """
@@ -37,7 +38,7 @@ ZESTAWY = [
     {
         "foto": "images/2026-10-zestaw4-rumianek-adaptiv-kapiel.jpg",
         "kup": ("Rumianek rzymski", "5 ml", 273.99, 58.0, 1),
-        "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", None, None, 2)],
+        "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", 115.00, None, 2)],
         "tytul": "Rumianek rzymski <span>+</span> 2 × olejek do kąpieli Adaptiv™",
         "krotko": "2 × olejek do kąpieli Adaptiv",
     },
@@ -52,6 +53,8 @@ ZESTAWY = [
         "tytul": "Sandałowiec <span>+</span> Grejpfrut, SuperMint™, Shinrin-Yoku™ Touch",
     },
 ]
+# ceny przyjęte szacunkowo (produktu nie ma jeszcze w cenniku PL)
+SZACUNKOWE = {"Olejek do kąpieli dōTERRA Adaptiv™"}
 PREZENT = ("Daglezja zielona (Douglas Fir)", "5 ml", 129.49)
 FOTO_PAKIET = "images/2026-10-pakiet.jpg"
 FOTO_PREZENT = "images/2026-10-gratis-daglezja.jpg"
@@ -97,6 +100,7 @@ karty = []
 wiersze = []
 suma_przed = 0.0
 brakuje_przed = []
+szac_pakiet = False
 suma_bogo = 0.0
 suma_pv = 0.0
 for i, z in enumerate(ZESTAWY, 1):
@@ -106,6 +110,9 @@ for i, z in enumerate(ZESTAWY, 1):
     wart = [wartosc(p) for p in pozycje]
     znane = all(v is not None for v in wart)
     przed = round(sum(wart), 2) if znane else None
+    przybl = any(p[0] in SZACUNKOWE for p in pozycje)
+    gw = "*" if przybl else ""
+    szac_pakiet = szac_pakiet or przybl
     suma_bogo += cena
     suma_pv += kup[3]
     suma_przed += sum(v for v in wart if v is not None)
@@ -115,9 +122,9 @@ for i, z in enumerate(ZESTAWY, 1):
     sklad = " · ".join(nazwa_poz(p) for p in pozycje)
     dopisek = f'<div style="font-size:12px; color:#78716c; margin:-8px 0 14px;">{z["dopisek"]}</div>' if z.get("dopisek") else ""
     if znane:
-        przed_html = f'<div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">{zl(przed)}</div>'
+        przed_html = f'<div style="font-size:19px; font-weight:600; color:#a8a29e; text-decoration:line-through; line-height:1.15;">{zl(przed)}{gw}</div>'
         oszcz = przed - cena
-        pill = f'{zl(oszcz)} · {round(oszcz / przed * 100)}%'
+        pill = f'{zl(oszcz)}{gw} · {round(oszcz / przed * 100)}%'
     else:
         przed_html = f'<div style="font-size:14px; font-weight:600; color:#a8a29e; line-height:1.3;">{zl(cena)} + {z["krotko"]}</div>'
         pill = z["krotko"] + " gratis"
@@ -158,8 +165,8 @@ for i, z in enumerate(ZESTAWY, 1):
     wiersze.append(f'''          <tr style="border-top:1px solid {sep}; background:#faf9f6;"><td colspan="2" style="padding:10px 20px 9px; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#4d6a5e;"><span style="display:inline-flex; align-items:center; gap:8px;"><span style="width:5px; height:5px; border-radius:50%; background:#4d6a5e;"></span>Zestaw {i:02d}</span><span class="para-cena" style="display:none; font-weight:600; letter-spacing:.02em; text-transform:none; color:#78716c;"> · {zl(cena)}</span></td><td class="zestaw-prawa" style="padding:10px 20px 9px; text-align:right; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#78716c;">zestaw {zl(cena)}</td></tr>''')
     for j, (p, w, d) in enumerate(zip(pozycje, wart, podzial(cena, pozycje))):
         border = "" if j == 0 else "border-top:1px solid #f6f1e6; "
-        poza = zl(w, False) if w is not None else "brak ceny"
-        wz = zl(d, False) if d is not None else "—"
+        poza = (zl(w, False) + ("*" if p[0] in SZACUNKOWE else "")) if w is not None else "brak ceny"
+        wz = (zl(d, False) + gw) if d is not None else "—"
         wiersze.append(f'''          <tr style="{border}"><td style="padding:13px 20px 13px 34px;">{nazwa_poz(p)}</td><td style="padding:13px 16px; text-align:right; color:#78716c;">{poza}</td><td style="padding:13px 20px; text-align:right; font-weight:700; color:#4d6a5e;">{wz}</td></tr>''')
 
 suma_przed += PREZENT[2]
@@ -171,6 +178,9 @@ dopisek_brak = (" + " + ", ".join(brakuje_przed)) if brakuje_przed else ""
 oszcz_pakiet = round(suma_przed - suma_bogo, 2)
 
 nota = "Ceny hurtowe brutto z cennika doTERRA Polska z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty."
+gp = "*" if szac_pakiet else ""
+if szac_pakiet:
+    nota += "<br>* Cena przybliżona: olejku do kąpieli Adaptiv nie ma jeszcze w cenniku doTERRA, przyjęto ok. 115 zł za sztukę."
 if brakuje_przed:
     nota += " Olejku do kąpieli Adaptiv nie ma jeszcze w cenniku — sumy „przed” i oszczędność nie zawierają jego wartości."
 
@@ -284,11 +294,11 @@ html = f'''<!DOCTYPE html>
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Płacisz</div>
               <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#1c1917; line-height:1.15;">{zl(suma_bogo)}</div>
-              <div style="font-size:12px; color:#a8a29e; margin-top:2px;"><span style="text-decoration:line-through;">zamiast {zl(suma_przed)}</span>{dopisek_brak}</div>
+              <div style="font-size:12px; color:#a8a29e; margin-top:2px;"><span style="text-decoration:line-through;">zamiast {zl(suma_przed)}{gp}</span>{dopisek_brak}</div>
             </div>
             <div style="padding:14px 20px; background:#4d6a5e; border-radius:14px; flex:1 1 auto;">
               <div style="font-size:11px; color:#9fb3a9; text-transform:uppercase; letter-spacing:.07em;">Oszczędzasz</div>
-              <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#eaf0ec;">{"min. " if brakuje_przed else ""}{zl(oszcz_pakiet)}</div>
+              <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#eaf0ec;">{"min. " if brakuje_przed else ""}{zl(oszcz_pakiet)}{gp}</div>
             </div>
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
               <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Łącznie PV</div>
@@ -333,7 +343,7 @@ html = f'''<!DOCTYPE html>
 {chr(10).join(wiersze)}
         </tbody>
         <tfoot>
-          <tr style="background:#4d6a5e; color:#f3efe4;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">Suma</td><td style="padding:18px 16px; text-align:right; color:#cdd6c9; text-decoration:line-through;">{zl(suma_przed, False)}</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px;">{zl(suma_bogo)}</td></tr>
+          <tr style="background:#4d6a5e; color:#f3efe4;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">Suma</td><td style="padding:18px 16px; text-align:right; color:#cdd6c9; text-decoration:line-through;">{zl(suma_przed, False)}{gp}</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px;">{zl(suma_bogo)}</td></tr>
         </tfoot>
       </table>
     </div>
