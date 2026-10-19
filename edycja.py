@@ -1,8 +1,7 @@
 """Dane jednej edycji BOGO — jedyny plik zmieniany co promocję.
 
 Z tych danych `python3 generuj.py` robi: index.html (PLN), index-eur.html (EUR), og.html
-(+ render podglądu linku), stronę rejestracji z pakietem w ../new-client-offer/<OFERTA["folder"]>/
-i blok „CENY” do dokumentu Google „Bogo”.
+(+ render podglądu linku) i stronę rejestracji z pakietem w ../new-client-offer/<OFERTA["folder"]>/.
 """
 
 MIESIAC = "2026-10"  # RRRR-MM: prefiks zdjęć w images/, nazwa grafiki podglądu linku
@@ -21,7 +20,7 @@ DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}
 
 # Produkty promocji. Nazwa = polska z aroma_product_localizations / broszury.
 #   pln, eur  — cena hurtowa brutto (PL: wholesale_gross z bazy; DE: „EK-Preis”), None = brak ceny
-#   en        — nazwa angielska: doterra-image.py, blok CENY w dokumencie „Bogo”
+#   en        — nazwa angielska do doterra-image.py
 #   slug      — slug Canvy (canva/materialy/<slug>/, canva/hasla/output/<slug>.html)
 #   krotko    — nazwa na stronie rejestracji (new-client-offer)
 #   foto      — packshot PNG w ../new-client-offer/<folder>/images/

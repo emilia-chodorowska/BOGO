@@ -4,8 +4,7 @@
 1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO)
 2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg
    (rejestracja z pakietem BOGO: pakiet = produkty kupowane, reszta to gratisy)
-3. zrodla-<MIESIAC>/ceny-do-dokumentu.txt — blok „CENY” do dokumentu Google „Bogo”
-4. teksty kart do hubów (new-client-offer/index.html, doterra-hub/index.html) — na ekran
+3. teksty kart do hubów (new-client-offer/index.html, doterra-hub/index.html) — na ekran
 
 Pliki HTML zapisuje tylko przy zmianie treści; grafiki renderuje, gdy HTML jest nowszy od JPG.
 """
@@ -248,34 +247,7 @@ print(f"{E.OFERTA['folder']}/index.html: pakiet {zl(cena_pakietu)} zł, {pv(pv_p
       f"{n_gratis} gratisów ok. {wartosc_gratisow} zł, suma poza {zl(suma_poza)}")
 
 
-# ---------- 3. blok CENY do dokumentu „Bogo” ----------
-def en(nazwa, ile):
-    return ("2x " if ile == 2 else "") + P[nazwa]["en"]
-
-
-linie = [f"BOGO {E.OKRES_KROTKO.replace('–', '-')}", "", "CENY", ""]
-przed_pakiet = 0.0
-for i, z in enumerate(E.ZESTAWY, 1):
-    n, _, _, ile = z["kup"]
-    cena = P[n]["pln"]
-    poz = [z["kup"]] + z["gratis"]
-    przed = sum(P[p[0]]["pln"] * p[3] for p in poz)
-    gw = "*" if any(p[0] in E.SZACUNKOWE for p in poz) else ""
-    przed_pakiet += przed
-    linie += [f"PARA {i:02d} · {en(n, ile)} + {', '.join(en(g[0], g[3]) for g in z['gratis'])}",
-              f"Cena pary przed: {zl(przed)} zł{gw}", f"Cena pary BOGO: {zl(cena)} zł", ""]
-przed_pakiet += P[E.PREZENT[0]]["pln"]
-linie += [f"PAKIET BOGO ({len(E.ZESTAWY)} par + {P[E.PREZENT[0]]['en']} {E.PREZENT[1]} gratis)",
-          f"Cena przed: {zl(przed_pakiet)} zł{'*' if szac else ''}", f"Cena BOGO: {zl(cena_pakietu)} zł"]
-if szac:
-    n0 = next(iter(E.SZACUNKOWE))
-    linie += ["", f"* {P[n0]['en']}: cena szacunkowa {zl(P[n0]['pln'])} zł za sztukę (brak w cenniku PL)"]
-zr = TU / f"zrodla-{E.MIESIAC}"
-zr.mkdir(exist_ok=True)
-(zr / "ceny-do-dokumentu.txt").write_text("\n".join(linie) + "\n", encoding="utf-8")
-print(f"blok CENY: zrodla-{E.MIESIAC}/ceny-do-dokumentu.txt")
-
-# ---------- 4. teksty kart do hubów ----------
+# ---------- 3. teksty kart do hubów ----------
 print("\nkarty w hubach:")
 print(f"  new-client-offer/index.html  pill: BOGO · {E.OKRES_KROTKO}")
 print(f"    h3: Rejestracja z pakietem BOGO · {zl(cena_pakietu)} zł")

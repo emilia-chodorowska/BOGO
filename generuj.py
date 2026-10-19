@@ -2,7 +2,7 @@
 """Generator BOGO z danych w edycja.py.
 
 `python3 generuj.py` robi wszystko: index.html (PLN), index-eur.html (EUR), og.html + render podglądu linku,
-stronę rejestracji z pakietem (../new-client-offer/<folder>/) i blok „CENY” do dokumentu Google „Bogo”.
+i stronę rejestracji z pakietem (../new-client-offer/<folder>/).
 `python3 generuj.py pln|eur` — tylko jedna strona BOGO.
 
 Ceny PLN: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
