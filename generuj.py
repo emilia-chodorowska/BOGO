@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Generator stron BOGO z danych na górze pliku: index.html (PLN) i index-eur.html (EUR).
+"""Generator BOGO z danych w edycja.py.
+
+`python3 generuj.py` robi wszystko: index.html (PLN), index-eur.html (EUR), og.html + render podglądu linku,
+stronę rejestracji z pakietem (../new-client-offer/<folder>/) i blok „CENY” do dokumentu Google „Bogo”.
+`python3 generuj.py pln|eur` — tylko jedna strona BOGO.
 
 Ceny PLN: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
 Ceny EUR: „EK-Preis” z kart produktów sklepu DE (shop.doterra.com/DE/de_DE/shop/<slug>/), czytane przez ego.
 Cena i PV zestawu = cena i PV produktu kupowanego (tak liczy doTERRA, sprawdzone na lipcu 2026).
 Brakująca cena (None) → strona pokazuje „brak ceny” zamiast zgadywać.
 Cena szacunkowa (nazwa w SZACUNKOWE) → kwoty z gwiazdką i przypis „cena przybliżona”.
-
-Uruchomienie: python3 generuj.py  → nadpisuje obie strony (albo: python3 generuj.py pln|eur)
 """
 import subprocess
 import sys
@@ -16,87 +18,33 @@ from pathlib import Path
 if len(sys.argv) < 2:
     for w in ("pln", "eur"):
         subprocess.run([sys.executable, __file__, w], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).with_name("dodatki.py"))], check=True)
     sys.exit()
 WALUTA = sys.argv[1]
 
-OKRES = "20–27 października 2026"
-OKRES_KROTKO = "20–27.10.2026"
-OKRES_WARUNKI = "20 do 27 października 2026 r."
-POPRZEDNIA = ("2026-07", "BOGO lipiec 2026")  # (folder archiwum, podpis linku w stopce)
-PREZENT_NAZWA = "olejek z daglezji zielonej"  # mianownik, małą literą
-# dodatkowe punkty w „Warunkach promocji” (np. produkty z oferty ograniczonej czasowo)
-WARUNKI_EXTRA = ["Waleriana (15 ml) i olejek do kąpieli Adaptiv to produkty z oferty ograniczonej czasowo."]
-# przypis do cen szacunkowych: dopełniacz nazwy produktu („… nie ma jeszcze w cenniku”)
-SZACUNEK_DOPELNIACZ = "olejku do kąpieli Adaptiv"
-KONIEC = "27 października"
-DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}[WALUTA]
-ZRODLO_CEN = {"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA]
+from edycja import (OKRES, OKRES_KROTKO, OKRES_WARUNKI, KONIEC, POPRZEDNIA, PREZENT_NAZWA, WARUNKI_EXTRA,
+                    SZACUNEK_DOPELNIACZ, SZACUNKOWE, FOTO_PAKIET, FOTO_PREZENT, MIESIAC, PRODUKTY)
+import edycja
+import liczenie
 
-# ceny hurtowe brutto: PLN (sklep PL) i EUR (sklep DE, EK-Preis)
-CENY = {
-    "Kozłek lekarski (waleriana)": (290.00, 63.75),
-    "dōTERRA Serenity™": (221.74, 48.75),
-    "On Guard™": (205.75, 45.26),
-    "Oregano": (162.50, 35.75),
-    "Air-X™": (179.75, 39.50),
-    "Eukaliptus": (107.00, 23.50),
-    "Rumianek rzymski": (273.99, 60.25),
-    "Olejek do kąpieli dōTERRA Adaptiv™": (115.00, 25.29),  # szacunek, EUR = 115 zł / 4,547
-    "Sandałowiec": (489.00, 107.50),
-    "Grejpfrut": (105.76, 23.25),
-    "dōTERRA SuperMint™": (168.25, 37.00),
-    "dōTERRA Shinrin-Yoku™ Touch": (119.49, 26.25),
-    "Daglezja zielona (Douglas Fir)": (129.49, 28.50),
-}
+DATA_CEN = edycja.DATA_CEN[WALUTA]
+ZRODLO_CEN = {"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA]
+OG_IMAGE = f"https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview-{MIESIAC}.jpg"
 
 
 def c(nazwa):
-    return CENY[nazwa][0 if WALUTA == "pln" else 1]
+    return PRODUKTY[nazwa][WALUTA]
 
-# (nazwa, rozmiar, cena hurtowa brutto albo None, PV, ilość)
-ZESTAWY = [
-    {
-        "foto": "images/2026-10-zestaw1-waleriana-serenity.jpg",
-        "kup": ("Kozłek lekarski (waleriana)", "15 ml", c("Kozłek lekarski (waleriana)"), 56.0, 1),
-        "gratis": [("dōTERRA Serenity™", "15 ml", c("dōTERRA Serenity™"), 47.0, 1)],
-        "tytul": "Waleriana <span>+</span> dōTERRA Serenity™",
-    },
-    {
-        "foto": "images/2026-10-zestaw2-onguard-oregano.jpg",
-        "kup": ("On Guard™", "15 ml", c("On Guard™"), 43.5, 1),
-        "gratis": [("Oregano", "15 ml", c("Oregano"), 34.5, 1)],
-        "tytul": "On Guard™ <span>+</span> Oregano",
-    },
-    {
-        "foto": "images/2026-10-zestaw3-airx-eukaliptus.jpg",
-        "kup": ("Air-X™", "15 ml", c("Air-X™"), 38.0, 1),
-        "gratis": [("Eukaliptus", "15 ml", c("Eukaliptus"), 22.5, 1)],
-        "tytul": "Air-X™ <span>+</span> Eukaliptus",
-    },
-    {
-        "foto": "images/2026-10-zestaw4-rumianek-adaptiv-kapiel.jpg",
-        "kup": ("Rumianek rzymski", "5 ml", c("Rumianek rzymski"), 58.0, 1),
-        "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", c("Olejek do kąpieli dōTERRA Adaptiv™"), None, 2)],
-        "tytul": "Rumianek rzymski <span>+</span> 2 × olejek do kąpieli Adaptiv™",
-        "krotko": "2 × olejek do kąpieli Adaptiv",
-    },
-    {
-        "foto": "images/2026-10-zestaw5-sandalowiec.jpg",
-        "kup": ("Sandałowiec", "5 ml", c("Sandałowiec"), 97.0, 1),
-        "gratis": [
-            ("Grejpfrut", "15 ml", c("Grejpfrut"), 22.5, 1),
-            ("dōTERRA SuperMint™", "15 ml", c("dōTERRA SuperMint™"), 36.0, 1),
-            ("dōTERRA Shinrin-Yoku™ Touch", "10 ml", c("dōTERRA Shinrin-Yoku™ Touch"), 25.5, 1),
-        ],
-        "tytul": "Sandałowiec <span>+</span> Grejpfrut, SuperMint™, Shinrin-Yoku™ Touch",
-    },
-]
-# ceny przyjęte szacunkowo (produktu nie ma jeszcze w cenniku PL)
-SZACUNKOWE = {"Olejek do kąpieli dōTERRA Adaptiv™"}
-PREZENT = ("Daglezja zielona (Douglas Fir)", "5 ml", c("Daglezja zielona (Douglas Fir)"))
-FOTO_PAKIET = "images/2026-10-pakiet.jpg"
-FOTO_PREZENT = "images/2026-10-gratis-daglezja.jpg"
-OG_IMAGE = "https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview-2026-10.jpg"
+
+def poz(p):
+    """(nazwa, pojemność, PV, ilość) → (nazwa, pojemność, cena, PV, ilość)"""
+    n, r, pv_, ile = p
+    return (n, r, c(n), pv_, ile)
+
+
+ZESTAWY = [dict(z, kup=poz(z["kup"]), gratis=[poz(g) for g in z["gratis"]]) for z in edycja.ZESTAWY]
+PREZENT = (edycja.PREZENT[0], edycja.PREZENT[1], c(edycja.PREZENT[0]))
+
 
 
 PLIK = "index.html" if WALUTA == "pln" else "index-eur.html"
@@ -118,18 +66,7 @@ def wartosc(poz):
 
 
 def podzial(cena_zestawu, pozycje):
-    """Proporcjonalny podział ceny zestawu na pozycje, suma co do grosza."""
-    w = [wartosc(p) for p in pozycje]
-    if any(v is None for v in w):
-        return [None] * len(pozycje)
-    total = sum(w)
-    grosze = round(cena_zestawu * 100)
-    surowe = [grosze * v / total for v in w]
-    czesci = [int(s) for s in surowe]
-    reszta = grosze - sum(czesci)
-    for i in sorted(range(len(w)), key=lambda i: surowe[i] - czesci[i], reverse=True)[:reszta]:
-        czesci[i] += 1
-    return [c / 100 for c in czesci]
+    return liczenie.podzial(cena_zestawu, [wartosc(p) for p in pozycje])
 
 
 def nazwa_poz(p):
