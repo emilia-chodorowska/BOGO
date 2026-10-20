@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Wgrywanie na Dropbox przez rclone (konto `db-emilia:`), bez przeglądarki.
 
-  python3 dropbox.py ewa "<folder Ewy>"   → do folderu udostępnionego przez Ewę (np. „BOGO 10.2026”)
-                                            TYLKO zdjęcia zestawów, podfolder „Bogo zdjęcia”
   python3 dropbox.py em                   → mój folder „BOGO Em/<MIESIAC>/”: wszystko, co ważne na koniec;
                                             składany w ~/MyProjects/doTERRA/BOGO Em/ (Finder), potem kopia na Dropbox
 
@@ -82,16 +80,8 @@ def em():
     kopiuj(lok, f"BOGO Em/{E.MIESIAC}")
 
 
-def ewa(folder):
-    if not subprocess.run(["rclone", "lsd", KONTO + folder], capture_output=True).returncode == 0:
-        sys.exit(f"Nie ma folderu „{folder}” na {KONTO} — Ewa musi go udostępnić (Dołącz do folderu w Dropboxie).")
-    kopiuj(ZDJECIA, f"{folder}/Bogo zdjęcia")
-
-
 if __name__ == "__main__":
-    if len(sys.argv) >= 3 and sys.argv[1] == "ewa":
-        ewa(sys.argv[2])
-    elif len(sys.argv) >= 2 and sys.argv[1] == "em":
+    if len(sys.argv) >= 2 and sys.argv[1] == "em":
         em()
     else:
         print(__doc__)
