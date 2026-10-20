@@ -67,11 +67,6 @@ def em():
         shutil.copytree(zrodlo, lok / nazwa, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".DS_Store"))
 
     wrzuc(TU / f"screeny-{E.MIESIAC}", "Screeny kart")
-    (lok / "Podglady linkow").mkdir(exist_ok=True)
-    for z, n in ((TU / f"images/bogo-social-preview-{E.MIESIAC}.jpg", "Podglad linku BOGO.jpg"),
-                 (TU.parent / "new-client-offer" / E.OFERTA["folder"] / "social-preview.jpg", "Podglad linku rejestracja.jpg")):
-        if z.exists():
-            shutil.copy2(z, lok / "Podglady linkow" / n)
     wrzuc(ZDJECIA, "Zdjecia zestawow")
     for pdf in ZR.glob("PL_*.pdf"):
         shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
