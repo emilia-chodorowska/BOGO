@@ -4,7 +4,7 @@
 1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO)
 2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg
    (rejestracja z pakietem BOGO: pakiet = produkty kupowane, reszta to gratisy)
-3. teksty kart do hubów (new-client-offer/index.html, doterra-hub/index.html) — na ekran
+3. teksty do sekcji BOGO w hubie doTERRA — na ekran
 
 Pliki HTML zapisuje tylko przy zmianie treści; grafiki renderuje, gdy HTML jest nowszy od JPG.
 """
@@ -248,10 +248,7 @@ print(f"{E.OFERTA['folder']}/index.html: pakiet {zl(cena_pakietu)} zł, {pv(pv_p
 
 
 # ---------- 3. teksty kart do hubów ----------
-print("\nkarty w hubach:")
-print(f"  new-client-offer/index.html  pill: BOGO · {E.OKRES_KROTKO}")
-print(f"    h3: Rejestracja z pakietem BOGO · {zl(cena_pakietu)} zł")
-print(f"    p:  {n_kup} {rz} ({pv(pv_pakietu)} PV) + gratisy o wartości ok. {wartosc_gratisow} zł: {E.OFERTA['gratisy_opis']}")
+print("\nhub doTERRA (sekcja BOGO):")
 print(f"  doterra-hub/index.html, sekcja BOGO (nie w Ofertach)  tytuł: Rejestracja z pakietem BOGO — {E.OKRES_KROTKO}")
 print(f"    pod:  {n_kup} {rz}, {zl(cena_pakietu)} zł, {pv(pv_pakietu)} PV + gratisy ok. {wartosc_gratisow} zł ({E.OFERTA['gratisy_hub']})")
 print(f"    link: {URL}")
