@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """Pomocnik do grafik z kółeczkami w Canvie dla edycji BOGO (dane z edycja.py).
 
-  python3 canva.py slugi             → slugi produktów promocji (do /canva-proces i /canva-hasla)
-  python3 canva.py stan              → które produkty mają tło, hasła PL/EN/DE, packshot
+  python3 canva.py slugi             → slugi produktów promocji BEZ grafiki w katalogu (tylko te idą do /canva-proces)
+  python3 canva.py stan              → katalog (strona w Canvie), tło, hasła PL/EN/DE
   python3 canva.py do-canvy          → canva/materialy/_wygenerowane-bogo-<MIESIAC>/do-canvy/BOGO-<MIESIAC>-<slug>.png
   python3 canva.py packshoty         → oficjalne rendery do zrodla-<MIESIAC>/grafiki-produktow/ i do strony rejestracji
+
+Katalog gotowych grafik: canva/materialy/_katalog-grafik/katalog.json (strony projektu „z kółeczkami i kwadratowe”,
+pobrane z Canvy; stan „gotowa” / „puste-kolka” / „do-sprawdzenia”). Produkt z wpisem w katalogu NIE idzie przez
+/canva-proces — pełna procedura tylko dla brakujących. „puste-kolka” = brakuje tylko haseł.
 
 Tło do Canvy: najnowsze zaakceptowane (materialy/<slug>/tla/chatgpt__*.png), a gdy go brak —
 najnowsze czekające na akceptację (tla/do-akceptacji/chatgpt__*.png; wtedy oznaczone na liście).
 """
+import json
 import shutil
 import subprocess
 import sys
@@ -21,6 +26,13 @@ MAT = Path.home() / "MyProjects/canva/materialy"
 HASLA = Path.home() / "MyProjects/canva/hasla/output"
 OFERTA_IMG = TU.parent / "new-client-offer" / E.OFERTA["folder"] / "images"
 DOTERRA_IMAGE = Path.home() / ".claude/scripts/doterra-image.py"
+KATALOG = MAT / "_katalog-grafik" / "katalog.json"
+
+
+def katalog(slug):
+    if not KATALOG.exists():
+        return []
+    return [g for g in json.loads(KATALOG.read_text(encoding="utf-8"))["grafiki"] if g["slug"] == slug and g["jezyk"] == "pl"]
 
 
 def produkty_promocji():
@@ -43,15 +55,17 @@ def tlo(slug):
 def main(cmd):
     nazwy = produkty_promocji()
     if cmd == "slugi":
-        print(" ".join(E.PRODUKTY[n]["slug"] for n in nazwy))
+        print(" ".join(E.PRODUKTY[n]["slug"] for n in nazwy if not katalog(E.PRODUKTY[n]["slug"])))
     elif cmd == "stan":
-        print(f"{'produkt':34} {'slug':16} tło          hasła")
+        print(f"{'produkt':34} {'slug':16} {'katalog (Canva)':24} tło          hasła")
         for n in nazwy:
             s = E.PRODUKTY[n]["slug"]
+            k = katalog(s)
+            kt = ", ".join(f"str. {g['strona']} {g['stan']}" for g in k) or "BRAK → /canva-proces"
             plik, ok = tlo(s)
             t = "zaakceptowane" if ok else ("do akceptacji" if plik else "BRAK")
-            h = "/".join(j for j, suf in (("PL", ""), ("EN", "-en"), ("DE", "-de")) if (HASLA / f"{s}{suf}.html").exists()) or "BRAK"
-            print(f"{n:34} {s:16} {t:13} {h}")
+            h = "/".join(j for j, suf in (("PL", ""), ("EN", "-en"), ("DE", "-de"), ("UK", "-uk")) if (HASLA / f"{s}{suf}.html").exists()) or "BRAK"
+            print(f"{n:34} {s:16} {kt:24} {t:13} {h}")
     elif cmd == "do-canvy":
         cel = MAT / f"_wygenerowane-bogo-{E.MIESIAC}" / "do-canvy"
         cel.mkdir(parents=True, exist_ok=True)

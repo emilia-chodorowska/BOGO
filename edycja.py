@@ -33,7 +33,7 @@ PRODUKTY = {
     "Eukaliptus": dict(pln=107.00, eur=23.50, en="Eucalyptus", slug="eucalyptus", krotko="Eukaliptus", foto="eukaliptus.png"),
     "Rumianek rzymski": dict(pln=273.99, eur=60.25, en="Roman Chamomile", slug="roman-chamomile", krotko="Rumianek rzymski", foto="rumianek.png"),
     # szacunek, EUR = 115 zł / 4,547
-    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=115.00, eur=25.29, en="Adaptiv Calming Bath Oil", slug="adaptiv", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png"),
+    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=115.00, eur=25.29, en="Adaptiv Calming Bath Oil", slug="adaptiv-bath-oil", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png"),
     "Sandałowiec": dict(pln=489.00, eur=107.50, en="Sandalwood", slug="sandalwood", krotko="Sandałowiec", foto="sandalowiec.png"),
     "Grejpfrut": dict(pln=105.76, eur=23.25, en="Grapefruit", slug="grapefruit", krotko="Grejpfrut", foto="grejpfrut.png"),
     "dōTERRA SuperMint™": dict(pln=168.25, eur=37.00, en="SuperMint", slug="supermint", krotko="dōTERRA SuperMint™", foto="supermint.png"),
