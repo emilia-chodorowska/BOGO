@@ -3,15 +3,16 @@
 
   python3 dropbox.py ewa "<folder Ewy>"   → do folderu udostępnionego przez Ewę (np. „BOGO 10.2026”)
                                             TYLKO zdjęcia zestawów, podfolder „Bogo zdjęcia”
-  python3 dropbox.py em                   → mój folder „BOGO Em/<MIESIAC>/”: wszystko, co ważne na koniec
+  python3 dropbox.py em                   → mój folder „BOGO Em/<MIESIAC>/”: wszystko, co ważne na koniec;
+                                            składany w ~/MyProjects/doTERRA/BOGO Em/ (Finder), potem kopia na Dropbox
 
 `rclone copy` tylko dokłada i nadpisuje zmienione pliki, niczego nie kasuje.
 Źródło zdjęć: zrodla-<MIESIAC>/dropbox/2 Zdjecia zestawow/ (po jednym na zestaw, gratis i pakiet, bez przycinania).
 """
 import json
+import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import edycja as E
@@ -20,6 +21,7 @@ TU = Path(__file__).resolve().parent
 ZR = TU / f"zrodla-{E.MIESIAC}"
 KONTO = "db-emilia:"
 ZDJECIA = ZR / "dropbox" / "2 Zdjecia zestawow"
+LOKALNIE = TU.parent / "BOGO Em"  # poza repo BOGO (Pages publikuje wszystko)
 
 
 def kopiuj(zrodlo, cel, *flagi):
@@ -52,25 +54,32 @@ def linki():
 
 
 def em():
-    cel = f"BOGO Em/{E.MIESIAC}/"
-    with tempfile.TemporaryDirectory() as tmp:
-        (Path(tmp) / "Linki.txt").write_text(linki(), encoding="utf-8")
-        kopiuj(tmp, cel)
-    kopiuj(TU / f"screeny-{E.MIESIAC}", cel + "Screeny kart")
-    pod = ZR / "_podglady"
-    pod.mkdir(exist_ok=True)
+    """Składa folder lokalnie (widać go w Finderze), potem kopia na Dropbox."""
+    lok = LOKALNIE / E.MIESIAC
+    lok.mkdir(parents=True, exist_ok=True)
+    (lok / "Linki.txt").write_text(linki(), encoding="utf-8")
+
+    def wrzuc(zrodlo, nazwa):
+        zrodlo = Path(zrodlo)
+        if not zrodlo.exists():
+            print(f"  BRAK: {zrodlo}")
+            return
+        shutil.copytree(zrodlo, lok / nazwa, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".DS_Store"))
+
+    wrzuc(TU / f"screeny-{E.MIESIAC}", "Screeny kart")
+    (lok / "Podglady linkow").mkdir(exist_ok=True)
     for z, n in ((TU / f"images/bogo-social-preview-{E.MIESIAC}.jpg", "Podglad linku BOGO.jpg"),
                  (TU.parent / "new-client-offer" / E.OFERTA["folder"] / "social-preview.jpg", "Podglad linku rejestracja.jpg")):
         if z.exists():
-            (pod / n).write_bytes(z.read_bytes())
-    kopiuj(pod, cel + "Podglady linkow")
-    kopiuj(ZR / "dropbox" / "1 Grafiki doTERRA", cel + "Grafiki doTERRA")
-    kopiuj(ZDJECIA, cel + "Zdjecia zestawow")
+            shutil.copy2(z, lok / "Podglady linkow" / n)
+    wrzuc(ZR / "dropbox" / "1 Grafiki doTERRA", "Grafiki doTERRA")
+    wrzuc(ZDJECIA, "Zdjecia zestawow")
     for pdf in ZR.glob("PL_*.pdf"):
-        subprocess.run(["rclone", "copyto", str(pdf), KONTO + cel + f"Broszura BOGO {E.MIESIAC} PL.pdf"], check=True)
-        print(f"  ok  {cel}Broszura")
-    kopiuj(ZR / "rolki", cel + "Rolki doTERRA")
-    kopiuj(Path.home() / f"MyProjects/canva/materialy/_wygenerowane-bogo-{E.MIESIAC}/do-canvy", cel + "Tla do Canvy")
+        shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
+    wrzuc(ZR / "rolki", "Rolki doTERRA")
+    wrzuc(Path.home() / f"MyProjects/canva/materialy/_wygenerowane-bogo-{E.MIESIAC}/do-canvy", "Tla do Canvy")
+    print(f"  lokalnie: {lok}")
+    kopiuj(lok, f"BOGO Em/{E.MIESIAC}")
 
 
 def ewa(folder):
