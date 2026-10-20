@@ -72,7 +72,6 @@ def em():
                  (TU.parent / "new-client-offer" / E.OFERTA["folder"] / "social-preview.jpg", "Podglad linku rejestracja.jpg")):
         if z.exists():
             shutil.copy2(z, lok / "Podglady linkow" / n)
-    wrzuc(ZR / "dropbox" / "1 Grafiki doTERRA", "Grafiki doTERRA")
     wrzuc(ZDJECIA, "Zdjecia zestawow")
     for pdf in ZR.glob("PL_*.pdf"):
         shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
