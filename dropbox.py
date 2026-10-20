@@ -67,6 +67,12 @@ def em():
         shutil.copytree(zrodlo, lok / nazwa, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".DS_Store"))
 
     wrzuc(TU / f"screeny-{E.MIESIAC}", "Screeny kart")
+    (lok / "Screeny z maila").mkdir(exist_ok=True)
+    for n, cel in (("mail-5-par.png", "1 Piec par.png"), ("mail-pakiet.png", "2 Pakiet i gratis.png")):
+        if (ZR / "mail" / n).exists():
+            shutil.copy2(ZR / "mail" / n, lok / "Screeny z maila" / cel)
+        else:
+            print(f"  BRAK: zrodla-{E.MIESIAC}/mail/{n}")
     wrzuc(ZDJECIA, "Zdjecia zestawow")
     for pdf in ZR.glob("PL_*.pdf"):
         shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
