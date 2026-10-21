@@ -3,3 +3,8 @@ images/.DS_Store
 zrodla-*/
 screeny-*/
 __pycache__/
+sklejka-*.json
+plansze-podglad.html
+sklejka-plan.html
+podglad-*.html
+suma-warianty.html
