@@ -6,7 +6,7 @@
   python3 canva.py do-canvy          → canva/materialy/_wygenerowane-bogo-<MIESIAC>/do-canvy/BOGO-<MIESIAC>-<slug>.png
   python3 canva.py packshoty         → oficjalne rendery do zrodla-<MIESIAC>/grafiki-produktow/, produkty/ (ig.py) i do strony rejestracji
 
-Katalog gotowych grafik: canva/materialy/_katalog-grafik/katalog.json (strony projektu „z kółeczkami i kwadratowe”,
+Katalog gotowych grafik: canva/materialy/_katalog-grafik/katalog.json (strony projektu „z kółeczkami PL”,
 pobrane z Canvy; stan „gotowa” / „puste-kolka” / „do-sprawdzenia”). Produkt z wpisem w katalogu NIE idzie przez
 /canva-proces — pełna procedura tylko dla brakujących. „puste-kolka” = brakuje tylko haseł.
 
