@@ -23,7 +23,8 @@ DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}
 #   en        — nazwa angielska do doterra-image.py
 #   slug      — slug Canvy (canva/materialy/<slug>/, canva/hasla/output/<slug>.html)
 #   krotko    — nazwa na stronie rejestracji (new-client-offer)
-#   foto      — packshot PNG w ../new-client-offer/<folder>/images/
+#   foto      — packshot PNG w ../new-client-offer/<folder>/images/ i zrodla-<MIESIAC>/produkty/
+#   ig        — (opcjonalnie) nazwa na grafice Instagram, gdy inna niż `krotko` bez „dōTERRA” i „™”
 PRODUKTY = {
     "Kozłek lekarski (waleriana)": dict(pln=290.00, eur=63.75, en="Valerian", slug="valerian", krotko="Waleriana", foto="waleriana.png"),
     "dōTERRA Serenity™": dict(pln=221.74, eur=48.75, en="Serenity", slug="serenity", krotko="dōTERRA Serenity™", foto="serenity.png"),
@@ -33,14 +34,14 @@ PRODUKTY = {
     "Eukaliptus": dict(pln=107.00, eur=23.50, en="Eucalyptus", slug="eucalyptus", krotko="Eukaliptus", foto="eukaliptus.png"),
     "Rumianek rzymski": dict(pln=273.99, eur=60.25, en="Roman Chamomile", slug="roman-chamomile", krotko="Rumianek rzymski", foto="rumianek.png"),
     # szacunek, EUR = 115 zł / 4,547
-    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=115.00, eur=25.29, en="Adaptiv Calming Bath Oil", slug="adaptiv-bath-oil", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png"),
+    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=115.00, eur=25.29, en="Adaptiv Calming Bath Oil", slug="adaptiv-bath-oil", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png", ig="Adaptiv do kąpieli"),
     "Sandałowiec": dict(pln=489.00, eur=107.50, en="Sandalwood", slug="sandalwood", krotko="Sandałowiec", foto="sandalowiec.png"),
     "Grejpfrut": dict(pln=105.76, eur=23.25, en="Grapefruit", slug="grapefruit", krotko="Grejpfrut", foto="grejpfrut.png"),
     "dōTERRA SuperMint™": dict(pln=168.25, eur=37.00, en="SuperMint", slug="supermint", krotko="dōTERRA SuperMint™", foto="supermint.png"),
     "dōTERRA Shinrin-Yoku™ Touch": dict(pln=119.49, eur=26.25, en="Shinrin-Yoku Touch", slug="shinrin-yoku", krotko="dōTERRA Shinrin-Yoku™ Touch", foto="shinrin-yoku.png"),
     "Daglezja zielona (Douglas Fir)": dict(pln=129.49, eur=28.50, en="Douglas Fir", slug="douglas-fir", krotko="Daglezja zielona", foto="daglezja.png"),
     # gratisy miesięcznej promocji rejestracji (200 PV) — tylko na stronie rejestracji
-    "Wild Orange": dict(pln=76.25, eur=None, en="Wild Orange", slug="wild-orange", krotko="Wild Orange", foto="wild-orange.png"),
+    "Wild Orange": dict(pln=76.25, eur=None, en="Wild Orange", slug="wild-orange", krotko="Wild Orange", foto="wild-orange.png", ig="Dzika pomarańcza"),
     "dōTERRA Balance™": dict(pln=137.50, eur=None, en="Balance", slug="balance", krotko="dōTERRA Balance™", foto="balance.png"),
 }
 

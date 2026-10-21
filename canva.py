@@ -4,7 +4,7 @@
   python3 canva.py slugi             → slugi produktów promocji BEZ grafiki w katalogu (tylko te idą do /canva-proces)
   python3 canva.py stan              → katalog (strona w Canvie), tło, hasła PL/EN/DE
   python3 canva.py do-canvy          → canva/materialy/_wygenerowane-bogo-<MIESIAC>/do-canvy/BOGO-<MIESIAC>-<slug>.png
-  python3 canva.py packshoty         → oficjalne rendery do zrodla-<MIESIAC>/grafiki-produktow/ i do strony rejestracji
+  python3 canva.py packshoty         → oficjalne rendery do zrodla-<MIESIAC>/grafiki-produktow/, produkty/ (ig.py) i do strony rejestracji
 
 Katalog gotowych grafik: canva/materialy/_katalog-grafik/katalog.json (strony projektu „z kółeczkami i kwadratowe”,
 pobrane z Canvy; stan „gotowa” / „puste-kolka” / „do-sprawdzenia”). Produkt z wpisem w katalogu NIE idzie przez
@@ -27,6 +27,7 @@ HASLA = Path.home() / "MyProjects/canva/hasla/output"
 OFERTA_IMG = TU.parent / "new-client-offer" / E.OFERTA["folder"] / "images"
 DOTERRA_IMAGE = Path.home() / ".claude/scripts/doterra-image.py"
 KATALOG = MAT / "_katalog-grafik" / "katalog.json"
+PRODUKTY_DIR = TU / f"zrodla-{E.MIESIAC}" / "produkty"  # pełny rozmiar (1350 px) — ig.py, plansze filmu
 
 
 def katalog(slug):
@@ -82,11 +83,12 @@ def main(cmd):
         gp = TU / f"zrodla-{E.MIESIAC}" / "grafiki-produktow"
         gp.mkdir(parents=True, exist_ok=True)
         OFERTA_IMG.mkdir(parents=True, exist_ok=True)
+        PRODUKTY_DIR.mkdir(parents=True, exist_ok=True)
         wszystkie = nazwy + [n for n, _ in E.OFERTA["gratis_200pv"]]
         for i, n in enumerate(wszystkie, 1):
             p = E.PRODUKTY[n]
             kto = ["--id", str(p["id"])] if p.get("id") else ["--product", p["en"]]
-            for cel in (gp / f"{i:02d} {p['krotko'].replace('™', '')}.png", OFERTA_IMG / p["foto"]):
+            for cel in (gp / f"{i:02d} {p['krotko'].replace('™', '')}.png", OFERTA_IMG / p["foto"], PRODUKTY_DIR / p["foto"]):
                 if cel.exists():
                     continue
                 r = subprocess.run([sys.executable, str(DOTERRA_IMAGE), *kto, "--output", str(cel)],

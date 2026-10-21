@@ -74,6 +74,9 @@ def em():
         else:
             print(f"  BRAK: zrodla-{E.MIESIAC}/mail/{n}")
     wrzuc(ZDJECIA, "Zdjecia zestawow")
+    (lok / "Instagram").mkdir(exist_ok=True)
+    for png in (ZR / "instagram").glob("*.png"):
+        shutil.copy2(png, lok / "Instagram" / png.name)
     for pdf in ZR.glob("PL_*.pdf"):
         shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
     wrzuc(ZR / "rolki", "Rolki doTERRA")
