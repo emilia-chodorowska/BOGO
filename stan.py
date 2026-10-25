@@ -95,7 +95,7 @@ def main():
             gotowe.append((p["krotko"], (KAT / pl["plik"]).as_uri()))
             continue
         z = json.loads((MAT / s / "zrodla.json").read_text(encoding="utf-8")) if (MAT / s / "zrodla.json").exists() else {}
-        strona = pill("ok", f"str. {pl['strona']}", (KAT / pl["plik"]).as_uri()) if pl else pill("cl", "brak · nowa strona")
+        strona = pill("ok", f"str. {pl['strona']}", (KAT / pl["plik"]).as_uri()) if pl else pill("cl", "brak")
         d = karta(s)
         ma_skan = any(x["zrodlo"] == "skan" for x in z.get("pozycje", []))
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
@@ -158,12 +158,13 @@ SZABLON = """<!DOCTYPE html>
   .legend{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow-x:auto;box-shadow:0 10px 30px rgba(63,58,53,.06)}
   table{border-collapse:collapse;width:100%;font-size:13.5px}
-  th{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:16px 14px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-  td{padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+  th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:14px 8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+  th:first-child,td:first-child{padding-left:18px} th:last-child,td:last-child{padding-right:18px}
   tr:last-child td{border-bottom:0}
-  .prod{display:flex;align-items:center;gap:12px;font-family:"Playfair Display",Georgia,serif;font-size:16px}
-  .prod img{height:40px;width:28px;object-fit:contain}
-  .p{display:inline-block;font-size:12.5px;font-weight:500;border-radius:999px;padding:4px 11px;border:1px solid transparent;text-decoration:none}
+  .prod{display:flex;align-items:center;gap:10px;font-family:"Playfair Display",Georgia,serif;font-size:15px}
+  .prod img{height:34px;width:22px;object-fit:contain}
+  .p{display:inline-block;font-size:12px;font-weight:500;border-radius:999px;padding:3px 9px;border:1px solid transparent;text-decoration:none}
   a.p:hover{filter:brightness(.96);text-decoration:underline}
   .p.ok{background:var(--sage-bg);color:var(--sage);border-color:var(--sage-line)}
   .p.ty{background:var(--sand-bg);color:var(--sand);border-color:var(--sand-line)}
@@ -185,7 +186,7 @@ SZABLON = """<!DOCTYPE html>
 </header>
 <div class="legend"><span class="p ok">jest</span><span class="p ty">Twoja kolej</span><span class="p cl">moja kolej</span><span class="p no">brak</span></div>
 <div class="card"><table>
-<thead><tr><th>Produkt</th><th>Strona w Canvie</th><th>Skan z książki</th><th>WhatsApp</th><th>Discord</th><th>Canva treści</th><th>Hasła PL</th><th>Kółka PL · EN · DE · UK</th></tr></thead>
+<thead><tr><th>Produkt</th><th>Canva</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Canva treści</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
 <tbody>
 __WIERSZE__
 </tbody></table></div>
