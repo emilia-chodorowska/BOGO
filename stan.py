@@ -96,6 +96,13 @@ def main():
             continue
         z = json.loads((MAT / s / "zrodla.json").read_text(encoding="utf-8")) if (MAT / s / "zrodla.json").exists() else {}
         strona = pill("ok", f"str. {pl['strona']}", (KAT / pl["plik"]).as_uri()) if pl else pill("cl", "brak")
+        plik_tla, _ = C.tlo(s)
+        if pl:
+            tlo = pill("no", "w Canvie")
+        elif plik_tla:
+            tlo = pill("ok", "gotowe", plik_tla.as_uri())
+        else:
+            tlo = pill("cl", "generuję")
         d = karta(s)
         ma_skan = any(x["zrodlo"] == "skan" for x in z.get("pozycje", []))
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
@@ -120,7 +127,7 @@ def main():
             kolka = pill("ok" if jezyki_gotowe else "cl", " · ".join(j.upper() for j in jezyki_gotowe) or pl["stan"])
         foto = C.PRODUKTY_DIR / p["foto"]
         img = f'<img src="produkty/{html.escape(p["foto"])}" alt="">' if foto.exists() else ""
-        wiersze.append(f'<tr><td><span class="prod">{img}<span>{html.escape(p["krotko"].replace("dōTERRA ", ""))}</span></span></td><td>{strona}</td>'
+        wiersze.append(f'<tr><td><span class="prod">{img}<span>{html.escape(p["krotko"].replace("dōTERRA ", ""))}</span></span></td><td>{strona}</td><td>{tlo}</td>'
                        f'<td>{komorka_zrodla(z, "skan", s)}</td><td>{komorka_zrodla(z, "whatsapp", s)}</td>'
                        f'<td>{komorka_zrodla(z, "discord", s)}</td><td>{ct}</td><td>{hasla}</td><td>{kolka}</td></tr>')
     teraz = datetime.now().strftime("%d.%m.%Y, %H:%M")
@@ -186,7 +193,7 @@ SZABLON = """<!DOCTYPE html>
 </header>
 <div class="legend"><span class="p ok">jest</span><span class="p ty">Twoja kolej</span><span class="p cl">moja kolej</span><span class="p no">brak</span></div>
 <div class="card"><table>
-<thead><tr><th>Produkt</th><th>Canva</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Hasła z 3 źródeł</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
+<thead><tr><th>Produkt</th><th>Canva</th><th>Tło</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Hasła z 3 źródeł</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
 <tbody>
 __WIERSZE__
 </tbody></table></div>
