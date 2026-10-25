@@ -68,7 +68,7 @@ def komorka_zrodla(z, zrodlo, slug):
     def href(p):
         if p["plik"].startswith("reflect:"):
             return "https://reflect.app/g/emiliachodorowska/" + p["plik"].split(":", 1)[1]
-        return (MAT / slug / "poprzednie-grafiki" / p["plik"]).as_uri()
+        return (MAT / slug / "poprzednie-grafiki" / p["plik"]).resolve().as_uri()
     if glowne:
         rodzaje = list(dict.fromkeys(re.sub(r"\s*\(.*?\)", "", p["rodzaj"]) for p in glowne))
         tekst = " + ".join(rodzaje[:2]) + (f" +{len(rodzaje) - 2}" if len(rodzaje) > 2 else "")
