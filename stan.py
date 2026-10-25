@@ -186,7 +186,7 @@ SZABLON = """<!DOCTYPE html>
 </header>
 <div class="legend"><span class="p ok">jest</span><span class="p ty">Twoja kolej</span><span class="p cl">moja kolej</span><span class="p no">brak</span></div>
 <div class="card"><table>
-<thead><tr><th>Produkt</th><th>Canva</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Canva treści</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
+<thead><tr><th>Produkt</th><th>Canva</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Hasła z 3 źródeł</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
 <tbody>
 __WIERSZE__
 </tbody></table></div>
