@@ -188,7 +188,7 @@ def main(zestaw="bogo"):
     kat = katalog()
     kopie = wybory()
     R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
-                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy", "edycja", "poprawka")}
+                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy", "edycja", "poprawka", "przeglad")}
     sprawdzono = set()
     for p in Z["produkty"]():
         s = p["slug"]
@@ -237,7 +237,9 @@ def main(zestaw="bogo"):
             R["ok_hasla"].append(chip(p, hub, str(len(zatw))))
         elif k.get("edycja"):
             R["edycja"].append(chip(p, hub))
-        elif n_ct:  # zaznaczanie dopiero przy komplecie trzech kolumn
+        elif n_ct and not z.get("sprawdzono"):  # kolumna ze skanu jest, ale WhatsApp i Discord jeszcze nieprzejrzane
+            R["przeglad"].append(chip(p, hub))
+        elif n_ct:  # zaznaczanie dopiero przy komplecie kolumn
             R["zaznacz"].append(chip(p, hub))
             R["do_listy"].append((f"zaznacz-hasla:{s}", f"{Z['prefiks']}: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
         # kółka i języki — Canva rusza dopiero po zatwierdzeniu; hasla-w-canvie.json = co jest teraz w kółkach
@@ -268,6 +270,7 @@ def main(zestaw="bogo"):
         wiersz("ja", "Generuję tło", R["tlo"]),
         wiersz("ja", "Zakładam stronę w Canvie z gotowym tłem", R["strona"]),
         wiersz("ja", f"Robię kartę haseł ({Z['karta']})", R["karta"]),
+        wiersz("ja", "Przeglądam Discord i WhatsApp — dołożę hasła z grafik", R["przeglad"]),
         wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
         wiersz("ja", "Wstawiam zatwierdzone hasła w kółka w Canvie", R["kolka"]),
         wiersz("ja", "Poprawiam grafikę — zmienione hasła", R["poprawka"]),
