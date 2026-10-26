@@ -3,6 +3,8 @@
 czeka na Ciebie · robię · gotowe).
 
   python3 stan.py                    → przebudowuje stronę z aktualnych danych (puszczaj po każdym przebiegu)
+  python3 stan.py skany              → ten sam stan dla olejków ze skanów (SKANY) → canva/stan-grafiki-ze-skanow.html
+  python3 stan.py bogo skany         → obie strony
   python3 stan.py w-canvie <slug>…   → po wstawieniu zatwierdzonych haseł w kółka: zapisuje, co jest w Canvie
 
 Hasła rusza do Canvy dopiero zatwierdzenie w karcie hubu (kopia w repo: zatwierdzone {at, hasla}, edycja).
@@ -63,10 +65,37 @@ def karta(slug):
     return json.loads(DATA_RE.search(p.read_text(encoding="utf-8")).group(1))
 
 
+# Zestawy produktów: „bogo” (bieżąca promocja) i „skany” (olejki ze skanem w Claude Inbox, bez grafiki — od 26.10.2026)
+SKANY = [("lemon", "Cytryna"), ("lavender", "Lawenda"), ("peppermint", "Mięta pieprzowa"), ("tea-tree", "Drzewo herbaciane"),
+         ("frankincense", "Kadzidło"), ("wild-orange", "Dzika pomarańcza"), ("copaiba", "Copaiba"),
+         ("bergamotka", "Bergamotka", "bergamot-bergamotka"), ("marjoram", "Majeranek"), ("citronella", "Citronella"),
+         ("balance", "Balance"), ("air", "Air (Breathe)"), ("deep-blue", "Deep Blue"), ("zengest", "ZenGest")]
+
+
+def produkty_bogo():
+    for n in C.produkty_promocji():
+        p = E.PRODUKTY[n]
+        foto = C.PRODUKTY_DIR / p["foto"]
+        yield {"slug": p["slug"], "hub": p["slug"], "krotko": p["krotko"], "img": f"produkty/{p['foto']}" if foto.exists() else ""}
+
+
+def produkty_skany():
+    for s, nazwa, *hub in SKANY:
+        rendery = sorted((MAT / s / "inspiracje-do-tla").glob("[0-9]*.png"), key=lambda f: len(f.name))
+        yield {"slug": s, "hub": hub[0] if hub else s, "krotko": nazwa, "img": rendery[0].as_uri() if rendery else ""}
+
+
+ZESTAWY = {
+    "bogo": {"produkty": produkty_bogo, "wyj": WYJ, "tytul": f"Stan grafik · BOGO {E.OKRES_KROTKO}", "prefiks": "BOGO",
+             "karta": "dokument „Bogo” + Claude", "wyslane": C.TU / f"zrodla-{E.MIESIAC}" / "lista-wyslane.json"},
+    "skany": {"produkty": produkty_skany, "wyj": MAT.parent / "stan-grafiki-ze-skanow.html", "tytul": "Stan grafik · ze skanów z książki",
+              "prefiks": "Grafiki ze skanów", "karta": "skan + Claude", "wyslane": MAT.parent / "stan-grafiki-ze-skanow-lista.json"},
+}
+
+
 def chip(p, href=None, dopisek=""):
     """Mały olejek ze zdjęciem — link, gdy jest dokąd prowadzić."""
-    foto = C.PRODUKTY_DIR / p["foto"]
-    img = f'<img src="produkty/{html.escape(p["foto"])}" alt="">' if foto.exists() else ""
+    img = f'<img src="{html.escape(p["img"])}" alt="">' if p["img"] else ""
     nazwa = html.escape(p["krotko"].replace("dōTERRA ", "")) + (f' <b>{html.escape(dopisek)}</b>' if dopisek else "")
     if href:
         return f'<a class="chip" href="{html.escape(href)}" target="_blank" rel="noopener">{img}{nazwa}</a>'
@@ -98,11 +127,10 @@ def zapisz_w_canvie(slug):
 
 
 LISTA_REPO = "repos/emilia-chodorowska/lista-do-odhaczenia-dane/contents/lista.json"
-WYSLANE = C.TU / f"zrodla-{E.MIESIAC}" / "lista-wyslane.json"
 DNI = ("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela")
 
 
-def do_listy(pozycje):
+def do_listy(pozycje, WYSLANE):
     """Kroki userki → lista dnia (dzisiaj) w apce lista-do-odhaczenia. pozycje: [(klucz albo lista kluczy, etykieta, url)].
     Każdy klucz idzie raz (lista-wyslane.json) — odhaczona albo skasowana pozycja nie wraca przy kolejnym przebiegu."""
     import base64
@@ -155,14 +183,14 @@ def do_listy(pozycje):
     print("lista do odhaczania: 3× konflikt zapisu, spróbuję przy następnym przebiegu")
 
 
-def main():
+def main(zestaw="bogo"):
+    Z = ZESTAWY[zestaw]
     kat = katalog()
     kopie = wybory()
     R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
                         "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy", "edycja", "poprawka")}
     sprawdzono = set()
-    for n in C.produkty_promocji():
-        p = E.PRODUKTY[n]
+    for p in Z["produkty"]():
         s = p["slug"]
         g = {x["jezyk"]: x for x in kat if x["slug"] == s}
         pl = g.get("pl")
@@ -171,7 +199,7 @@ def main():
             R["ok_wszystko"].append(chip(p, (KAT / pl["plik"]).as_uri()))
             continue
         z = json.loads((MAT / s / "zrodla.json").read_text(encoding="utf-8")) if (MAT / s / "zrodla.json").exists() else {}
-        hub = f"{HUB}#{s}"
+        hub = f"{HUB}#{p['hub']}"
         # Canva + tło
         plik_tla, _ = C.tlo(s)
         if pl:
@@ -192,7 +220,7 @@ def main():
         if z.get("sprawdzono"):
             R["ok_zrodla"].append(chip(p))
             sprawdzono.add(z["sprawdzono"])
-        d = karta(s)
+        d = karta(p["hub"])
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
         if n_ct:
             R["ok_kol3"].append(chip(p, hub, str(n_ct)))
@@ -211,7 +239,7 @@ def main():
             R["edycja"].append(chip(p, hub))
         elif n_ct:  # zaznaczanie dopiero przy komplecie trzech kolumn
             R["zaznacz"].append(chip(p, hub))
-            R["do_listy"].append((f"zaznacz-hasla:{s}", f"BOGO: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
+            R["do_listy"].append((f"zaznacz-hasla:{s}", f"{Z['prefiks']}: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
         # kółka i języki — Canva rusza dopiero po zatwierdzeniu; hasla-w-canvie.json = co jest teraz w kółkach
         w_canvie = json.loads(W_CANVIE(s).read_text(encoding="utf-8"))["hasla"] if W_CANVIE(s).exists() else None
         gotowa = bool(pl and pl["stan"] == "gotowa")
@@ -227,19 +255,19 @@ def main():
             R["kolka_stoi"].append(chip(p))
 
     if R["skany_listy"]:  # skany jako jedna pozycja ze wszystkimi olejkami
-        R["do_listy"].insert(0, ([k for k, _ in R["skany_listy"]], "BOGO: skany z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — "
+        R["do_listy"].insert(0, ([k for k, _ in R["skany_listy"]], f"{Z['prefiks']}: skany z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — "
                                  + ", ".join(n for _, n in R["skany_listy"]), None))
-    do_listy(R["do_listy"])
+    do_listy(R["do_listy"], Z["wyslane"])
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
         wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
-        wiersz("ty", "Zaznacz i zatwierdź hasła PL w hubie", R["zaznacz"], "wszystkie 3 kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
+        wiersz("ty", "Zaznacz i zatwierdź hasła PL w hubie", R["zaznacz"], "wszystkie kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
         wiersz("ty", "Hasła w trybie edycji — zatwierdź ponownie", R["edycja"], "grafika czeka przy poprzednio zatwierdzonych"),
     ]
     ja = [
         wiersz("ja", "Generuję tło", R["tlo"]),
         wiersz("ja", "Zakładam stronę w Canvie z gotowym tłem", R["strona"]),
-        wiersz("ja", "Robię kartę haseł (dokument „Bogo” + Claude)", R["karta"]),
+        wiersz("ja", f"Robię kartę haseł ({Z['karta']})", R["karta"]),
         wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
         wiersz("ja", "Wstawiam zatwierdzone hasła w kółka w Canvie", R["kolka"]),
         wiersz("ja", "Poprawiam grafikę — zmienione hasła", R["poprawka"]),
@@ -264,13 +292,13 @@ def main():
         tresc = "".join(wiersze) or f'<div class="pusto">{pusto}</div>'
         return f'<section class="{klasa}"><div class="head"><h2>{tytul}</h2><span class="count">{len(wiersze)}</span></div>{tresc}</section>'
     teraz = datetime.now().strftime("%d.%m.%Y, %H:%M")
-    WYJ.write_text(SZABLON.replace("__OKRES__", html.escape(E.OKRES_KROTKO)).replace("__TERAZ__", teraz)
+    Z["wyj"].write_text(SZABLON.replace("__TYTUL__", html.escape(Z["tytul"])).replace("__TERAZ__", teraz)
                    .replace("__TY__", sekcja("s-ty", "Czeka na Ciebie", ty, "Nic — wszystko po Twojej stronie zrobione."))
                    .replace("__JA__", sekcja("s-ja", "Robię", ja, "Nic w toku."))
                    .replace("__STOI__", sekcja("s-stoi", "Ruszę po Twoim kroku", stoi, "Nic nie czeka na Twój krok."))
                    .replace("__OK__", sekcja("s-ok", "Gotowe", ok, "Jeszcze nic.")),
                    encoding="utf-8")
-    print(WYJ)
+    print(Z["wyj"])
 
 
 SZABLON = """<!DOCTYPE html>
@@ -278,7 +306,7 @@ SZABLON = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stan grafik · BOGO __OKRES__</title>
+<title>__TYTUL__</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236f9285'/%3E%3Cpath d='M28 52l15 15 30-32' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
   :root{--green:#6f9285;--green-soft:#ecf2f0;--green-dark:#46605a;
@@ -333,7 +361,7 @@ SZABLON = """<!DOCTYPE html>
 <body>
 <div class="wrap">
 <div class="top">
-  <h1>Stan grafik · BOGO __OKRES__</h1>
+  <h1>__TYTUL__</h1>
   Stan z __TERAZ__ · odśwież kartę po moim przebiegu
   <div class="legend"><span><i class="l-ty"></i>czeka na Ciebie</span><span><i class="l-ja"></i>robię</span><span><i class="l-stoi"></i>ruszę po Twoim kroku</span><span><i class="l-ok"></i>gotowe</span></div>
 </div>
@@ -351,4 +379,7 @@ if __name__ == "__main__":
     if sys.argv[1:2] == ["w-canvie"]:
         for s in sys.argv[2:]:
             zapisz_w_canvie(s)
-    main()
+        main()
+    else:
+        for z in (sys.argv[1:] or ["bogo"]):
+            main(z)
