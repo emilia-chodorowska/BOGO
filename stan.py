@@ -2,7 +2,11 @@
 """Stan grafik z kółeczkami dla edycji BOGO → zrodla-<MIESIAC>/stan-grafik.html (styl listy do odhaczania:
 czeka na Ciebie · robię · gotowe).
 
-  python3 stan.py            → przebudowuje stronę z aktualnych danych (puszczaj po każdym przebiegu)
+  python3 stan.py                    → przebudowuje stronę z aktualnych danych (puszczaj po każdym przebiegu)
+  python3 stan.py w-canvie <slug>…   → po wstawieniu zatwierdzonych haseł w kółka: zapisuje, co jest w Canvie
+
+Hasła rusza do Canvy dopiero zatwierdzenie w karcie hubu (kopia w repo: zatwierdzone {at, hasla}, edycja).
+Zatwierdzone ≠ hasla-w-canvie.json → „Poprawiam grafikę”.
 
 Źródła danych:
 - katalog Canvy        canva/materialy/_katalog-grafik/katalog.json (strona, stan, języki)
@@ -78,6 +82,21 @@ def wiersz(stan, tekst, chipy, pod=""):
             f'<div class="chips">{"".join(chipy)}</div></div></div>')
 
 
+W_CANVIE = lambda slug: MAT / slug / "hasla-w-canvie.json"
+
+
+def zapisz_w_canvie(slug):
+    """Po wstawieniu haseł w kółka: zapamiętaj, które są w Canvie (stan porówna je z kolejnym zatwierdzeniem)."""
+    d = karta(slug)
+    k = kopia(f"{d['noteId']}.json") if d else {}
+    z = (k.get("zatwierdzone") or {}).get("hasla")
+    if not z:
+        raise SystemExit(f"{slug}: hasła niezatwierdzone")
+    W_CANVIE(slug).write_text(json.dumps({"hasla": z, "zatwierdzone": k["zatwierdzone"]["at"], "wstawione": datetime.now().isoformat(timespec="minutes")},
+                                         ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"{slug}: w Canvie {len(z)} haseł")
+
+
 LISTA_REPO = "repos/emilia-chodorowska/lista-do-odhaczenia-dane/contents/lista.json"
 WYSLANE = C.TU / f"zrodla-{E.MIESIAC}" / "lista-wyslane.json"
 DNI = ("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela")
@@ -140,7 +159,7 @@ def main():
     kat = katalog()
     kopie = wybory()
     R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
-                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy")}
+                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy", "edycja", "poprawka")}
     sprawdzono = set()
     for n in C.produkty_promocji():
         p = E.PRODUKTY[n]
@@ -182,22 +201,28 @@ def main():
         else:
             R["kol3_stoi"].append(chip(p))
         # hasła PL
-        wybrane = None
+        k = kopia(f"{d['noteId']}.json") if d and f"{d.get('noteId')}.json" in kopie else {}
+        zatw = (k.get("zatwierdzone") or {}).get("hasla") if not k.get("edycja") else None
         if not d:
             R["karta"].append(chip(p))
-        elif f"{d.get('noteId')}.json" in kopie:
-            wybrane = len(kopia(f"{d['noteId']}.json").get("zaznaczone", []))
-            R["ok_hasla"].append(chip(p, hub, str(wybrane)))
+        elif zatw:
+            R["ok_hasla"].append(chip(p, hub, str(len(zatw))))
+        elif k.get("edycja"):
+            R["edycja"].append(chip(p, hub))
         elif n_ct:  # zaznaczanie dopiero przy komplecie trzech kolumn
             R["zaznacz"].append(chip(p, hub))
-            R["do_listy"].append((f"zaznacz-hasla:{s}", f"BOGO: zaznacz hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
-        # kółka i języki
-        if pl and pl["stan"] == "gotowa":
+            R["do_listy"].append((f"zaznacz-hasla:{s}", f"BOGO: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
+        # kółka i języki — Canva rusza dopiero po zatwierdzeniu; hasla-w-canvie.json = co jest teraz w kółkach
+        w_canvie = json.loads(W_CANVIE(s).read_text(encoding="utf-8"))["hasla"] if W_CANVIE(s).exists() else None
+        gotowa = bool(pl and pl["stan"] == "gotowa")
+        if zatw and not gotowa:
+            R["kolka"].append(chip(p, hub))
+        elif zatw and w_canvie is not None and w_canvie != zatw:
+            R["poprawka"].append(chip(p, hub))
+        elif gotowa:
             R["ok_kolka"].append(chip(p, (KAT / pl["plik"]).as_uri()))
             brak = [j.upper() for j in JEZYKI if j not in jezyki_gotowe]
             R["jezyki"].append(chip(p, None, " · ".join(brak)))
-        elif wybrane:
-            R["kolka"].append(chip(p))
         else:
             R["kolka_stoi"].append(chip(p))
 
@@ -208,23 +233,25 @@ def main():
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
         wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
-        wiersz("ty", "Zaznacz hasła PL w hubie", R["zaznacz"], "wszystkie 3 kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
+        wiersz("ty", "Zaznacz i zatwierdź hasła PL w hubie", R["zaznacz"], "wszystkie 3 kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
+        wiersz("ty", "Hasła w trybie edycji — zatwierdź ponownie", R["edycja"], "grafika czeka przy poprzednio zatwierdzonych"),
     ]
     ja = [
         wiersz("ja", "Generuję tło", R["tlo"]),
         wiersz("ja", "Zakładam stronę w Canvie z gotowym tłem", R["strona"]),
         wiersz("ja", "Robię kartę haseł (dokument „Bogo” + Claude)", R["karta"]),
         wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
-        wiersz("ja", "Wstawiam hasła w kółka w Canvie", R["kolka"]),
+        wiersz("ja", "Wstawiam zatwierdzone hasła w kółka w Canvie", R["kolka"]),
+        wiersz("ja", "Poprawiam grafikę — zmienione hasła", R["poprawka"]),
         wiersz("ja", "Robię wersje językowe", R["jezyki"], "przy olejku brakujące języki"),
     ]
     stoi = [
         wiersz("stoi", "Kolumna Skan · WhatsApp · Discord", R["kol3_stoi"], "po Twoich skanach"),
-        wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "po Twoim wyborze haseł"),
+        wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "po zatwierdzeniu haseł"),
     ]
     ok = [
         wiersz("ok", "Wszystkie języki gotowe", R["ok_wszystko"]),
-        wiersz("ok", "Hasła PL wybrane", R["ok_hasla"], "liczba = zaznaczone hasła"),
+        wiersz("ok", "Hasła PL zatwierdzone", R["ok_hasla"], "liczba = zatwierdzone hasła"),
         wiersz("ok", "Kółka PL w Canvie", R["ok_kolka"]),
         wiersz("ok", "Kolumna Skan · WhatsApp · Discord", R["ok_kol3"]),
         wiersz("ok", "Skan dostałam", R["ok_skan"]),
@@ -320,4 +347,8 @@ __OK__
 """
 
 if __name__ == "__main__":
+    import sys
+    if sys.argv[1:2] == ["w-canvie"]:
+        for s in sys.argv[2:]:
+            zapisz_w_canvie(s)
     main()
