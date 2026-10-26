@@ -126,7 +126,7 @@ def main():
         elif f"{d.get('noteId')}.json" in kopie:
             wybrane = len(kopia(f"{d['noteId']}.json").get("zaznaczone", []))
             R["ok_hasla"].append(chip(p, hub, str(wybrane)))
-        else:
+        elif n_ct:  # zaznaczanie dopiero przy komplecie trzech kolumn
             R["zaznacz"].append(chip(p, hub))
         # kółka i języki
         if pl and pl["stan"] == "gotowa":
@@ -141,7 +141,7 @@ def main():
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
         wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
-        wiersz("ty", "Zaznacz hasła PL w hubie", R["zaznacz"], "klik w olejek otwiera jego kartę haseł"),
+        wiersz("ty", "Zaznacz hasła PL w hubie", R["zaznacz"], "wszystkie 3 kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
     ]
     ja = [
         wiersz("ja", "Generuję tło", R["tlo"]),
