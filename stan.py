@@ -84,13 +84,14 @@ DNI = ("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Ni
 
 
 def do_listy(pozycje):
-    """Kroki userki → lista dnia (dzisiaj) w apce lista-do-odhaczenia. pozycje: [(klucz, etykieta, url)].
+    """Kroki userki → lista dnia (dzisiaj) w apce lista-do-odhaczenia. pozycje: [(klucz albo lista kluczy, etykieta, url)].
     Każdy klucz idzie raz (lista-wyslane.json) — odhaczona albo skasowana pozycja nie wraca przy kolejnym przebiegu."""
     import base64
     import random
     import string
     wyslane = json.loads(WYSLANE.read_text(encoding="utf-8")) if WYSLANE.exists() else {}
-    nowe = [x for x in pozycje if x[0] not in wyslane]
+    pozycje = [([k] if isinstance(k, str) else k, e, u) for k, e, u in pozycje]
+    nowe = [x for x in pozycje if any(k not in wyslane for k in x[0])]
     if not nowe:
         return
     def uid(prefix):
@@ -124,8 +125,9 @@ def do_listy(pozycje):
                            "content": base64.b64encode(json.dumps(d, ensure_ascii=False, indent=1).encode()).decode()})
         r = subprocess.run(["gh", "api", "-X", "PUT", LISTA_REPO, "--input", "-"], input=body, capture_output=True, text=True)
         if r.returncode == 0:
-            for k, etykieta, _ in nowe:
-                wyslane[k] = dzis.strftime("%Y-%m-%d %H:%M")
+            for klucze, etykieta, _ in nowe:
+                for k in klucze:
+                    wyslane[k] = dzis.strftime("%Y-%m-%d %H:%M")
                 print(f"lista do odhaczania ({kat['name']}): {etykieta}")
             WYSLANE.write_text(json.dumps(wyslane, ensure_ascii=False, indent=1), encoding="utf-8")
             return
@@ -138,7 +140,7 @@ def main():
     kat = katalog()
     kopie = wybory()
     R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
-                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy")}
+                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy", "skany_listy")}
     sprawdzono = set()
     for n in C.produkty_promocji():
         p = E.PRODUKTY[n]
@@ -167,7 +169,7 @@ def main():
             R["ok_skan"].append(chip(p))
         else:
             R["skan"].append(chip(p))
-            R["do_listy"].append((f"skan:{s}", f"BOGO: skan z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — {p['krotko'].replace('dōTERRA ', '')}", None))
+            R["skany_listy"].append((f"skan:{s}", p["krotko"].replace("dōTERRA ", "")))
         if z.get("sprawdzono"):
             R["ok_zrodla"].append(chip(p))
             sprawdzono.add(z["sprawdzono"])
@@ -199,6 +201,9 @@ def main():
         else:
             R["kolka_stoi"].append(chip(p))
 
+    if R["skany_listy"]:  # skany jako jedna pozycja ze wszystkimi olejkami
+        R["do_listy"].insert(0, ([k for k, _ in R["skany_listy"]], "BOGO: skany z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — "
+                                 + ", ".join(n for _, n in R["skany_listy"]), None))
     do_listy(R["do_listy"])
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
