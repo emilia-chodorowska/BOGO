@@ -255,7 +255,7 @@ def main(zestaw="bogo"):
         elif gotowa:
             R["ok_kolka"].append(chip(p, (KAT / pl["plik"]).as_uri()))
             brak = [j.upper() for j in JEZYKI if j not in jezyki_gotowe]
-            R["jezyki"].append(chip(p, None, " · ".join(brak)))
+            R["jezyki"].append(chip(p, (KAT / pl["plik"]).as_uri(), " · ".join(brak)))
         else:
             R["kolka_stoi"].append(chip(p))
 
@@ -268,6 +268,7 @@ def main(zestaw="bogo"):
         wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
         wiersz("ty", "Zaznacz i zatwierdź hasła PL w hubie", R["zaznacz"], "wszystkie kolumny wypełnione · klik w olejek otwiera jego kartę haseł"),
         wiersz("ty", "Hasła w trybie edycji — zatwierdź ponownie", R["edycja"], "grafika czeka przy poprzednio zatwierdzonych"),
+        wiersz("ty", "Obejrzyj polską grafikę — wersje językowe dopiero po Twojej zgodzie", R["jezyki"], "napisz, że jest OK, a zapytam o brakujące języki"),
     ]
     ja = [
         wiersz("ja", "Generuję tło", R["tlo"]),
@@ -277,7 +278,6 @@ def main(zestaw="bogo"):
         wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord · FB w hubie", R["kol3"]),
         wiersz("ja", "Wstawiam zatwierdzone hasła w kółka w Canvie", R["kolka"]),
         wiersz("ja", "Poprawiam grafikę — zmienione hasła", R["poprawka"]),
-        wiersz("ja", "Robię wersje językowe", R["jezyki"], "przy olejku brakujące języki"),
     ]
     stoi = [
         wiersz("stoi", "Kolumna Skan · WhatsApp · Discord · FB", R["kol3_stoi"], "po Twoich skanach"),
