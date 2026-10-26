@@ -242,7 +242,7 @@ def main(zestaw="bogo"):
             R["edycja"].append(chip(p, hub))
         elif n_ct and not z.get("sprawdzono"):  # kolumna ze skanu jest, ale WhatsApp i Discord jeszcze nieprzejrzane
             R["przeglad"].append(chip(p, hub))
-        elif n_ct and skan:  # zaznaczanie dopiero przy komplecie kolumn — bez skanu kolumna Skan · WhatsApp · Discord nie jest pełna
+        elif n_ct and skan:  # zaznaczanie dopiero przy komplecie kolumn — bez skanu kolumna Skan · WhatsApp · Discord · FB nie jest pełna
             R["zaznacz"].append(chip(p, hub))
             R["do_listy"].append((f"zaznacz-hasla:{s}", f"{Z['prefiks']}: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
         # kółka i języki — Canva rusza dopiero po zatwierdzeniu; hasla-w-canvie.json = co jest teraz w kółkach
@@ -274,20 +274,20 @@ def main(zestaw="bogo"):
         wiersz("ja", "Zakładam stronę w Canvie z gotowym tłem", R["strona"]),
         wiersz("ja", f"Robię kartę haseł ({Z['karta']})", R["karta"]),
         wiersz("ja", "Przeglądam Discord i WhatsApp — dołożę hasła z grafik", R["przeglad"]),
-        wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
+        wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord · FB w hubie", R["kol3"]),
         wiersz("ja", "Wstawiam zatwierdzone hasła w kółka w Canvie", R["kolka"]),
         wiersz("ja", "Poprawiam grafikę — zmienione hasła", R["poprawka"]),
         wiersz("ja", "Robię wersje językowe", R["jezyki"], "przy olejku brakujące języki"),
     ]
     stoi = [
-        wiersz("stoi", "Kolumna Skan · WhatsApp · Discord", R["kol3_stoi"], "po Twoich skanach"),
+        wiersz("stoi", "Kolumna Skan · WhatsApp · Discord · FB", R["kol3_stoi"], "po Twoich skanach"),
         wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "po zatwierdzeniu haseł"),
     ]
     ok = [
         wiersz("ok", "Wszystkie języki gotowe", R["ok_wszystko"]),
         wiersz("ok", "Hasła PL zatwierdzone", R["ok_hasla"], "liczba = zatwierdzone hasła"),
         wiersz("ok", "Kółka PL w Canvie", R["ok_kolka"]),
-        wiersz("ok", "Kolumna Skan · WhatsApp · Discord", R["ok_kol3"]),
+        wiersz("ok", "Kolumna Skan · WhatsApp · Discord · FB", R["ok_kol3"]),
         wiersz("ok", "Skan dostałam", R["ok_skan"]),
         wiersz("ok", "WhatsApp i Discord przejrzane", R["ok_zrodla"], f"sprawdzone {daty}" if daty else ""),
         wiersz("ok", "Tło gotowe", R["ok_tlo"]),
