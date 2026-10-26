@@ -11,7 +11,7 @@ czeka na Ciebie · robię · gotowe).
 - karty haseł          canva/hasla/output/<slug>.html (hasła z kolumny „Canva treści” = zrodlo „reflect”)
 - wybór userki         repo lista-do-odhaczenia-dane/canva-hasla/<noteId>.json (gh api)
 
-Kroki userki (na razie „zaznacz hasła PL”, gdy 3 kolumny są pełne) idą też raz na listę dnia w apce
+Kroki userki (skan do wysłania; „zaznacz hasła PL”, gdy 3 kolumny są pełne) idą też raz na listę dnia w apce
 lista-do-odhaczenia (lista.json w tym samym repo); co wysłane — zrodla-<MIESIAC>/lista-wyslane.json.
 """
 import html
@@ -110,10 +110,13 @@ def do_listy(pozycje):
         if not kat:
             kat = {"id": uid("c"), "name": f"{DNI[dzis.weekday()]} {dzis.day}.{dzis.month:02d}", "day": dzis.strftime("%Y-%m-%d"), "items": []}
             d["categories"].append(kat)
-        juz = {i.get("url") for i in kat["items"]}
+        juz = {i.get("url") or i.get("label") for i in kat["items"]}
         for _, etykieta, url in nowe:
-            if url not in juz:
-                kat["items"].append({"id": uid("i"), "label": etykieta, "checked": False, "mark": "", "url": url})
+            if (url or etykieta) not in juz:
+                poz = {"id": uid("i"), "label": etykieta, "checked": False, "mark": ""}
+                if url:
+                    poz["url"] = url
+                kat["items"].append(poz)
         d["savedAt"] = int(dzis.timestamp() * 1000)
         d["savedAtLocal"] = dzis.strftime("%d.%m.%Y, %H:%M:%S")
         d["device"] = "Claude (skrypt)"
@@ -164,6 +167,7 @@ def main():
             R["ok_skan"].append(chip(p))
         else:
             R["skan"].append(chip(p))
+            R["do_listy"].append((f"skan:{s}", f"BOGO: skan z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — {p['krotko'].replace('dōTERRA ', '')}", None))
         if z.get("sprawdzono"):
             R["ok_zrodla"].append(chip(p))
             sprawdzono.add(z["sprawdzono"])
