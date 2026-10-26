@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Stan grafik z kółeczkami dla edycji BOGO → zrodla-<MIESIAC>/stan-grafik.html (styl Kappahl).
+"""Stan grafik z kółeczkami dla edycji BOGO → zrodla-<MIESIAC>/stan-grafik.html (styl listy do odhaczania:
+czeka na Ciebie · robię · gotowe).
 
   python3 stan.py            → przebudowuje stronę z aktualnych danych (puszczaj po każdym przebiegu)
 
@@ -55,36 +56,31 @@ def karta(slug):
     return json.loads(DATA_RE.search(p.read_text(encoding="utf-8")).group(1))
 
 
-def pill(kind, text, href=None):
-    t = html.escape(text)
+def chip(p, href=None, dopisek=""):
+    """Mały olejek ze zdjęciem — link, gdy jest dokąd prowadzić."""
+    foto = C.PRODUKTY_DIR / p["foto"]
+    img = f'<img src="produkty/{html.escape(p["foto"])}" alt="">' if foto.exists() else ""
+    nazwa = html.escape(p["krotko"].replace("dōTERRA ", "")) + (f' <b>{html.escape(dopisek)}</b>' if dopisek else "")
     if href:
-        return f'<a class="p {kind}" href="{html.escape(href)}" target="_blank" rel="noopener">{t}</a>'
-    return f'<span class="p {kind}">{t}</span>'
+        return f'<a class="chip" href="{html.escape(href)}" target="_blank" rel="noopener">{img}{nazwa}</a>'
+    return f'<span class="chip">{img}{nazwa}</span>'
 
 
-def komorka_zrodla(z, zrodlo, slug):
-    poz = [p for p in z.get("pozycje", []) if p["zrodlo"] == zrodlo]
-    glowne = [p for p in poz if p["glowny"]]
-    def href(p):
-        if p["plik"].startswith("reflect:"):
-            return "https://reflect.app/g/emiliachodorowska/" + p["plik"].split(":", 1)[1]
-        return (MAT / slug / "poprzednie-grafiki" / p["plik"]).resolve().as_uri()
-    if glowne:
-        rodzaje = list(dict.fromkeys(re.sub(r"\s*\(.*?\)", "", p["rodzaj"]) for p in glowne))
-        tekst = " + ".join(rodzaje[:2]) + (f" +{len(rodzaje) - 2}" if len(rodzaje) > 2 else "")
-        return pill("ok", tekst, href(glowne[0]))
-    uw = z.get("uwagi", {}).get(zrodlo)
-    if poz:
-        return pill("no", uw or "tylko " + poz[0]["rodzaj"], href(poz[0]))
-    if zrodlo == "skan":
-        return pill("ty", "czekam")
-    return pill("no", uw or "brak")
+def wiersz(stan, tekst, chipy, pod=""):
+    """stan: ty (czeka na Ciebie) · ja (robię) · stoi (u mnie, ale czeka na Twój krok) · ok (gotowe)."""
+    if not chipy:
+        return ""
+    pod = f'<div class="pod">{pod}</div>' if pod else ""
+    return (f'<div class="row {stan}"><span class="ico"></span><div class="tresc"><div class="lbl">{tekst}</div>{pod}'
+            f'<div class="chips">{"".join(chipy)}</div></div></div>')
 
 
 def main():
     kat = katalog()
     kopie = wybory()
-    wiersze, gotowe = [], []
+    R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
+                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko")}
+    sprawdzono = set()
     for n in C.produkty_promocji():
         p = E.PRODUKTY[n]
         s = p["slug"]
@@ -92,48 +88,90 @@ def main():
         pl = g.get("pl")
         jezyki_gotowe = [j for j in JEZYKI if g.get(j, {}).get("stan") == "gotowa"]
         if len(jezyki_gotowe) == len(JEZYKI):
-            gotowe.append((p["krotko"], (KAT / pl["plik"]).as_uri()))
+            R["ok_wszystko"].append(chip(p, (KAT / pl["plik"]).as_uri()))
             continue
         z = json.loads((MAT / s / "zrodla.json").read_text(encoding="utf-8")) if (MAT / s / "zrodla.json").exists() else {}
-        strona = pill("ok", f"str. {pl['strona']}", (KAT / pl["plik"]).as_uri()) if pl else pill("cl", "brak")
+        hub = f"{HUB}#{s}"
+        # Canva + tło
         plik_tla, _ = C.tlo(s)
         if pl:
-            tlo = pill("no", "w Canvie")
+            R["ok_strona"].append(chip(p, (KAT / pl["plik"]).as_uri(), f"str. {pl['strona']}"))
+            R["ok_tlo"].append(chip(p))
         elif plik_tla:
-            tlo = pill("ok", "gotowe", plik_tla.as_uri())
+            R["ok_tlo"].append(chip(p, plik_tla.as_uri()))
+            R["strona"].append(chip(p, plik_tla.as_uri()))
         else:
-            tlo = pill("cl", "generuję")
+            R["tlo"].append(chip(p))
+        # źródła haseł
+        skan = [x for x in z.get("pozycje", []) if x["zrodlo"] == "skan"]
+        if skan:
+            R["ok_skan"].append(chip(p))
+        else:
+            R["skan"].append(chip(p))
+        if z.get("sprawdzono"):
+            R["ok_zrodla"].append(chip(p))
+            sprawdzono.add(z["sprawdzono"])
         d = karta(s)
-        ma_skan = any(x["zrodlo"] == "skan" for x in z.get("pozycje", []))
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
-        if not ma_skan:
-            ct = pill("no", "czeka na skan")
-        elif n_ct:
-            ct = pill("ok", f"{n_ct} haseł", f"{HUB}#{s}")
+        if n_ct:
+            R["ok_kol3"].append(chip(p, hub, str(n_ct)))
+        elif skan:
+            R["kol3"].append(chip(p, hub))
         else:
-            ct = pill("cl", "do zbudowania")
+            R["kol3_stoi"].append(chip(p))
+        # hasła PL
+        wybrane = None
         if not d:
-            hasla = pill("ty", "brak haseł")
+            R["karta"].append(chip(p))
         elif f"{d.get('noteId')}.json" in kopie:
-            zazn = kopia(f"{d['noteId']}.json").get("zaznaczone", [])
-            hasla = pill("ok", f"wybrane {len(zazn)}", f"{HUB}#{s}")
+            wybrane = len(kopia(f"{d['noteId']}.json").get("zaznaczone", []))
+            R["ok_hasla"].append(chip(p, hub, str(wybrane)))
         else:
-            hasla = pill("ty", "do wyboru", f"{HUB}#{s}")
-        if not pl:
-            kolka = pill("cl", "nowa strona")
-        elif pl["stan"] == "puste-kolka":
-            kolka = pill("cl", "puste kółka")
+            R["zaznacz"].append(chip(p, hub))
+        # kółka i języki
+        if pl and pl["stan"] == "gotowa":
+            R["ok_kolka"].append(chip(p, (KAT / pl["plik"]).as_uri()))
+            brak = [j.upper() for j in JEZYKI if j not in jezyki_gotowe]
+            R["jezyki"].append(chip(p, None, " · ".join(brak)))
+        elif wybrane:
+            R["kolka"].append(chip(p))
         else:
-            kolka = pill("ok" if jezyki_gotowe else "cl", " · ".join(j.upper() for j in jezyki_gotowe) or pl["stan"])
-        foto = C.PRODUKTY_DIR / p["foto"]
-        img = f'<img src="produkty/{html.escape(p["foto"])}" alt="">' if foto.exists() else ""
-        wiersze.append(f'<tr><td><span class="prod">{img}<span>{html.escape(p["krotko"].replace("dōTERRA ", ""))}</span></span></td><td>{strona}</td><td>{tlo}</td>'
-                       f'<td>{komorka_zrodla(z, "skan", s)}</td><td>{komorka_zrodla(z, "whatsapp", s)}</td>'
-                       f'<td>{komorka_zrodla(z, "discord", s)}</td><td>{ct}</td><td>{hasla}</td><td>{kolka}</td></tr>')
+            R["kolka_stoi"].append(chip(p))
+
+    daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
+    ty = [
+        wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
+        wiersz("ty", "Zaznacz hasła PL w hubie", R["zaznacz"], "klik w olejek otwiera jego kartę haseł"),
+    ]
+    ja = [
+        wiersz("ja", "Generuję tło", R["tlo"]),
+        wiersz("ja", "Zakładam stronę w Canvie z gotowym tłem", R["strona"]),
+        wiersz("ja", "Robię kartę haseł (dokument „Bogo” + Claude)", R["karta"]),
+        wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
+        wiersz("ja", "Wstawiam hasła w kółka w Canvie", R["kolka"]),
+        wiersz("ja", "Robię wersje językowe", R["jezyki"], "przy olejku brakujące języki"),
+        wiersz("stoi", "Kolumna Skan · WhatsApp · Discord", R["kol3_stoi"], "ruszę po Twoich skanach"),
+        wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "ruszę po Twoim wyborze haseł"),
+    ]
+    ok = [
+        wiersz("ok", "Wszystkie języki gotowe", R["ok_wszystko"]),
+        wiersz("ok", "Hasła PL wybrane", R["ok_hasla"], "liczba = zaznaczone hasła"),
+        wiersz("ok", "Kółka PL w Canvie", R["ok_kolka"]),
+        wiersz("ok", "Kolumna Skan · WhatsApp · Discord", R["ok_kol3"]),
+        wiersz("ok", "Skan dostałam", R["ok_skan"]),
+        wiersz("ok", "WhatsApp i Discord przejrzane", R["ok_zrodla"], f"sprawdzone {daty}" if daty else ""),
+        wiersz("ok", "Tło gotowe", R["ok_tlo"]),
+        wiersz("ok", "Strona w Canvie", R["ok_strona"]),
+    ]
+    def sekcja(klasa, tytul, wiersze, pusto):
+        wiersze = [w for w in wiersze if w]
+        tresc = "".join(wiersze) or f'<div class="pusto">{pusto}</div>'
+        return f'<section class="{klasa}"><div class="head"><h2>{tytul}</h2><span class="count">{len(wiersze)}</span></div>{tresc}</section>'
     teraz = datetime.now().strftime("%d.%m.%Y, %H:%M")
     WYJ.write_text(SZABLON.replace("__OKRES__", html.escape(E.OKRES_KROTKO)).replace("__TERAZ__", teraz)
-                   .replace("__WIERSZE__", "\n".join(wiersze))
-                   .replace("__GOTOWE__", "".join(f'<a class="p ok" href="{h}" target="_blank" rel="noopener">{html.escape(t)}</a>' for t, h in gotowe)),
+                   .replace("__TY__", sekcja("s-ty", "Czeka na Ciebie", ty, "Nic — wszystko po Twojej stronie zrobione."))
+                   .replace("__JA__", sekcja("s-ja", "Robię", ja, "Nic w toku."))
+                   .replace("__OK__", sekcja("s-ok", "Gotowe", ok, "Jeszcze nic.")),
                    encoding="utf-8")
     print(WYJ)
 
@@ -144,72 +182,67 @@ SZABLON = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stan grafik · BOGO __OKRES__</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234d6a5e'/%3E%3Ccircle cx='38' cy='40' r='16' fill='%23fcfbfa'/%3E%3Ccircle cx='64' cy='62' r='16' fill='%23fcfbfa' fill-opacity='.6'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236f9285'/%3E%3Cpath d='M28 52l15 15 30-32' fill='none' stroke='white' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
-  :root{--bg:#f1ede7;--card:#fcfbfa;--ink:#3f3a35;--muted:#8a857d;--line:#ece7e0;
-        --sage:#4d6a5e;--sage-bg:#eef2f0;--sage-line:#dfe7e3;
-        --sand:#8a6a45;--sand-bg:#f5ede2;--sand-line:#eadcc8;
-        --mist:#5f6b78;--mist-bg:#eef0f3;--mist-line:#e0e4ea;
-        --off:#a29d95;--off-bg:#f3f1ee}
+  :root{--green:#6f9285;--green-soft:#ecf2f0;--green-dark:#46605a;
+        --amber:#b7791f;--amber-soft:#fdf4e3;--amber-line:#f0d9a8;
+        --blue:#4f6d8f;--blue-soft:#eef2f7;
+        --s100:#f5f4f1;--s200:#ebe9e4;--s300:#cfcdc4;--s400:#70706c;--s500:#4a4a47;--s800:#151513;--line:#f2f1ed}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,sans-serif;padding:40px 16px 60px}
-  .wrap{max-width:var(--maxw,1180px);margin:0 auto}
-  body[data-wide="1"] .wrap{max-width:none;padding:0 24px}
-  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-  .eyebrow{font-size:11px;letter-spacing:.30em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-  h1{font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:34px;margin:0;letter-spacing:-.3px}
-  .kiedy{font-size:13px;color:var(--muted);margin-top:8px}
-  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer}
-  .btn:hover{color:var(--ink)} .btn svg{width:15px;height:15px}
-  .legend{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow-x:auto;box-shadow:0 10px 30px rgba(63,58,53,.06)}
-  table{border-collapse:collapse;width:100%;font-size:13.5px}
-  th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:14px 8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-  td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
-  th:first-child,td:first-child{padding-left:18px} th:last-child,td:last-child{padding-right:18px}
-  tr:last-child td{border-bottom:0}
-  .prod{display:flex;align-items:center;gap:10px;font-family:"Playfair Display",Georgia,serif;font-size:15px}
-  .prod img{height:34px;width:22px;object-fit:contain}
-  .p{display:inline-block;font-size:12px;font-weight:500;border-radius:999px;padding:3px 9px;border:1px solid transparent;text-decoration:none}
-  a.p:hover{filter:brightness(.96);text-decoration:underline}
-  .p.ok{background:var(--sage-bg);color:var(--sage);border-color:var(--sage-line)}
-  .p.ty{background:var(--sand-bg);color:var(--sand);border-color:var(--sand-line)}
-  .p.cl{background:var(--mist-bg);color:var(--mist);border-color:var(--mist-line)}
-  .p.no{background:var(--off-bg);color:var(--off)}
-  .done{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:16px 4px 0;font-size:13px;color:var(--muted)}
-  .stopka{margin-top:28px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage)}
+  body{margin:0;background:#fff;color:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:36px 16px 60px}
+  .wrap{max-width:760px;margin:0 auto}
+  .top{font-size:13px;color:var(--s400);margin-bottom:26px}
+  .top h1{font-size:30px;font-weight:600;letter-spacing:-.02em;margin:0 0 4px;color:#000}
+  section{margin-bottom:34px}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:8px;border-bottom:2px solid var(--s200)}
+  .head h2{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0;flex:1}
+  .count{font-size:13px;font-weight:600;min-width:24px;height:24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px}
+  .s-ty .head{border-color:var(--amber-line)} .s-ty .count{background:var(--amber-soft);color:var(--amber)}
+  .s-ja .head{border-color:#dbe3ec} .s-ja .count{background:var(--blue-soft);color:var(--blue)}
+  .s-ok .head{border-color:#d5e2dd} .s-ok .count{background:var(--green-soft);color:var(--green-dark)}
+  .row{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .ico{width:22px;height:22px;border-radius:50%;flex-shrink:0;margin-top:1px;position:relative;border:2px solid var(--s300)}
+  .row.ty .ico{border-color:var(--amber);background:var(--amber-soft)}
+  .row.ja .ico{border:2px solid var(--blue-soft);border-top-color:var(--blue);animation:obrot 1.4s linear infinite}
+  .row.stoi .ico{border:2px dashed var(--s300)}
+  .row.ok .ico{background:var(--green);border-color:var(--green)}
+  .row.ok .ico::after{content:'';position:absolute;left:6.8px;top:3.4px;width:4.6px;height:9.2px;border:solid #fff;border-width:0 1.7px 1.7px 0;transform:rotate(45deg)}
+  @keyframes obrot{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.row.ja .ico{animation:none}}
+  .tresc{flex:1;min-width:0}
+  .lbl{font-size:16px;color:var(--s800);line-height:1.35}
+  .row.ty .lbl{font-weight:600}
+  .row.stoi .lbl{color:var(--s400)}
+  .row.ok .lbl{color:var(--s400);text-decoration:line-through;text-decoration-color:var(--s300)}
+  .pod{font-size:12.5px;color:var(--s400);margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--s500);background:var(--s100);border-radius:999px;padding:3px 10px 3px 4px;text-decoration:none;line-height:1.3}
+  .chip img{height:22px;width:16px;object-fit:contain}
+  .chip b{font-weight:600;color:var(--s800)}
+  a.chip:hover{background:var(--green-soft);color:var(--green-dark)}
+  .row.ty .chip{background:var(--amber-soft);color:#7a5414}
+  .row.ty a.chip:hover{background:#fbe9c6}
+  .row.ok .chip{opacity:.75}
+  .pusto{font-size:14px;color:var(--s400);padding:12px 0}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--s400);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid var(--s300)}
+  .legend .l-ty{border-color:var(--amber);background:var(--amber-soft)} .legend .l-ja{border-color:var(--blue-soft);border-top-color:var(--blue)}
+  .legend .l-stoi{border-style:dashed} .legend .l-ok{background:var(--green);border-color:var(--green)}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <div>
-    <div class="eyebrow">Grafiki z kółeczkami · BOGO __OKRES__</div>
-    <h1>Stan grafik</h1>
-    <div class="kiedy">Stan z __TERAZ__ · skan, WhatsApp i Discord sprawdzam przy każdym przebiegu</div>
-  </div>
-  <button class="btn" id="wideBtn" type="button"></button>
-</header>
-<div class="legend"><span class="p ok">jest</span><span class="p ty">Twoja kolej</span><span class="p cl">moja kolej</span><span class="p no">brak</span></div>
-<div class="card"><table>
-<thead><tr><th>Produkt</th><th>Canva</th><th>Tło</th><th>Skan</th><th>WhatsApp</th><th>Discord</th><th>Hasła z 3 źródeł</th><th>Hasła PL</th><th>Kółka</th></tr></thead>
-<tbody>
-__WIERSZE__
-</tbody></table></div>
-<div class="done">Gotowe we wszystkich językach: __GOTOWE__</div>
-<div class="stopka">dōTERRA · BOGO __OKRES__</div>
+<div class="top">
+  <h1>Stan grafik · BOGO __OKRES__</h1>
+  Stan z __TERAZ__ · odśwież kartę po moim przebiegu
+  <div class="legend"><span><i class="l-ty"></i>czeka na Ciebie</span><span><i class="l-ja"></i>robię</span><span><i class="l-stoi"></i>u mnie, czeka na Twój krok</span><span><i class="l-ok"></i>gotowe</span></div>
 </div>
-<script>
-(function(){
-  var b=document.getElementById('wideBtn');
-  var ico={max:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
-           min:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'};
-  function set(w){document.body.dataset.wide=w?'1':'0';b.innerHTML=w?ico.min+'Zwykła szerokość':ico.max+'Szeroki widok';try{localStorage.setItem('stanGrafikWide',w?'1':'0')}catch(e){}}
-  var w=false;try{w=localStorage.getItem('stanGrafikWide')==='1'}catch(e){}
-  set(w);b.onclick=function(){set(document.body.dataset.wide!=='1')};
-})();
-</script>
+__TY__
+__JA__
+__OK__
+</div>
 </body>
 </html>
 """
