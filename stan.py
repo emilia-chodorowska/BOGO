@@ -10,6 +10,9 @@ czeka na Ciebie · robię · gotowe).
                        ({zrodlo: skan|whatsapp|discord, plik, rodzaj, glowny}); uzupełnia Claude po każdym przebiegu
 - karty haseł          canva/hasla/output/<slug>.html (hasła z kolumny „Canva treści” = zrodlo „reflect”)
 - wybór userki         repo lista-do-odhaczenia-dane/canva-hasla/<noteId>.json (gh api)
+
+Kroki userki (na razie „zaznacz hasła PL”, gdy 3 kolumny są pełne) idą też raz na listę dnia w apce
+lista-do-odhaczenia (lista.json w tym samym repo); co wysłane — zrodla-<MIESIAC>/lista-wyslane.json.
 """
 import html
 import json
@@ -75,11 +78,64 @@ def wiersz(stan, tekst, chipy, pod=""):
             f'<div class="chips">{"".join(chipy)}</div></div></div>')
 
 
+LISTA_REPO = "repos/emilia-chodorowska/lista-do-odhaczenia-dane/contents/lista.json"
+WYSLANE = C.TU / f"zrodla-{E.MIESIAC}" / "lista-wyslane.json"
+DNI = ("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela")
+
+
+def do_listy(pozycje):
+    """Kroki userki → lista dnia (dzisiaj) w apce lista-do-odhaczenia. pozycje: [(klucz, etykieta, url)].
+    Każdy klucz idzie raz (lista-wyslane.json) — odhaczona albo skasowana pozycja nie wraca przy kolejnym przebiegu."""
+    import base64
+    import random
+    import string
+    wyslane = json.loads(WYSLANE.read_text(encoding="utf-8")) if WYSLANE.exists() else {}
+    nowe = [x for x in pozycje if x[0] not in wyslane]
+    if not nowe:
+        return
+    def uid(prefix):
+        ms, b36 = int(datetime.now().timestamp() * 1000), ""
+        while ms:
+            ms, r = divmod(ms, 36)
+            b36 = "0123456789abcdefghijklmnopqrstuvwxyz"[r] + b36
+        return prefix + b36 + "".join(random.choices(string.ascii_lowercase + string.digits, k=4))
+    for _ in range(3):  # 409 = userka zapisała w międzyczasie → świeże pobranie i jeszcze raz
+        r = subprocess.run(["gh", "api", LISTA_REPO], capture_output=True, text=True)
+        if r.returncode:
+            print("lista do odhaczania: nie pobrałam lista.json —", r.stderr.strip()); return
+        meta = json.loads(r.stdout)
+        d = json.loads(base64.b64decode(meta["content"]))
+        dzis = datetime.now()
+        kat = next((c for c in d["categories"] if c.get("day") == dzis.strftime("%Y-%m-%d") and not c.get("navSep")), None)
+        if not kat:
+            kat = {"id": uid("c"), "name": f"{DNI[dzis.weekday()]} {dzis.day}.{dzis.month:02d}", "day": dzis.strftime("%Y-%m-%d"), "items": []}
+            d["categories"].append(kat)
+        juz = {i.get("url") for i in kat["items"]}
+        for _, etykieta, url in nowe:
+            if url not in juz:
+                kat["items"].append({"id": uid("i"), "label": etykieta, "checked": False, "mark": "", "url": url})
+        d["savedAt"] = int(dzis.timestamp() * 1000)
+        d["savedAtLocal"] = dzis.strftime("%d.%m.%Y, %H:%M:%S")
+        d["device"] = "Claude (skrypt)"
+        body = json.dumps({"message": f"BOGO: {len(nowe)} poz. do listy {kat['name']}", "sha": meta["sha"],
+                           "content": base64.b64encode(json.dumps(d, ensure_ascii=False, indent=1).encode()).decode()})
+        r = subprocess.run(["gh", "api", "-X", "PUT", LISTA_REPO, "--input", "-"], input=body, capture_output=True, text=True)
+        if r.returncode == 0:
+            for k, etykieta, _ in nowe:
+                wyslane[k] = dzis.strftime("%Y-%m-%d %H:%M")
+                print(f"lista do odhaczania ({kat['name']}): {etykieta}")
+            WYSLANE.write_text(json.dumps(wyslane, ensure_ascii=False, indent=1), encoding="utf-8")
+            return
+        if "409" not in r.stdout + r.stderr:
+            print("lista do odhaczania: zapis nie przeszedł —", (r.stdout + r.stderr).strip()[:300]); return
+    print("lista do odhaczania: 3× konflikt zapisu, spróbuję przy następnym przebiegu")
+
+
 def main():
     kat = katalog()
     kopie = wybory()
     R = {k: [] for k in ("skan", "zaznacz", "tlo", "strona", "karta", "kol3", "kol3_stoi", "kolka", "kolka_stoi", "jezyki",
-                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko")}
+                        "ok_strona", "ok_tlo", "ok_skan", "ok_zrodla", "ok_kol3", "ok_hasla", "ok_kolka", "ok_wszystko", "do_listy")}
     sprawdzono = set()
     for n in C.produkty_promocji():
         p = E.PRODUKTY[n]
@@ -128,6 +184,7 @@ def main():
             R["ok_hasla"].append(chip(p, hub, str(wybrane)))
         elif n_ct:  # zaznaczanie dopiero przy komplecie trzech kolumn
             R["zaznacz"].append(chip(p, hub))
+            R["do_listy"].append((f"zaznacz-hasla:{s}", f"BOGO: zaznacz hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
         # kółka i języki
         if pl and pl["stan"] == "gotowa":
             R["ok_kolka"].append(chip(p, (KAT / pl["plik"]).as_uri()))
@@ -138,6 +195,7 @@ def main():
         else:
             R["kolka_stoi"].append(chip(p))
 
+    do_listy(R["do_listy"])
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
         wiersz("ty", "Wyślij skany stron z „Advanced Oil Magic” do grupy „Grafiki dla Claude” na WhatsAppie", R["skan"]),
