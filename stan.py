@@ -211,8 +211,13 @@ def main(zestaw="bogo"):
         else:
             R["tlo"].append(chip(p))
         # źródła haseł
+        d = karta(p["hub"])
+        k = kopia(f"{d['noteId']}.json") if d and f"{d.get('noteId')}.json" in kopie else {}
         skan = [x for x in z.get("pozycje", []) if x["zrodlo"] == "skan"]
-        if skan:
+        if not skan and k.get("pominSkan"):  # „Pomiń skan z książki” w karcie haseł
+            skan = ["pominięty"]
+            R["ok_skan"].append(chip(p, None, "pominięty"))
+        elif skan:
             R["ok_skan"].append(chip(p))
         else:
             R["skan"].append(chip(p))
@@ -220,7 +225,6 @@ def main(zestaw="bogo"):
         if z.get("sprawdzono"):
             R["ok_zrodla"].append(chip(p))
             sprawdzono.add(z["sprawdzono"])
-        d = karta(p["hub"])
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
         if n_ct and skan:
             R["ok_kol3"].append(chip(p, hub, str(n_ct)))
@@ -229,7 +233,6 @@ def main(zestaw="bogo"):
         else:
             R["kol3_stoi"].append(chip(p))
         # hasła PL
-        k = kopia(f"{d['noteId']}.json") if d and f"{d.get('noteId')}.json" in kopie else {}
         zatw = (k.get("zatwierdzone") or {}).get("hasla") if not k.get("edycja") else None
         if not d:
             R["karta"].append(chip(p))
