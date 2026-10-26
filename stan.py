@@ -217,8 +217,10 @@ def main():
         wiersz("ja", "Dokładam kolumnę Skan · WhatsApp · Discord w hubie", R["kol3"]),
         wiersz("ja", "Wstawiam hasła w kółka w Canvie", R["kolka"]),
         wiersz("ja", "Robię wersje językowe", R["jezyki"], "przy olejku brakujące języki"),
-        wiersz("stoi", "Kolumna Skan · WhatsApp · Discord", R["kol3_stoi"], "ruszę po Twoich skanach"),
-        wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "ruszę po Twoim wyborze haseł"),
+    ]
+    stoi = [
+        wiersz("stoi", "Kolumna Skan · WhatsApp · Discord", R["kol3_stoi"], "po Twoich skanach"),
+        wiersz("stoi", "Hasła w kółkach w Canvie", R["kolka_stoi"], "po Twoim wyborze haseł"),
     ]
     ok = [
         wiersz("ok", "Wszystkie języki gotowe", R["ok_wszystko"]),
@@ -238,6 +240,7 @@ def main():
     WYJ.write_text(SZABLON.replace("__OKRES__", html.escape(E.OKRES_KROTKO)).replace("__TERAZ__", teraz)
                    .replace("__TY__", sekcja("s-ty", "Czeka na Ciebie", ty, "Nic — wszystko po Twojej stronie zrobione."))
                    .replace("__JA__", sekcja("s-ja", "Robię", ja, "Nic w toku."))
+                   .replace("__STOI__", sekcja("s-stoi", "Ruszę po Twoim kroku", stoi, "Nic nie czeka na Twój krok."))
                    .replace("__OK__", sekcja("s-ok", "Gotowe", ok, "Jeszcze nic.")),
                    encoding="utf-8")
     print(WYJ)
@@ -266,6 +269,7 @@ SZABLON = """<!DOCTYPE html>
   .count{font-size:13px;font-weight:600;min-width:24px;height:24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px}
   .s-ty .head{border-color:var(--amber-line)} .s-ty .count{background:var(--amber-soft);color:var(--amber)}
   .s-ja .head{border-color:#dbe3ec} .s-ja .count{background:var(--blue-soft);color:var(--blue)}
+  .s-stoi .head{border-color:var(--s200)} .s-stoi .count{background:var(--s100);color:var(--s500)}
   .s-ok .head{border-color:#d5e2dd} .s-ok .count{background:var(--green-soft);color:var(--green-dark)}
   .row{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
   .row:last-child{border-bottom:0}
@@ -304,10 +308,11 @@ SZABLON = """<!DOCTYPE html>
 <div class="top">
   <h1>Stan grafik · BOGO __OKRES__</h1>
   Stan z __TERAZ__ · odśwież kartę po moim przebiegu
-  <div class="legend"><span><i class="l-ty"></i>czeka na Ciebie</span><span><i class="l-ja"></i>robię</span><span><i class="l-stoi"></i>u mnie, czeka na Twój krok</span><span><i class="l-ok"></i>gotowe</span></div>
+  <div class="legend"><span><i class="l-ty"></i>czeka na Ciebie</span><span><i class="l-ja"></i>robię</span><span><i class="l-stoi"></i>ruszę po Twoim kroku</span><span><i class="l-ok"></i>gotowe</span></div>
 </div>
 __TY__
 __JA__
+__STOI__
 __OK__
 </div>
 </body>
