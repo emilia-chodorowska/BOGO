@@ -222,7 +222,7 @@ def main(zestaw="bogo"):
             sprawdzono.add(z["sprawdzono"])
         d = karta(p["hub"])
         n_ct = sum(1 for h in (d or {}).get("haslaProposed", []) if h.get("zrodlo") == "reflect")
-        if n_ct:
+        if n_ct and skan:
             R["ok_kol3"].append(chip(p, hub, str(n_ct)))
         elif skan:
             R["kol3"].append(chip(p, hub))
@@ -239,7 +239,7 @@ def main(zestaw="bogo"):
             R["edycja"].append(chip(p, hub))
         elif n_ct and not z.get("sprawdzono"):  # kolumna ze skanu jest, ale WhatsApp i Discord jeszcze nieprzejrzane
             R["przeglad"].append(chip(p, hub))
-        elif n_ct:  # zaznaczanie dopiero przy komplecie kolumn
+        elif n_ct and skan:  # zaznaczanie dopiero przy komplecie kolumn — bez skanu kolumna Skan · WhatsApp · Discord nie jest pełna
             R["zaznacz"].append(chip(p, hub))
             R["do_listy"].append((f"zaznacz-hasla:{s}", f"{Z['prefiks']}: zaznacz i zatwierdź hasła PL — {p['krotko'].replace('dōTERRA ', '')}", hub))
         # kółka i języki — Canva rusza dopiero po zatwierdzeniu; hasla-w-canvie.json = co jest teraz w kółkach
