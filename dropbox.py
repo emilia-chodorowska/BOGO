@@ -170,7 +170,7 @@ def whatsapp():
         if not pary:
             return
         if tytul and tytul not in naglowki:
-            kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
+            kroki.append({"tekst": tytul}); pliki_krokow.append([("#naglowek", tytul)])
         for opis, url, *film in pary:
             obraz = miniatura(url, em_lok / ".miniatury", film[0] if film else None)
             tekst = f"{opis}: {url}" if opis else url  # rolki: sam link, bez opisu (userka 27.10.2026)
@@ -205,7 +205,7 @@ def whatsapp():
         if not zdj and not filmy:
             continue
         if tytul not in naglowki:  # nagłówek sekcji raz na miesiąc, nie przy każdym dosłaniu
-            kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
+            kroki.append({"tekst": tytul}); pliki_krokow.append([("#naglowek", tytul)])
         for i in range(0, len(zdj), 30):
             kroki.append({"zdjecia": [str(f) for f in zdj[i:i + 30]]}); pliki_krokow.append(zdj[i:i + 30])
         for f in filmy:
