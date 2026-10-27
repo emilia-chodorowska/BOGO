@@ -2,9 +2,9 @@
 """Wszystko poza stronami BOGO, z tych samych danych (edycja.py). Odpalane przez `python3 generuj.py`.
 
 1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO),
-   og-en.html + …-<MIESIAC>-en.jpg (to samo po angielsku, dla index-en.html)
+   og-<jezyk>.html + …-<MIESIAC>-<jezyk>.jpg (to samo po angielsku i niemiecku, dla index-en/de.html)
 2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg,
-   index-en.html + social-preview-en.* (po angielsku, ceny EUR z pola `eur`; bez kompletu cen EUR — pominięta)
+   index-en.html / index-de.html + social-preview-en/de.* (ceny EUR z pola `eur`; bez kompletu cen EUR — pominięta)
    (rejestracja z pakietem BOGO: pakiet = produkty kupowane, reszta to gratisy)
 3. teksty do sekcji BOGO w hubie doTERRA — na ekran
 
@@ -72,10 +72,11 @@ def renderuj(html, jpg):
 
 
 # ---------- 1. podgląd linku strony BOGO (PL i EN) ----------
-for en in (False, True):
-    L = lambda pl, ang: ang if en else pl
+for J in ("pl", "en", "de"):
+    L = lambda pl, en, de: {"pl": pl, "en": en, "de": de}[J]
+    X = E.WERSJE.get(J, E.WERSJE["en"])  # dla PL nieużywany, ale L() liczy wszystkie argumenty
     og = f'''<!DOCTYPE html>
-<html lang="{L('pl', 'en')}">
+<html lang="{L('pl', 'en', 'de')}">
 <head>
 <meta charset="UTF-8">
 <title>og BOGO {E.MIESIAC}</title>
@@ -101,28 +102,29 @@ for en in (False, True):
   <div class="wrap">
     <div class="txt">
       <div class="marka">doTERRA</div>
-      <h1>{L('Oferta BOGO', 'BOGO Offer')}</h1>
-      <div class="data">{L(E.OKRES, E.EN['okres'])}</div>
-      <div class="opis">{L(f'{len(E.ZESTAWY)} zestawów: kupujesz jeden produkt, drugi dostajesz gratis.', f'{len(E.ZESTAWY)} sets: buy one product, get the second one free.')}</div>
-      <div class="pill">{L(f'Pakiet BOGO + {E.PREZENT_KROTKO} gratis', 'BOGO bundle + ' + E.EN['prezent_krotko'] + ' free')}</div>
+      <h1>{L('Oferta BOGO', 'BOGO Offer', 'BOGO-Angebot')}</h1>
+      <div class="data">{L(E.OKRES, X['okres'], X['okres'])}</div>
+      <div class="opis">{L(f'{len(E.ZESTAWY)} zestawów: kupujesz jeden produkt, drugi dostajesz gratis.', f'{len(E.ZESTAWY)} sets: buy one product, get the second one free.', f'{len(E.ZESTAWY)} Sets: Sie kaufen ein Produkt und erhalten das zweite gratis.')}</div>
+      <div class="pill">{L(f'Pakiet BOGO + {E.PREZENT_KROTKO} gratis', 'BOGO bundle + ' + X['prezent_krotko'] + ' free', 'BOGO-Paket + ' + X['prezent_krotko'] + ' gratis')}</div>
     </div>
     <div class="foto"><img src="{E.FOTO_PAKIET}" alt=""></div>
   </div>
 </body>
 </html>
 '''
-    sfx = "-en" if en else ""
+    sfx = "" if J == "pl" else "-" + J
     zapisz(TU / f"og{sfx}.html", og)
     renderuj(TU / f"og{sfx}.html", TU / f"images/bogo-social-preview-{E.MIESIAC}{sfx}.jpg")
 
 
 # ---------- 2. rejestracja z pakietem BOGO (EN z cenami EUR, potem PL) ----------
-for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
-    L = lambda pl, ang: ang if en else pl
-    WAL, SYMBOL, SFX = ("eur", "€", "-en") if en else ("pln", "zł", "")
-    zl = (lambda x: f"{x:.2f}") if en else zl_pl
-    pv = (lambda x: f"{x:.1f}") if en else pv_pl
-    nazwa = (lambda n: E.NAZWY_EN.get(n) or P[n]["en"]) if en else (lambda n: P[n]["krotko"])
+for J in ("en", "de", "pl"):  # PL na końcu — z jej wartości korzysta sekcja 3
+    L = lambda pl, en, de: {"pl": pl, "en": en, "de": de}[J]
+    X = E.WERSJE.get(J, E.WERSJE["en"])  # dla PL nieużywany, ale L() liczy wszystkie argumenty
+    WAL, SYMBOL, SFX = ("pln", "zł", "") if J == "pl" else ("eur", "€", "-" + J)
+    zl = (lambda x: f"{x:.2f}") if J == "en" else zl_pl
+    pv = (lambda x: f"{x:.1f}") if J == "en" else pv_pl
+    nazwa = (lambda n: P[n]["krotko"]) if J == "pl" else (lambda n: X["nazwy"].get(n) or P[n]["en"])
 
     def wiersz(nazwa, poj, ile, etykieta):
         cena = P[nazwa][WAL]
@@ -131,13 +133,13 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
 
 
     kup = [wiersz(z["kup"][0], z["kup"][1], z["kup"][3], None) for z in E.ZESTAWY]
-    bogo = [wiersz(g[0], g[1], g[3], L("gratis BOGO", "free BOGO")) for z in E.ZESTAWY for g in z["gratis"]]
-    prezent = [wiersz(E.PREZENT[0], E.PREZENT[1], 1, L("gratis do pakietu", "free with the bundle"))]
-    pv200 = [wiersz(n, r, 1, L("gratis 200PV", "free from 200 PV")) for n, r in E.OFERTA["gratis_200pv"]]
+    bogo = [wiersz(g[0], g[1], g[3], L("gratis BOGO", "free BOGO", "gratis BOGO")) for z in E.ZESTAWY for g in z["gratis"]]
+    prezent = [wiersz(E.PREZENT[0], E.PREZENT[1], 1, L("gratis do pakietu", "free with the bundle", "gratis zum Paket"))]
+    pv200 = [wiersz(n, r, 1, L("gratis 200PV", "free from 200 PV", "gratis ab 200 PV")) for n, r in E.OFERTA["gratis_200pv"]]
     wiersze = kup + bogo + prezent + pv200
     brak_cen = [w["nazwa"] for w in wiersze if w["poza"] is None]
-    if en and brak_cen:
-        print(f"  index-en.html POMINIĘTA — brak ceny EUR: {', '.join(brak_cen)} (edycja.py, pole eur)")
+    if J != "pl" and brak_cen:
+        print(f"  index-{J}.html POMINIĘTA — brak ceny EUR: {', '.join(brak_cen)} (edycja.py, pole eur)")
         continue
     cena_pakietu = round(sum(w["poza"] for w in kup), 2)
     pv_pakietu = sum(z["kup"][2] for z in E.ZESTAWY)
@@ -147,20 +149,24 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
     n_gratis = sum(w["ile"] for w in gratisy)
     wartosc_gratisow = ok10(sum(w["poza"] or 0 for w in gratisy))
     szac = any(w["nazwa"] in E.SZACUNKOWE for w in wiersze)
-    rz = L(E.OFERTA["rzeczownik_kup"], E.EN["rzeczownik_kup"])
+    rz = L(E.OFERTA["rzeczownik_kup"], X["rzeczownik_kup"], X["rzeczownik_kup"])
     n_kup = len(kup)
     suma_poza = round(sum(w["poza"] or 0 for w in wiersze), 2)
 
 
     def kr(w):
         k = nazwa(w["nazwa"])
-        return f"2 × {k if en else k[0].lower() + k[1:]}" if w["ile"] == 2 else k
+        return f"2 × {k if J != 'pl' else k[0].lower() + k[1:]}" if w["ile"] == 2 else k
 
 
-    if en:
-        TYTUL_OG = f'{E.EN["miesiac"]} - Enrollment with the BOGO bundle: {n_kup} {rz} + {n_gratis} products free'
+    if J == "de":
+        TYTUL_OG = f'{X["miesiac"]} - Einschreibung mit dem BOGO-Paket: {n_kup} {rz} + {n_gratis} Produkte gratis'
+        OPIS_OG = (f"Einschreibung mit dem dōTERRA BOGO-Paket ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} €, "
+                   f"{pv(pv_pakietu)} PV. {n_gratis} Produkte gratis im Wert von ca. {wartosc_gratisow} €: {X['gratisy_opis']}.")
+    elif J == "en":
+        TYTUL_OG = f'{X["miesiac"]} - Enrollment with the BOGO bundle: {n_kup} {rz} + {n_gratis} products free'
         OPIS_OG = (f"Enrollment with the dōTERRA BOGO bundle ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} €, "
-                   f"{pv(pv_pakietu)} PV. {n_gratis} products free, worth approx. {wartosc_gratisow} €: {E.EN['gratisy_opis']}.")
+                   f"{pv(pv_pakietu)} PV. {n_gratis} products free, worth approx. {wartosc_gratisow} €: {X['gratisy_opis']}.")
     else:
         TYTUL_OG = f'{E.OFERTA["miesiac"]} - Rejestracja z pakietem BOGO: {n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis'
         OPIS_OG = (f"Rejestracja z pakietem BOGO dōTERRA ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} zł, "
@@ -206,7 +212,7 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
     def tr(w):
         k = nazwa(w["nazwa"])
         et = f' <span class="text-xs font-semibold" style="color: var(--green);">{w["etykieta"]}</span>' if w["etykieta"] else ""
-        poza = L("brak ceny", "no price") if w["poza"] is None else zl(w["poza"]) + ("*" if w["nazwa"] in E.SZACUNKOWE else "")
+        poza = L("brak ceny", "no price", "kein Preis") if w["poza"] is None else zl(w["poza"]) + ("*" if w["nazwa"] in E.SZACUNKOWE else "")
         wz = "—" if w["w_zestawie"] is None else zl(w["w_zestawie"])
         return f'''                                <tr data-product-name="{k}">
                                     <td class="py-1 px-2 border-b border-r text-center align-middle strike-column">
@@ -222,15 +228,16 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
     nazwy200 = [nazwa(n) for n, _ in E.OFERTA["gratis_200pv"]]
     promo_przypis = ""
     if nazwy200:
-        lista = nazwy200[0] if len(nazwy200) == 1 else ", ".join(nazwy200[:-1]) + L(" i ", " and ") + nazwy200[-1]
+        lista = nazwy200[0] if len(nazwy200) == 1 else ", ".join(nazwy200[:-1]) + L(" i ", " and ", " und ") + nazwy200[-1]
         promo_przypis = f'''
-                        <p class="text-xs mt-2" style="color: var(--text-muted);">*{lista}: {L("zamówienie rejestracyjne na 200 PV lub więcej, złożone od " + E.OKRES_WARUNKI, "enrollment order of 200 PV or more, placed from " + E.EN["okres_warunki"])}</p>'''
+                        <p class="text-xs mt-2" style="color: var(--text-muted);">*{lista}: {L("zamówienie rejestracyjne na 200 PV lub więcej, złożone od " + E.OKRES_WARUNKI, "enrollment order of 200 PV or more, placed from " + X["okres_warunki"], "Einschreibungsbestellung ab 200 PV, aufgegeben vom " + X["okres_warunki"])}</p>'''
     przypis_szac = ""
     if szac:
         n0 = next(iter(E.SZACUNKOWE))
         cena0 = P[n0][WAL]
         cena_txt = f"{int(cena0)} {SYMBOL}" if cena0 == int(cena0) else f"{zl(cena0)} {SYMBOL}"
-        tekst = (f"{E.EN['szacunek']} is not yet in the doTERRA price list, assumed at approx. {cena_txt} each." if en else
+        tekst = (f"{X['szacunek']} is not yet in the doTERRA price list, assumed at approx. {cena_txt} each." if J == "en" else
+                 f"{X['szacunek']} ist noch nicht in der doTERRA Preisliste, angenommen ca. {cena_txt} pro Stück." if J == "de" else
                  f"{E.SZACUNEK_DOPELNIACZ[0].upper()}{E.SZACUNEK_DOPELNIACZ[1:]} nie ma jeszcze w cenniku doTERRA Polska – przyjęta cena szacunkowa {cena_txt} za sztukę.")
         przypis_szac = f'''
                     <p class="text-xs mt-3" style="color: var(--text-muted);">*{tekst}</p>'''
@@ -238,13 +245,13 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
     szablon = (TU / "szablony" / f"oferta-rejestracji{SFX}.html").read_text(encoding="utf-8")
     oferta = szablon
     for k, v in {
-        "TYTUL": L(f'Rejestracja z pakietem BOGO – {E.OFERTA["miesiac"][0].lower()}{E.OFERTA["miesiac"][1:]}', f'Enrollment with the BOGO bundle – {E.EN["miesiac"]}'),
+        "TYTUL": L(f'Rejestracja z pakietem BOGO – {E.OFERTA["miesiac"][0].lower()}{E.OFERTA["miesiac"][1:]}', f'Enrollment with the BOGO bundle – {X["miesiac"]}', f'Einschreibung mit dem BOGO-Paket – {X["miesiac"]}'),
         "TYTUL_OG": TYTUL_OG, "OPIS_OG": OPIS_OG, "URL": URL,
-        "MIESIAC": L(E.OFERTA["miesiac"], E.EN["miesiac"]), "OKRES_KROTKO": E.OKRES_KROTKO,
+        "MIESIAC": L(E.OFERTA["miesiac"], X["miesiac"], X["miesiac"]), "OKRES_KROTKO": E.OKRES_KROTKO,
         "IMG_KIT": img_kit, "CENA": zl(cena_pakietu), "LI_KIT": li_kit, "PV": pv(pv_pakietu),
         "WARTOSC_GRATISOW": str(wartosc_gratisow), "GWIAZDKA_PROMO": "*" if nazwy200 else "", "PROMO_PRZYPIS": promo_przypis,
-        "GRUPY": "\n".join(g for g in (grupa(L("Gratis BOGO (1+1)", "Free BOGO (1+1)"), bogo), grupa(L("Gratis do pakietu", "Free with the bundle"), prezent),
-                                        grupa(L("Gratis przy rejestracji od 200 PV", "Free with enrollment from 200 PV"), pv200)) if g),
+        "GRUPY": "\n".join(g for g in (grupa(L("Gratis BOGO (1+1)", "Free BOGO (1+1)", "Gratis BOGO (1+1)"), bogo), grupa(L("Gratis do pakietu", "Free with the bundle", "Gratis zum Paket"), prezent),
+                                        grupa(L("Gratis przy rejestracji od 200 PV", "Free with enrollment from 200 PV", "Gratis bei Einschreibung ab 200 PV"), pv200)) if g),
         "WIERSZE": "\n".join(tr(w) for w in wiersze),
         "SUMA_POZA": zl(suma_poza) + ("*" if szac else ""), "PRZYPIS_SZAC": przypis_szac,
     }.items():
@@ -252,8 +259,8 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
 
     sp = (TU / "szablony" / f"oferta-social-preview{SFX}.html").read_text(encoding="utf-8")
     sp = (sp.replace("{{BADGE}}", L(f"{n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis (ok. {wartosc_gratisow} zł)",
-                                    f"{n_kup} {rz} + {n_gratis} products free (approx. {wartosc_gratisow} €)"))
-            .replace("{{PODTYTUL}}", f"{L(E.OKRES, E.EN['okres'])} · {zl(cena_pakietu)} {SYMBOL} · {pv(pv_pakietu)} PV"))
+                                    f"{n_kup} {rz} + {n_gratis} products free (approx. {wartosc_gratisow} €)", f"{n_kup} {rz} + {n_gratis} Produkte gratis (ca. {wartosc_gratisow} €)"))
+            .replace("{{PODTYTUL}}", f"{L(E.OKRES, X['okres'], X['okres'])} · {zl(cena_pakietu)} {SYMBOL} · {pv(pv_pakietu)} PV"))
 
     (OFERTA_DIR / "images").mkdir(parents=True, exist_ok=True)
     for wspolny in ("doterralogo.png", "liscie-gora.png"):
@@ -262,7 +269,7 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
             zrodlo = next(iter(sorted(glob.glob(str(TU.parent / "new-client-offer" / "*" / "images" / wspolny)))), None)
             if zrodlo:
                 shutil.copy(zrodlo, cel)
-    zapisz(OFERTA_DIR / L("index.html", "index-en.html"), oferta)
+    zapisz(OFERTA_DIR / L("index.html", "index-en.html", "index-de.html"), oferta)
     zapisz(OFERTA_DIR / f"social-preview{SFX}.html", sp)
     renderuj(OFERTA_DIR / f"social-preview{SFX}.html", OFERTA_DIR / f"social-preview{SFX}.jpg")
 
@@ -270,7 +277,7 @@ for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
     for n in dict.fromkeys(brak):
         print(f'  BRAK zdjęcia: python3 ~/.claude/scripts/doterra-image.py --product "{P[n]["en"]}" --output /tmp/x '
               f'→ {OFERTA_DIR.relative_to(TU.parent)}/images/{P[n]["foto"]}')
-    print(f"{E.OFERTA['folder']}/{L('index.html', 'index-en.html')}: pakiet {zl(cena_pakietu)} {SYMBOL}, {pv(pv_pakietu)} PV, "
+    print(f"{E.OFERTA['folder']}/{L('index.html', 'index-en.html', 'index-de.html')}: pakiet {zl(cena_pakietu)} {SYMBOL}, {pv(pv_pakietu)} PV, "
           f"{n_gratis} gratisów ok. {wartosc_gratisow} {SYMBOL}, suma poza {zl(suma_poza)}")
 
 

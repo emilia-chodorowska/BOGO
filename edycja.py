@@ -54,6 +54,7 @@ ZESTAWY = [
         "gratis": [("dōTERRA Serenity™", "15 ml", 47.0, 1)],
         "tytul": "Waleriana <span>+</span> dōTERRA Serenity™",
         "tytul_en": "Valerian <span>+</span> dōTERRA Serenity™",
+        "tytul_de": "Baldrian <span>+</span> dōTERRA Serenity™",
     },
     {
         "foto": "images/2026-10-zestaw2-onguard-oregano.jpg",
@@ -61,6 +62,7 @@ ZESTAWY = [
         "gratis": [("Oregano", "15 ml", 34.5, 1)],
         "tytul": "On Guard™ <span>+</span> Oregano",
         "tytul_en": "On Guard™ <span>+</span> Oregano",
+        "tytul_de": "On Guard™ <span>+</span> Oregano",
     },
     {
         "foto": "images/2026-10-zestaw3-airx-eukaliptus.jpg",
@@ -68,6 +70,7 @@ ZESTAWY = [
         "gratis": [("Eukaliptus", "15 ml", 22.5, 1)],
         "tytul": "Air-X™ <span>+</span> Eukaliptus",
         "tytul_en": "Air-X™ <span>+</span> Eucalyptus",
+        "tytul_de": "Air-X™ <span>+</span> Eukalyptus",
     },
     {
         "foto": "images/2026-10-zestaw4-rumianek-adaptiv-kapiel.jpg",
@@ -75,6 +78,7 @@ ZESTAWY = [
         "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", None, 2)],
         "tytul": "Rumianek rzymski <span>+</span> 2 × olejek do kąpieli Adaptiv™",
         "tytul_en": "Roman Chamomile <span>+</span> 2 × Adaptiv™ Calming Bath Oil",
+        "tytul_de": "Römische Kamille <span>+</span> 2 × Adaptiv™ Beruhigendes Badeöl",
         "krotko": "2 × olejek do kąpieli Adaptiv",
     },
     {
@@ -87,6 +91,7 @@ ZESTAWY = [
         ],
         "tytul": "Sandałowiec <span>+</span> Grejpfrut, SuperMint™, Shinrin-Yoku™ Touch",
         "tytul_en": "Sandalwood <span>+</span> Grapefruit, SuperMint™, Shinrin-Yoku™ Touch",
+        "tytul_de": "Sandelholz <span>+</span> Grapefruit, SuperMint™, Shinrin-Yoku™ Touch",
     },
 ]
 # ceny przyjęte szacunkowo (produktu nie ma jeszcze w cenniku PL)
@@ -120,6 +125,41 @@ NAZWY_EN = {
     "dōTERRA Shinrin-Yoku™ Touch": "dōTERRA Shinrin-Yoku™ Touch",
     "dōTERRA Balance™": "dōTERRA Balance™",
 }
+
+# Wersja niemiecka (index-de.html, ceny EUR) — dla grupy WhatsApp „BOGO DE od Claude”. Forma „Sie” jak w doTERRA DE.
+# Nazwy produktów: aroma_product_localizations dla cennika DE (price_list_id 24).
+DE = dict(
+    okres="20.–27. Oktober 2026",
+    okres_warunki="20. bis 27. Oktober 2026",
+    koniec="27. Oktober",
+    prezent_nazwa="Douglasienöl",
+    prezent_krotko="Douglasie",
+    poprzednia=None,
+    warunki_extra=["Baldrian (15 ml) und dōTERRA Adaptiv™ Beruhigendes Badeöl sind Produkte aus einem zeitlich begrenzten Angebot."],
+    szacunek="dōTERRA Adaptiv™ Beruhigendes Badeöl",
+    miesiac="Oktober 2026",
+    rzeczownik_kup="Öle",
+    gratisy_opis="6 Öle und 2 Adaptiv Badeöle (BOGO), Douglasie (zum Paket), Wild Orange und Balance (Einschreibung ab 200 PV)",
+)
+NAZWY_DE = {
+    "Kozłek lekarski (waleriana)": "Baldrian",
+    "dōTERRA Serenity™": "dōTERRA Serenity™",
+    "On Guard™": "dōTERRA On Guard™",
+    "Oregano": "Oregano",
+    "Air-X™": "dōTERRA Air-X™",
+    "Eukaliptus": "Eukalyptus",
+    "Rumianek rzymski": "Römische Kamille",
+    "Olejek do kąpieli dōTERRA Adaptiv™": "dōTERRA Adaptiv™ Beruhigendes Badeöl",
+    "Sandałowiec": "Sandelholz",
+    "Grejpfrut": "Grapefruit",
+    "dōTERRA SuperMint™": "dōTERRA SuperMint™",
+    "dōTERRA Shinrin-Yoku™ Touch": "dōTERRA Shinrin-Yoku™ Touch",
+    "Daglezja zielona (Douglas Fir)": "Douglasie",
+    "Wild Orange": "Wild Orange",
+    "dōTERRA Balance™": "dōTERRA Balance™",
+}
+# wersje obcojęzyczne stron (ceny EUR): teksty edycji + nazwy produktów
+WERSJE = {"en": dict(EN, nazwy=NAZWY_EN), "de": dict(DE, nazwy=NAZWY_DE)}
 
 # Strona rejestracji z pakietem BOGO: ../new-client-offer/<folder>/
 OFERTA = {

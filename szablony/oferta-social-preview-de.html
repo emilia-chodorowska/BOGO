@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Preview - Rejestracja z pakietem BOGO</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .preview-container {
+            width: 1200px;
+            height: 630px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .leaves {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            align-self: stretch;
+        }
+
+        .logo {
+            width: 240px;
+            margin-bottom: 28px;
+        }
+
+        .title {
+            font-size: 62px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 22px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 34px;
+            color: #6B7280;
+            font-weight: 400;
+        }
+
+        .badge {
+            display: block;
+            width: fit-content;
+            font-size: 20px;
+            font-weight: 600;
+            color: #7E57C2;
+            background: #F3EEFA;
+            padding: 8px 24px;
+            border-radius: 999px;
+            margin: 0 auto 28px auto;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <img
+            src="images/liscie-gora.png"
+            alt=""
+            class="leaves"
+        >
+
+        <div class="content">
+            <img
+                src="images/doterralogo.png"
+                alt="dōTERRA Logo"
+                class="logo"
+            >
+            <div class="badge">{{BADGE}}</div>
+            <h1 class="title">Einschreibung mit dem BOGO-Paket</h1>
+            <p class="subtitle">{{PODTYTUL}}</p>
+        </div>
+    </div>
+</body>
+</html>
