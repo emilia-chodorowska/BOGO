@@ -195,7 +195,7 @@ def whatsapp():
         data, _, kod = f.stem.partition("-")
         if kod:
             rolki.append((f"Rolka doTERRA {data[6:8]}.{data[4:6]}", f"https://www.instagram.com/reel/{kod}/", f))
-    linki_sekcja("Rolki doTERRA", rolki)
+    linki_sekcja(None, rolki)  # bez nagłówka „Rolki doTERRA” (userka 27.10.2026)
     for pdf in nowe(sorted(em_lok.glob("*.pdf"))):
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
     for tytul, pliki in sekcje:
