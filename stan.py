@@ -4,6 +4,8 @@ czeka na Ciebie · robię · gotowe).
 
   python3 stan.py                    → przebudowuje stronę z aktualnych danych (puszczaj po każdym przebiegu)
   python3 stan.py skany              → ten sam stan dla olejków ze skanów (SKANY) → canva/stan-grafiki-ze-skanow.html
+  python3 stan.py nowe               → olejki z seminarium Boyda i z grafik WA/Discord/FB (materialy/_nowe-olejki.json)
+                                       → canva/stan-grafiki-nowe.html
   python3 stan.py bogo skany         → obie strony
   python3 stan.py w-canvie <slug>…   → po wstawieniu zatwierdzonych haseł w kółka: zapisuje, co jest w Canvie
 
@@ -85,11 +87,23 @@ def produkty_skany():
         yield {"slug": s, "hub": hub[0] if hub else s, "krotko": nazwa, "img": rendery[0].as_uri() if rendery else ""}
 
 
+NOWE = MAT / "_nowe-olejki.json"  # olejki z seminarium Boyda i z grafik WhatsApp/Discord/FB bez wcześniejszej karty (od 27.10.2026)
+
+
+def produkty_nowe():
+    for p in (json.loads(NOWE.read_text(encoding="utf-8"))["olejki"] if NOWE.exists() else []):
+        s = p["slug"]
+        rendery = sorted((MAT / s / "inspiracje-do-tla").glob("[0-9]*.png"), key=lambda f: len(f.name))
+        yield {"slug": s, "hub": p.get("hub", s), "krotko": p["nazwa"], "img": rendery[0].as_uri() if rendery else ""}
+
+
 ZESTAWY = {
     "bogo": {"produkty": produkty_bogo, "wyj": WYJ, "tytul": f"Stan grafik · BOGO {E.OKRES_KROTKO}", "prefiks": "BOGO",
              "karta": "dokument „Bogo” + Claude", "wyslane": C.TU / f"zrodla-{E.MIESIAC}" / "lista-wyslane.json"},
     "skany": {"produkty": produkty_skany, "wyj": MAT.parent / "stan-grafiki-ze-skanow.html", "tytul": "Stan grafik · ze skanów z książki",
               "prefiks": "Grafiki ze skanów", "karta": "skan + Claude", "wyslane": MAT.parent / "stan-grafiki-ze-skanow-lista.json"},
+    "nowe": {"produkty": produkty_nowe, "wyj": MAT.parent / "stan-grafiki-nowe.html", "tytul": "Stan grafik · nowe olejki (Boyd, WhatsApp, Discord, FB)",
+             "prefiks": "Nowe olejki", "karta": "grafiki + Boyd + Claude", "wyslane": MAT.parent / "stan-grafiki-nowe-lista.json"},
 }
 
 
@@ -260,8 +274,10 @@ def main(zestaw="bogo"):
             R["kolka_stoi"].append(chip(p))
 
     if R["skany_listy"]:  # skany jako jedna pozycja ze wszystkimi olejkami
+        dlugo = len(R["skany_listy"]) > 10  # przy dużym zestawie liczba + link do strony stanu zamiast wyliczanki
         R["do_listy"].insert(0, ([k for k, _ in R["skany_listy"]], f"{Z['prefiks']}: skany z „Advanced Oil Magic” do grupy „Grafiki dla Claude” — "
-                                 + ", ".join(n for _, n in R["skany_listy"]), None))
+                                 + (f"{len(R['skany_listy'])} olejków (lista na stronie stanu)" if dlugo else ", ".join(n for _, n in R["skany_listy"])),
+                                 Z["wyj"].as_uri() if dlugo else None))
     do_listy(R["do_listy"], Z["wyslane"])
     daty = ", ".join(datetime.fromisoformat(x).strftime("%d.%m") for x in sorted(sprawdzono))
     ty = [
