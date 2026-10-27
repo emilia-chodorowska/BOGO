@@ -16,7 +16,7 @@ PREZENT_KROTKO = "daglezja zielona"  # do pilla na grafice podglądu linku
 WARUNKI_EXTRA = ["Waleriana (15 ml) i olejek do kąpieli Adaptiv to produkty z oferty ograniczonej czasowo."]
 # przypis do cen szacunkowych: dopełniacz nazwy produktu („… nie ma jeszcze w cenniku”)
 SZACUNEK_DOPELNIACZ = "olejku do kąpieli Adaptiv"
-DATA_CEN = {"pln": "17.10.2026", "eur": "18.10.2026"}
+DATA_CEN = {"pln": "27.10.2026", "eur": "27.10.2026"}  # baza aroma-pricing (PL i DE)
 
 # Produkty promocji. Nazwa = polska z aroma_product_localizations / broszury.
 #   pln, eur  — cena hurtowa brutto (PL: wholesale_gross z bazy; DE: „EK-Preis”), None = brak ceny
@@ -33,16 +33,16 @@ PRODUKTY = {
     "Air-X™": dict(pln=179.75, eur=39.50, en="Air-X", slug="air-x", krotko="Air-X™", foto="airx.png"),
     "Eukaliptus": dict(pln=107.00, eur=23.50, en="Eucalyptus", slug="eucalyptus", krotko="Eukaliptus", foto="eukaliptus.png"),
     "Rumianek rzymski": dict(pln=273.99, eur=60.25, en="Roman Chamomile", slug="roman-chamomile", krotko="Rumianek rzymski", foto="rumianek.png"),
-    # szacunek, EUR = 115 zł / 4,547
-    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=115.00, eur=25.29, en="Adaptiv Calming Bath Oil", slug="adaptiv-bath-oil", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png", ig="Adaptiv do kąpieli"),
+    # do 27.10 szacunek 115 zł / 25,29 €; cena z cennika od 27.10 (baza aroma-pricing, item 60213519)
+    "Olejek do kąpieli dōTERRA Adaptiv™": dict(pln=100.00, eur=22.00, en="Adaptiv Calming Bath Oil", slug="adaptiv-bath-oil", krotko="Olejek do kąpieli Adaptiv™", foto="adaptiv.png", ig="Adaptiv do kąpieli"),
     "Sandałowiec": dict(pln=489.00, eur=107.50, en="Sandalwood", slug="sandalwood", krotko="Sandałowiec", foto="sandalowiec.png"),
     "Grejpfrut": dict(pln=105.76, eur=23.25, en="Grapefruit", slug="grapefruit", krotko="Grejpfrut", foto="grejpfrut.png"),
     "dōTERRA SuperMint™": dict(pln=168.25, eur=37.00, en="SuperMint", slug="supermint", krotko="dōTERRA SuperMint™", foto="supermint.png"),
     "dōTERRA Shinrin-Yoku™ Touch": dict(pln=119.49, eur=26.25, en="Shinrin-Yoku Touch", slug="shinrin-yoku", krotko="dōTERRA Shinrin-Yoku™ Touch", foto="shinrin-yoku.png"),
     "Daglezja zielona (Douglas Fir)": dict(pln=129.49, eur=28.50, en="Douglas Fir", slug="douglas-fir", krotko="Daglezja zielona", foto="daglezja.png"),
     # gratisy miesięcznej promocji rejestracji (200 PV) — tylko na stronie rejestracji
-    "Wild Orange": dict(pln=76.25, eur=None, en="Wild Orange", slug="wild-orange", krotko="Wild Orange", foto="wild-orange.png", ig="Dzika pomarańcza"),
-    "dōTERRA Balance™": dict(pln=137.50, eur=None, en="Balance", slug="balance", krotko="dōTERRA Balance™", foto="balance.png"),
+    "Wild Orange": dict(pln=76.25, eur=16.76, en="Wild Orange", slug="wild-orange", krotko="Wild Orange", foto="wild-orange.png", ig="Dzika pomarańcza"),
+    "dōTERRA Balance™": dict(pln=137.50, eur=30.25, en="Balance", slug="balance", krotko="dōTERRA Balance™", foto="balance.png"),
 }
 
 # pozycja: (nazwa z PRODUKTY, pojemność, PV albo None, ilość)
@@ -90,7 +90,7 @@ ZESTAWY = [
     },
 ]
 # ceny przyjęte szacunkowo (produktu nie ma jeszcze w cenniku PL)
-SZACUNKOWE = {"Olejek do kąpieli dōTERRA Adaptiv™"}
+SZACUNKOWE = set()
 PREZENT = ("Daglezja zielona (Douglas Fir)", "5 ml")  # gratis do całego pakietu
 FOTO_PAKIET = "images/2026-10-pakiet.jpg"
 FOTO_PREZENT = "images/2026-10-gratis-daglezja.jpg"
@@ -106,6 +106,10 @@ EN = dict(
     poprzednia=None,  # (folder, podpis) poprzedniej edycji z index-en.html; None = bez linku
     warunki_extra=["Valerian (15 ml) and dōTERRA Adaptiv™ Calming Bath Oil are limited-time offer products."],
     szacunek="dōTERRA Adaptiv™ Calming Bath Oil",  # odpowiednik SZACUNEK_DOPELNIACZ
+    # strona rejestracji EN (new-client-offer/<folder>/index-en.html, ceny EUR)
+    miesiac="October 2026",
+    rzeczownik_kup="oils",
+    gratisy_opis="6 oils and 2 Adaptiv bath oils (BOGO), Douglas Fir (with the bundle), Wild Orange and Balance (enrollment from 200 PV)",
 )
 NAZWY_EN = {
     "dōTERRA Serenity™": "dōTERRA Serenity™",

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23E8F5E9'/><path d='M21 9C12 11 9.9 17.17 7.82 22.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C23 21 26 4 26 4c-1 2-8 2.25-13 3.25S6 12.5 6 14.5s1.75 3.75 1.75 3.75' fill='none' stroke='%232E7D32' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    <title>{{TYTUL}}</title>
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{TYTUL_OG}}">
+    <meta property="og:description" content="{{OPIS_OG}}">
+    <meta property="og:image" content="{{URL}}social-preview-en.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="{{URL}}index-en.html">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{TYTUL_OG}}">
+    <meta name="twitter:description" content="{{OPIS_OG}}">
+    <meta name="twitter:image" content="{{URL}}social-preview-en.jpg">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --purple: #7E57C2;
+            --purple-soft: #F3EEFA;
+            --purple-dark: #4D2C91;
+            --green: #4CAF50;
+            --bg-soft: #F9FAFB;
+            --text: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --border: #E5E7EB;
+        }
+
+        /* Custom font for the project */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-soft);
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        .back-link {
+            color: var(--purple);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: var(--purple-dark);
+            text-decoration: underline;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--purple);
+            background: var(--purple-soft);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Styles for the price bubble to avoid positioning issues in Tailwind */
+        .price-bubble {
+            position: absolute;
+            top: -2rem;
+            right: -1rem;
+        }
+
+        /* Style for a continuous strikethrough on a table row */
+        .strike-row {
+            position: relative;
+            color: #6b7280; /* gray-500 */
+        }
+        .strike-row::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: #6b7280; /* Tailwind gray-500 */
+            z-index: 10;
+        }
+
+        /* Responsiveness for smaller screens */
+        @media (max-width: 768px) {
+            .price-bubble {
+                width: 8rem; /* smaller bubble */
+                height: 8rem;
+                font-size: 1.25rem; /* smaller font */
+                top: -1.5rem;
+                right: -1.5rem;
+            }
+
+            /* Make table fit on mobile */
+            #calculation-table th,
+            #calculation-table td {
+                padding: 0.375rem 0.15rem !important;
+                font-size: 0.7rem;
+            }
+
+            #calculation-table thead th {
+                font-size: 0.6rem;
+                line-height: 1.05;
+                word-wrap: break-word;
+            }
+
+            /* Smaller checkbox */
+            .strike-toggle {
+                width: 1rem !important;
+                height: 1rem !important;
+            }
+
+            /* Narrower input fields */
+            .strike-column input[type="text"] {
+                padding: 0.125rem !important;
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen py-3">
+
+    <div id="main-container" class="relative container max-w-5xl my-1 p-4 sm:p-5 md:p-6 bg-white shadow-xl">
+
+        <img
+            src="images/liscie-gora.png"
+            alt="Decorative leaves"
+            class="absolute top-0 left-0 w-1/3 opacity-40 pointer-events-none"
+        >
+
+
+        <header id="header-container" class="text-center mb-3 md:mb-4 relative z-10 p-2">
+            <div>
+                 <img
+                    src="images/doterralogo.png"
+                    alt="dōTERRA Logo"
+                    class="mx-auto mb-3 w-40 md:w-44"
+                 >
+                 <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-2" style="color: var(--text);">{{MIESIAC}}</h1>
+                 <p class="text-lg md:text-xl font-light" style="color: var(--text-secondary);">Enrollment with the BOGO bundle · {{OKRES_KROTKO}}</p>
+            </div>
+        </header>
+
+        <main id="main-content-container" class="relative z-10 flex flex-col gap-4 p-2">
+
+            <div id="top-section" class="grid md:grid-cols-[auto_1fr] gap-5 md:gap-9 items-center">
+                <div id="product-image-container" class="relative p-2 w-fit justify-self-center">
+                    <div id="main-image-container" class="bg-gray-50 pl-4 md:pl-5 pr-16 md:pr-28 pt-12 md:pt-14 pb-4 rounded-xl shadow-inner flex items-end gap-2 md:gap-3">
+{{IMG_KIT}}
+                    </div>
+                    <div class="price-bubble font-bold text-xl md:text-2xl w-32 h-32 md:w-36 md:h-36 rounded-full flex items-center justify-center shadow-lg" style="background: #cce2d3; color: #1e293b;">
+                        {{CENA}} €
+                    </div>
+                </div>
+
+                <div id="right-column-container" class="flex items-center p-2">
+                    <div id="kit-contents-container" class="bg-white p-4 md:p-6 rounded-lg w-full h-fit border-2 border-[#a7c5a9]">
+                        <h3 class="text-center text-xl md:text-2xl font-semibold mb-4" style="color: var(--text);">The bundle includes:</h3>
+                        <ul id="kit-list" class="grid grid-cols-1 gap-y-2 text-base md:text-lg w-fit mx-auto" style="color: var(--text);">
+{{LI_KIT}}
+                        </ul>
+                        <p class="text-center text-sm mt-4" style="color: var(--text-secondary);">{{PV}} PV</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="promo-section-container" class="px-2 pb-0 pt-0">
+                <div id="promo-box-container" class="bg-white p-4 md:p-6 rounded-lg border-2 border-[#a7c5a9] flex flex-col gap-5">
+                    <div id="promo-text-container" class="text-center" style="color: var(--text);">
+                        <h2 class="text-xl md:text-2xl font-semibold leading-snug">Free products worth approx. {{WARTOSC_GRATISOW}} €{{GWIAZDKA_PROMO}}</h2>{{PROMO_PRZYPIS}}
+                    </div>
+                    <div id="all-gratis-container" class="flex flex-wrap justify-center items-start gap-x-8 gap-y-5">
+{{GRUPY}}
+                    </div>
+                </div>
+            </div>
+
+            <div id="table-section-container" class="p-2 mt-4">
+                 <h2 class="text-2xl md:text-3xl font-semibold text-center mb-6" style="color: var(--text);">Detailed calculation</h2>
+                <div>
+                    <div class="overflow-x-auto">
+                        <table id="calculation-table" class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-2 border-b border-r text-center align-middle w-12 strike-column"></th>
+                                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-slate-600">PRODUCT</th>
+                                    <th class="py-3 px-4 border-b text-left text-sm font-semibold text-slate-600 strike-column">NOTE</th>
+                                    <th class="py-3 px-4 border-b text-right text-sm font-semibold text-slate-600">REGULAR PRICE (EUR)</th>
+                                    <th class="py-3 px-4 border-b text-right text-sm font-semibold text-slate-600">IN THE BUNDLE (EUR)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-700">
+{{WIERSZE}}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-100 text-slate-800">
+                                    <td id="footer-sum-cell" class="py-4 px-4 font-bold" colspan="3">Total</td>
+                                    <td class="py-4 px-4 text-right font-normal">{{SUMA_POZA}}</td>
+                                    <td class="py-4 px-4 text-right font-bold">{{CENA}}</td>
+                                </tr>
+                                <tr id="strike-sum-row" class="bg-gray-200 text-slate-800">
+                                    <td id="footer-struck-sum-cell" class="py-3 px-4 font-semibold" colspan="3">Total crossed out</td>
+                                    <td id="struck-sum-poza-cell" class="py-3 px-4 text-right font-semibold">0.00</td>
+                                    <td id="struck-sum-w-zestawie-cell" class="py-3 px-4 text-right font-semibold">0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>{{PRZYPIS_SZAC}}
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-6 pt-4 text-center text-xs relative z-10" style="border-top: 1px solid var(--border); color: var(--text-muted);">
+            <p>Emilia Chodorowska · doTERRA Wellness Advocate</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Team Mode Detection ---
+            const isTeamMode = window.location.search.includes('team=true');
+
+            // --- UI Elements ---
+            const table = document.getElementById('calculation-table');
+            const allCheckboxes = table.querySelectorAll('.strike-toggle');
+
+            // --- Strikethrough Logic ---
+
+            function toggleStrike(productName, shouldStrike) {
+                const tableRow = document.querySelector(`#calculation-table tr[data-product-name="${productName}"]`);
+                const listItem = document.querySelector(`#kit-list li[data-product-name="${productName}"]`);
+
+                if (tableRow) {
+                    tableRow.classList.toggle('strike-row', shouldStrike);
+                }
+
+                if (listItem) {
+                    listItem.classList.toggle('line-through', shouldStrike);
+                    listItem.classList.toggle('text-gray-500', shouldStrike);
+                }
+            }
+
+            function updateStruckSum() {
+                let totalPoza = 0;
+                let totalWZestawie = 0;
+                const sumPozaCell = document.getElementById('struck-sum-poza-cell');
+                const sumWZestawieCell = document.getElementById('struck-sum-w-zestawie-cell');
+
+                allCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const row = document.querySelector(`tr[data-product-name="${checkbox.dataset.productName}"]`);
+                        if (row) {
+                            const pozaPriceText = row.cells[3].textContent;
+                            const wZestawiePriceText = row.cells[4].textContent;
+                            const pozaVal = parseFloat(pozaPriceText.replace(/[^0-9.]/g, ''));
+                            const wZestawieVal = parseFloat(wZestawiePriceText.replace(/[^0-9.]/g, ''));
+                            if (!isNaN(pozaVal)) totalPoza += pozaVal;
+                            if (!isNaN(wZestawieVal)) totalWZestawie += wZestawieVal;
+                        }
+                    }
+                });
+
+                if(sumPozaCell && sumWZestawieCell) {
+                    sumPozaCell.textContent = totalPoza.toFixed(2);
+                    sumWZestawieCell.textContent = totalWZestawie.toFixed(2);
+                }
+            }
+
+            // --- Striking Feature (Always Enabled in Team Mode) ---
+            function initializeStriking() {
+                const strikeColumns = document.querySelectorAll('.strike-column');
+                const footerSumCell = document.getElementById('footer-sum-cell');
+                const footerStruckSumCell = document.getElementById('footer-struck-sum-cell');
+                const strikeSumRow = document.getElementById('strike-sum-row');
+
+                // Show strike columns and sum row only in team mode
+                if (isTeamMode) {
+                    strikeColumns.forEach(col => col.classList.remove('hidden'));
+                    strikeSumRow.classList.remove('hidden');
+                    footerSumCell.setAttribute('colspan', '3');
+                    footerStruckSumCell.setAttribute('colspan', '3');
+
+                    // Enable all checkboxes
+                    allCheckboxes.forEach(checkbox => {
+                        checkbox.disabled = false;
+                    });
+                } else {
+                    // Hide strike features for clients
+                    strikeColumns.forEach(col => col.classList.add('hidden'));
+                    strikeSumRow.classList.add('hidden');
+                    footerSumCell.setAttribute('colspan', '1');
+                    footerStruckSumCell.setAttribute('colspan', '1');
+                }
+            }
+
+            // --- Event Listeners & Initial Calls ---
+            allCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    toggleStrike(event.target.dataset.productName, event.target.checked);
+                    updateStruckSum();
+                });
+            });
+
+            // Initial state setup on page load
+            initializeStriking();
+            updateStruckSum();
+        });
+    </script>
+
+</body>
+</html>

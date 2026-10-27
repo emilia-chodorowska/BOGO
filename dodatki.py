@@ -3,7 +3,8 @@
 
 1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO),
    og-en.html + …-<MIESIAC>-en.jpg (to samo po angielsku, dla index-en.html)
-2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg
+2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg,
+   index-en.html + social-preview-en.* (po angielsku, ceny EUR z pola `eur`; bez kompletu cen EUR — pominięta)
    (rejestracja z pakietem BOGO: pakiet = produkty kupowane, reszta to gratisy)
 3. teksty do sekcji BOGO w hubie doTERRA — na ekran
 
@@ -29,6 +30,9 @@ def zl(x):
 
 def pv(x):
     return f"{x:.1f}".replace(".", ",")
+
+
+zl_pl, pv_pl = zl, pv
 
 
 def ok10(x):
@@ -112,59 +116,75 @@ for en in (False, True):
     renderuj(TU / f"og{sfx}.html", TU / f"images/bogo-social-preview-{E.MIESIAC}{sfx}.jpg")
 
 
-# ---------- 2. rejestracja z pakietem BOGO ----------
-def wiersz(nazwa, poj, ile, etykieta):
-    cena = P[nazwa]["pln"]
-    return dict(nazwa=nazwa, poj=poj, ile=ile, etykieta=etykieta,
-                poza=None if cena is None else round(cena * ile, 2))
+# ---------- 2. rejestracja z pakietem BOGO (EN z cenami EUR, potem PL) ----------
+for en in (True, False):  # PL na końcu — z jej wartości korzysta sekcja 3
+    L = lambda pl, ang: ang if en else pl
+    WAL, SYMBOL, SFX = ("eur", "€", "-en") if en else ("pln", "zł", "")
+    zl = (lambda x: f"{x:.2f}") if en else zl_pl
+    pv = (lambda x: f"{x:.1f}") if en else pv_pl
+    nazwa = (lambda n: E.NAZWY_EN.get(n) or P[n]["en"]) if en else (lambda n: P[n]["krotko"])
+
+    def wiersz(nazwa, poj, ile, etykieta):
+        cena = P[nazwa][WAL]
+        return dict(nazwa=nazwa, poj=poj, ile=ile, etykieta=etykieta,
+                    poza=None if cena is None else round(cena * ile, 2))
 
 
-kup = [wiersz(z["kup"][0], z["kup"][1], z["kup"][3], None) for z in E.ZESTAWY]
-bogo = [wiersz(g[0], g[1], g[3], "gratis BOGO") for z in E.ZESTAWY for g in z["gratis"]]
-prezent = [wiersz(E.PREZENT[0], E.PREZENT[1], 1, "gratis do pakietu")]
-pv200 = [wiersz(n, r, 1, "gratis 200PV") for n, r in E.OFERTA["gratis_200pv"]]
-wiersze = kup + bogo + prezent + pv200
-cena_pakietu = round(sum(w["poza"] for w in kup), 2)
-pv_pakietu = sum(z["kup"][2] for z in E.ZESTAWY)
-for w, d in zip(wiersze, podzial(cena_pakietu, [w["poza"] for w in wiersze])):
-    w["w_zestawie"] = d
-gratisy = bogo + prezent + pv200
-n_gratis = sum(w["ile"] for w in gratisy)
-wartosc_gratisow = ok10(sum(w["poza"] or 0 for w in gratisy))
-szac = any(w["nazwa"] in E.SZACUNKOWE for w in wiersze)
-rz = E.OFERTA["rzeczownik_kup"]
-n_kup = len(kup)
-suma_poza = round(sum(w["poza"] or 0 for w in wiersze), 2)
+    kup = [wiersz(z["kup"][0], z["kup"][1], z["kup"][3], None) for z in E.ZESTAWY]
+    bogo = [wiersz(g[0], g[1], g[3], L("gratis BOGO", "free BOGO")) for z in E.ZESTAWY for g in z["gratis"]]
+    prezent = [wiersz(E.PREZENT[0], E.PREZENT[1], 1, L("gratis do pakietu", "free with the bundle"))]
+    pv200 = [wiersz(n, r, 1, L("gratis 200PV", "free from 200 PV")) for n, r in E.OFERTA["gratis_200pv"]]
+    wiersze = kup + bogo + prezent + pv200
+    brak_cen = [w["nazwa"] for w in wiersze if w["poza"] is None]
+    if en and brak_cen:
+        print(f"  index-en.html POMINIĘTA — brak ceny EUR: {', '.join(brak_cen)} (edycja.py, pole eur)")
+        continue
+    cena_pakietu = round(sum(w["poza"] for w in kup), 2)
+    pv_pakietu = sum(z["kup"][2] for z in E.ZESTAWY)
+    for w, d in zip(wiersze, podzial(cena_pakietu, [w["poza"] for w in wiersze])):
+        w["w_zestawie"] = d
+    gratisy = bogo + prezent + pv200
+    n_gratis = sum(w["ile"] for w in gratisy)
+    wartosc_gratisow = ok10(sum(w["poza"] or 0 for w in gratisy))
+    szac = any(w["nazwa"] in E.SZACUNKOWE for w in wiersze)
+    rz = L(E.OFERTA["rzeczownik_kup"], E.EN["rzeczownik_kup"])
+    n_kup = len(kup)
+    suma_poza = round(sum(w["poza"] or 0 for w in wiersze), 2)
 
 
-def kr(w):
-    k = P[w["nazwa"]]["krotko"]
-    return f"2 × {k[0].lower()}{k[1:]}" if w["ile"] == 2 else k
+    def kr(w):
+        k = nazwa(w["nazwa"])
+        return f"2 × {k if en else k[0].lower() + k[1:]}" if w["ile"] == 2 else k
 
 
-TYTUL_OG = f'{E.OFERTA["miesiac"]} - Rejestracja z pakietem BOGO: {n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis'
-OPIS_OG = (f"Rejestracja z pakietem BOGO dōTERRA ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} zł, "
-           f"{pv(pv_pakietu)} PV. {n_gratis} {produktow(n_gratis)} gratis o wartości ok. {wartosc_gratisow} zł: "
-           f"{E.OFERTA['gratisy_opis']}.")
-URL = f"https://emilia-chodorowska.github.io/new-client-offer/{E.OFERTA['folder']}/"
+    if en:
+        TYTUL_OG = f'{E.EN["miesiac"]} - Enrollment with the BOGO bundle: {n_kup} {rz} + {n_gratis} products free'
+        OPIS_OG = (f"Enrollment with the dōTERRA BOGO bundle ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} €, "
+                   f"{pv(pv_pakietu)} PV. {n_gratis} products free, worth approx. {wartosc_gratisow} €: {E.EN['gratisy_opis']}.")
+    else:
+        TYTUL_OG = f'{E.OFERTA["miesiac"]} - Rejestracja z pakietem BOGO: {n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis'
+        OPIS_OG = (f"Rejestracja z pakietem BOGO dōTERRA ({E.OKRES_KROTKO}): {n_kup} {rz}, {zl(cena_pakietu)} zł, "
+                   f"{pv(pv_pakietu)} PV. {n_gratis} {produktow(n_gratis)} gratis o wartości ok. {wartosc_gratisow} zł: "
+                   f"{E.OFERTA['gratisy_opis']}.")
+    URL = f"https://emilia-chodorowska.github.io/new-client-offer/{E.OFERTA['folder']}/"
 
-li_kit = "\n".join(
-    f'''                            <li data-product-name="{P[w["nazwa"]]["krotko"]}">{P[w["nazwa"]]["krotko"]} <span class="text-sm font-medium" style="color: var(--text-secondary);">({w["poj"]})</span></li>'''
-    for w in kup)
-img_kit = "\n".join(
-    f'''                            <img src="images/{P[w["nazwa"]]["foto"]}" alt="{P[w["nazwa"]]["krotko"]}" class="h-24 md:h-44 object-contain">'''
-    for w in kup)
+    li_kit = "\n".join(
+        f'''                            <li data-product-name="{nazwa(w["nazwa"])}">{nazwa(w["nazwa"])} <span class="text-sm font-medium" style="color: var(--text-secondary);">({w["poj"]})</span></li>'''
+        for w in kup)
+    img_kit = "\n".join(
+        f'''                            <img src="images/{P[w["nazwa"]]["foto"]}" alt="{nazwa(w["nazwa"])}" class="h-24 md:h-44 object-contain">'''
+        for w in kup)
 
 
-def figura(w):
-    p = P[w["nazwa"]]
-    if w["ile"] == 1:
-        return f'''                            <figure class="flex flex-col items-center gap-1.5 w-[4.5rem] md:w-24">
-                                <img src="images/{p["foto"]}" alt="{p["krotko"]}" class="h-24 md:h-32 w-full object-contain object-bottom">
+    def figura(w):
+        p = P[w["nazwa"]]
+        if w["ile"] == 1:
+            return f'''                            <figure class="flex flex-col items-center gap-1.5 w-[4.5rem] md:w-24">
+                                <img src="images/{p["foto"]}" alt="{nazwa(w["nazwa"])}" class="h-24 md:h-32 w-full object-contain object-bottom">
                                 <figcaption class="text-[0.65rem] md:text-xs font-medium text-center leading-tight" style="color: var(--text-secondary);">{kr(w)}</figcaption>
                             </figure>'''
-    imgs = "\n".join(f'''                                    <img src="images/{p["foto"]}" alt="{p["krotko"]}" class="h-24 md:h-32 w-auto object-contain object-bottom">''' for _ in range(w["ile"]))
-    return f'''                            <figure class="flex flex-col items-center gap-1.5 w-[6.5rem] md:w-32">
+        imgs = "\n".join(f'''                                    <img src="images/{p["foto"]}" alt="{nazwa(w["nazwa"])}" class="h-24 md:h-32 w-auto object-contain object-bottom">''' for _ in range(w["ile"]))
+        return f'''                            <figure class="flex flex-col items-center gap-1.5 w-[6.5rem] md:w-32">
                                 <div class="flex items-end justify-center gap-1">
 {imgs}
                                 </div>
@@ -172,10 +192,10 @@ def figura(w):
                             </figure>'''
 
 
-def grupa(tytul, ws):
-    if not ws:
-        return ""
-    return f'''                    <div class="flex flex-col items-center gap-2">
+    def grupa(tytul, ws):
+        if not ws:
+            return ""
+        return f'''                    <div class="flex flex-col items-center gap-2">
                         <div class="text-xs font-semibold uppercase tracking-wider" style="color: var(--green);">{tytul}</div>
                         <div class="flex flex-wrap justify-center items-start gap-2 md:gap-3">
 {chr(10).join(figura(w) for w in ws)}
@@ -183,12 +203,12 @@ def grupa(tytul, ws):
                     </div>'''
 
 
-def tr(w):
-    k = P[w["nazwa"]]["krotko"]
-    et = f' <span class="text-xs font-semibold" style="color: var(--green);">{w["etykieta"]}</span>' if w["etykieta"] else ""
-    poza = "brak ceny" if w["poza"] is None else zl(w["poza"]) + ("*" if w["nazwa"] in E.SZACUNKOWE else "")
-    wz = "—" if w["w_zestawie"] is None else zl(w["w_zestawie"])
-    return f'''                                <tr data-product-name="{k}">
+    def tr(w):
+        k = nazwa(w["nazwa"])
+        et = f' <span class="text-xs font-semibold" style="color: var(--green);">{w["etykieta"]}</span>' if w["etykieta"] else ""
+        poza = L("brak ceny", "no price") if w["poza"] is None else zl(w["poza"]) + ("*" if w["nazwa"] in E.SZACUNKOWE else "")
+        wz = "—" if w["w_zestawie"] is None else zl(w["w_zestawie"])
+        return f'''                                <tr data-product-name="{k}">
                                     <td class="py-1 px-2 border-b border-r text-center align-middle strike-column">
                                         <input type="checkbox" class="strike-toggle h-5 w-5 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer" data-product-name="{k}">
                                     </td>
@@ -199,56 +219,59 @@ def tr(w):
                                 </tr>'''
 
 
-nazwy200 = [P[n]["krotko"] for n, _ in E.OFERTA["gratis_200pv"]]
-promo_przypis = ""
-if nazwy200:
-    lista = nazwy200[0] if len(nazwy200) == 1 else ", ".join(nazwy200[:-1]) + " i " + nazwy200[-1]
-    promo_przypis = f'''
-                        <p class="text-xs mt-2" style="color: var(--text-muted);">*{lista}: zamówienie rejestracyjne na 200 PV lub więcej, złożone od {E.OKRES_WARUNKI}</p>'''
-przypis_szac = ""
-if szac:
-    n0 = next(iter(E.SZACUNKOWE))
-    cena0 = P[n0]["pln"]
-    cena_txt = f"{int(cena0)} zł" if cena0 == int(cena0) else f"{zl(cena0)} zł"
-    przypis_szac = f'''
-                    <p class="text-xs mt-3" style="color: var(--text-muted);">*{E.SZACUNEK_DOPELNIACZ[0].upper()}{E.SZACUNEK_DOPELNIACZ[1:]} nie ma jeszcze w cenniku doTERRA Polska – przyjęta cena szacunkowa {cena_txt} za sztukę.</p>'''
+    nazwy200 = [nazwa(n) for n, _ in E.OFERTA["gratis_200pv"]]
+    promo_przypis = ""
+    if nazwy200:
+        lista = nazwy200[0] if len(nazwy200) == 1 else ", ".join(nazwy200[:-1]) + L(" i ", " and ") + nazwy200[-1]
+        promo_przypis = f'''
+                        <p class="text-xs mt-2" style="color: var(--text-muted);">*{lista}: {L("zamówienie rejestracyjne na 200 PV lub więcej, złożone od " + E.OKRES_WARUNKI, "enrollment order of 200 PV or more, placed from " + E.EN["okres_warunki"])}</p>'''
+    przypis_szac = ""
+    if szac:
+        n0 = next(iter(E.SZACUNKOWE))
+        cena0 = P[n0][WAL]
+        cena_txt = f"{int(cena0)} {SYMBOL}" if cena0 == int(cena0) else f"{zl(cena0)} {SYMBOL}"
+        tekst = (f"{E.EN['szacunek']} is not yet in the doTERRA price list, assumed at approx. {cena_txt} each." if en else
+                 f"{E.SZACUNEK_DOPELNIACZ[0].upper()}{E.SZACUNEK_DOPELNIACZ[1:]} nie ma jeszcze w cenniku doTERRA Polska – przyjęta cena szacunkowa {cena_txt} za sztukę.")
+        przypis_szac = f'''
+                    <p class="text-xs mt-3" style="color: var(--text-muted);">*{tekst}</p>'''
 
-szablon = (TU / "szablony" / "oferta-rejestracji.html").read_text(encoding="utf-8")
-oferta = szablon
-for k, v in {
-    "TYTUL": f'Rejestracja z pakietem BOGO – {E.OFERTA["miesiac"][0].lower()}{E.OFERTA["miesiac"][1:]}',
-    "TYTUL_OG": TYTUL_OG, "OPIS_OG": OPIS_OG, "URL": URL,
-    "MIESIAC": E.OFERTA["miesiac"], "OKRES_KROTKO": E.OKRES_KROTKO,
-    "IMG_KIT": img_kit, "CENA": zl(cena_pakietu), "LI_KIT": li_kit, "PV": pv(pv_pakietu),
-    "WARTOSC_GRATISOW": str(wartosc_gratisow), "GWIAZDKA_PROMO": "*" if nazwy200 else "", "PROMO_PRZYPIS": promo_przypis,
-    "GRUPY": "\n".join(g for g in (grupa("Gratis BOGO (1+1)", bogo), grupa("Gratis do pakietu", prezent),
-                                    grupa("Gratis przy rejestracji od 200 PV", pv200)) if g),
-    "WIERSZE": "\n".join(tr(w) for w in wiersze),
-    "SUMA_POZA": zl(suma_poza) + ("*" if szac else ""), "PRZYPIS_SZAC": przypis_szac,
-}.items():
-    oferta = oferta.replace("{{" + k + "}}", v)
+    szablon = (TU / "szablony" / f"oferta-rejestracji{SFX}.html").read_text(encoding="utf-8")
+    oferta = szablon
+    for k, v in {
+        "TYTUL": L(f'Rejestracja z pakietem BOGO – {E.OFERTA["miesiac"][0].lower()}{E.OFERTA["miesiac"][1:]}', f'Enrollment with the BOGO bundle – {E.EN["miesiac"]}'),
+        "TYTUL_OG": TYTUL_OG, "OPIS_OG": OPIS_OG, "URL": URL,
+        "MIESIAC": L(E.OFERTA["miesiac"], E.EN["miesiac"]), "OKRES_KROTKO": E.OKRES_KROTKO,
+        "IMG_KIT": img_kit, "CENA": zl(cena_pakietu), "LI_KIT": li_kit, "PV": pv(pv_pakietu),
+        "WARTOSC_GRATISOW": str(wartosc_gratisow), "GWIAZDKA_PROMO": "*" if nazwy200 else "", "PROMO_PRZYPIS": promo_przypis,
+        "GRUPY": "\n".join(g for g in (grupa(L("Gratis BOGO (1+1)", "Free BOGO (1+1)"), bogo), grupa(L("Gratis do pakietu", "Free with the bundle"), prezent),
+                                        grupa(L("Gratis przy rejestracji od 200 PV", "Free with enrollment from 200 PV"), pv200)) if g),
+        "WIERSZE": "\n".join(tr(w) for w in wiersze),
+        "SUMA_POZA": zl(suma_poza) + ("*" if szac else ""), "PRZYPIS_SZAC": przypis_szac,
+    }.items():
+        oferta = oferta.replace("{{" + k + "}}", v)
 
-sp = (TU / "szablony" / "oferta-social-preview.html").read_text(encoding="utf-8")
-sp = (sp.replace("{{BADGE}}", f"{n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis (ok. {wartosc_gratisow} zł)")
-        .replace("{{PODTYTUL}}", f"{E.OKRES} · {zl(cena_pakietu)} zł · {pv(pv_pakietu)} PV"))
+    sp = (TU / "szablony" / f"oferta-social-preview{SFX}.html").read_text(encoding="utf-8")
+    sp = (sp.replace("{{BADGE}}", L(f"{n_kup} {rz} + {n_gratis} {produktow(n_gratis)} gratis (ok. {wartosc_gratisow} zł)",
+                                    f"{n_kup} {rz} + {n_gratis} products free (approx. {wartosc_gratisow} €)"))
+            .replace("{{PODTYTUL}}", f"{L(E.OKRES, E.EN['okres'])} · {zl(cena_pakietu)} {SYMBOL} · {pv(pv_pakietu)} PV"))
 
-(OFERTA_DIR / "images").mkdir(parents=True, exist_ok=True)
-for wspolny in ("doterralogo.png", "liscie-gora.png"):
-    cel = OFERTA_DIR / "images" / wspolny
-    if not cel.exists():
-        zrodlo = next(iter(sorted(glob.glob(str(TU.parent / "new-client-offer" / "*" / "images" / wspolny)))), None)
-        if zrodlo:
-            shutil.copy(zrodlo, cel)
-zapisz(OFERTA_DIR / "index.html", oferta)
-zapisz(OFERTA_DIR / "social-preview.html", sp)
-renderuj(OFERTA_DIR / "social-preview.html", OFERTA_DIR / "social-preview.jpg")
+    (OFERTA_DIR / "images").mkdir(parents=True, exist_ok=True)
+    for wspolny in ("doterralogo.png", "liscie-gora.png"):
+        cel = OFERTA_DIR / "images" / wspolny
+        if not cel.exists():
+            zrodlo = next(iter(sorted(glob.glob(str(TU.parent / "new-client-offer" / "*" / "images" / wspolny)))), None)
+            if zrodlo:
+                shutil.copy(zrodlo, cel)
+    zapisz(OFERTA_DIR / L("index.html", "index-en.html"), oferta)
+    zapisz(OFERTA_DIR / f"social-preview{SFX}.html", sp)
+    renderuj(OFERTA_DIR / f"social-preview{SFX}.html", OFERTA_DIR / f"social-preview{SFX}.jpg")
 
-brak = [w["nazwa"] for w in wiersze if not (OFERTA_DIR / "images" / P[w["nazwa"]]["foto"]).exists()]
-for n in dict.fromkeys(brak):
-    print(f'  BRAK zdjęcia: python3 ~/.claude/scripts/doterra-image.py --product "{P[n]["en"]}" --output /tmp/x '
-          f'→ {OFERTA_DIR.relative_to(TU.parent)}/images/{P[n]["foto"]}')
-print(f"{E.OFERTA['folder']}/index.html: pakiet {zl(cena_pakietu)} zł, {pv(pv_pakietu)} PV, "
-      f"{n_gratis} gratisów ok. {wartosc_gratisow} zł, suma poza {zl(suma_poza)}")
+    brak = [w["nazwa"] for w in wiersze if not (OFERTA_DIR / "images" / P[w["nazwa"]]["foto"]).exists()]
+    for n in dict.fromkeys(brak):
+        print(f'  BRAK zdjęcia: python3 ~/.claude/scripts/doterra-image.py --product "{P[n]["en"]}" --output /tmp/x '
+              f'→ {OFERTA_DIR.relative_to(TU.parent)}/images/{P[n]["foto"]}')
+    print(f"{E.OFERTA['folder']}/{L('index.html', 'index-en.html')}: pakiet {zl(cena_pakietu)} {SYMBOL}, {pv(pv_pakietu)} PV, "
+          f"{n_gratis} gratisów ok. {wartosc_gratisow} {SYMBOL}, suma poza {zl(suma_poza)}")
 
 
 # ---------- 3. teksty kart do hubów ----------

@@ -10,7 +10,8 @@
                                             do grupy WhatsApp „BOGO od Claude”; Dropbox zostaje jako kopia (decyzja 27.10.2026).
                                             Wysyła tylko nowe/zmienione pliki (BOGO Em/<MIESIAC>/.wyslane-whatsapp.json, md5).
   python3 dropbox.py whatsapp-eng         → wersja dla odbiorców spoza Polski do grupy „BOGO ENG od Claude”: strona BOGO EN
-                                            (index-en.html, ceny EUR), playlista + cały film, rolki, grafiki z kółeczkami EN,
+                                            (index-en.html, ceny EUR), rejestracja z pakietem EN, playlista + cały film, rolki,
+                                            broszura EN, grafiki z kółeczkami EN,
                                             screeny kart EN (pakiet na końcu); nagłówki po angielsku; osobny stan
                                             .wyslane-whatsapp-eng.json. Instagramu do Asi nie rusza.
   python3 dropbox.py grafiki-ewy "<link>" → grafiki od Ewy (link dropbox.com/home/… albo ścieżka) do
@@ -51,6 +52,7 @@ def linki():
          f"Strona BOGO (EUR): https://emilia-chodorowska.github.io/BOGO/index-eur.html",
          f"Strona BOGO (EN, EUR): https://emilia-chodorowska.github.io/BOGO/index-en.html",
          f"Rejestracja z pakietem BOGO: {oferta}",
+         f"Rejestracja z pakietem BOGO (EN, EUR): {oferta}index-en.html",
          f"Rejestracja, widok zespołu: {oferta}?team=true",
          "Hub doTERRA (sekcja BOGO): https://emilia-chodorowska.github.io/doterra-hub/"]
     yt = ZR / "film" / "yt-stan.json"
@@ -89,8 +91,9 @@ def em():
     (lok / "Instagram").mkdir(exist_ok=True)
     for png in (ZR / "instagram").glob("*.png"):
         shutil.copy2(png, lok / "Instagram" / png.name)
-    for pdf in ZR.glob("PL_*.pdf"):
-        shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} PL.pdf")
+    for jezyk in ("PL", "EN"):  # EN do grupy „BOGO ENG od Claude”
+        for pdf in ZR.glob(f"{jezyk}_*.pdf"):
+            shutil.copy2(pdf, lok / f"Broszura BOGO {E.MIESIAC} {jezyk}.pdf")
     wrzuc(ZR / "rolki", "Rolki doTERRA")
     wrzuc(Path.home() / f"MyProjects/canva/materialy/_wygenerowane-bogo-{E.MIESIAC}/do-canvy", "Tla do Canvy")
     print(f"  lokalnie: {lok}")
@@ -103,7 +106,8 @@ WARIANTY_WA = {
     "eng": dict(grupa="BOGO ENG od Claude", stan=".wyslane-whatsapp-eng.json", log=".wyslane-whatsapp-eng-log.json"),
 }
 # ENG: podpisy linków po angielsku (klucz = opis z Linki.txt)
-OPISY_ENG = {"Strona BOGO (EN, EUR)": "BOGO page", "Playlista": "Playlist", "calosc": "Full video"}
+OPISY_ENG = {"Strona BOGO (EN, EUR)": "BOGO page", "Rejestracja z pakietem BOGO (EN, EUR)": "Enrollment with the BOGO bundle",
+             "Playlista": "Playlist", "calosc": "Full video"}
 EGO_BIN = str(Path.home() / ".local/bin/ego-browser")
 WA_SKRYPT = Path.home() / "MyProjects/canva/proces/automaty/ego/wyslij_whatsapp.mjs"
 KAT = Path.home() / "MyProjects/canva/materialy/_katalog-grafik"
@@ -222,7 +226,7 @@ def whatsapp(wariant="pl"):
         if kod:
             rolki.append(("", f"https://www.instagram.com/reel/{kod}/", f))
     linki_sekcja(None, rolki)  # bez nagłówka „Rolki doTERRA” (userka 27.10.2026)
-    for pdf in [] if eng else nowe(sorted(em_lok.glob("*.pdf"))):  # broszura tylko po polsku
+    for pdf in nowe(sorted(em_lok.glob(f"* {'EN' if eng else 'PL'}.pdf"))):  # broszura w języku grupy
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
     for tytul, pliki in sekcje:
         zdj = nowe([f for f in pliki if f.suffix.lower() in OBRAZY])
