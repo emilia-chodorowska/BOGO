@@ -103,14 +103,15 @@ FILMY = {".mp4", ".mov"}  # przez „Zdjęcia i filmy” WhatsApp Web nie robi p
 def grafiki_kolka():
     """Gotowe grafiki z kółeczkami produktów bieżącej promocji (katalog Canvy), tylko PL (userka 27.10: EN/DE/UK to za dużo)."""
     import canva as C
-    slugi = {E.PRODUKTY[n]["slug"] for n in C.produkty_promocji()}
+    kolejnosc = [E.PRODUKTY[n]["slug"] for n in C.produkty_promocji()]  # kolejność jak na stronie BOGO
+    slugi = set(kolejnosc)
     try:
         kat = json.loads((KAT / "katalog.json").read_text(encoding="utf-8"))["grafiki"]
     except Exception:
         return []
     kol = {"pl": 0, "en": 1, "de": 2, "uk": 3}
     g = [x for x in kat if x["slug"] in slugi and x["jezyk"] == "pl" and x["stan"] == "gotowa" and (KAT / x["plik"]).exists()]
-    return [KAT / x["plik"] for x in sorted(g, key=lambda x: (kol.get(x["jezyk"], 9), x["strona"]))]
+    return [KAT / x["plik"] for x in sorted(g, key=lambda x: (kol.get(x["jezyk"], 9), kolejnosc.index(x["slug"]), x["strona"]))]
 
 
 def miniatura(url, katalog, film=None):
