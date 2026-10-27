@@ -173,7 +173,8 @@ def whatsapp():
             kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
         for opis, url, *film in pary:
             obraz = miniatura(url, em_lok / ".miniatury", film[0] if film else None)
-            krok = {"zdjecia": [str(obraz)], "podpis": f"{opis}: {url}"} if obraz else {"tekst": f"{opis}: {url}", "podglad": True}
+            tekst = f"{opis}: {url}" if opis else url  # rolki: sam link, bez opisu (userka 27.10.2026)
+            krok = {"zdjecia": [str(obraz)], "podpis": tekst} if obraz else {"tekst": tekst, "podglad": True}
             kroki.append(krok); pliki_krokow.append([("#link", url)])
 
     linki_p = em_lok / "Linki.txt"
@@ -194,7 +195,7 @@ def whatsapp():
     for f in sorted((em_lok / "Rolki doTERRA").glob("*.mp4")):
         data, _, kod = f.stem.partition("-")
         if kod:
-            rolki.append((f"Rolka doTERRA {data[6:8]}.{data[4:6]}", f"https://www.instagram.com/reel/{kod}/", f))
+            rolki.append(("", f"https://www.instagram.com/reel/{kod}/", f))
     linki_sekcja(None, rolki)  # bez nagłówka „Rolki doTERRA” (userka 27.10.2026)
     for pdf in nowe(sorted(em_lok.glob("*.pdf"))):
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
