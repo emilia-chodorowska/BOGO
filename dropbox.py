@@ -169,7 +169,7 @@ def whatsapp():
         pary = [(opis, url, *film) for opis, url, *film in pary if url not in wyslane_linki]
         if not pary:
             return
-        if tytul not in naglowki:
+        if tytul and tytul not in naglowki:
             kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
         for opis, url, *film in pary:
             obraz = miniatura(url, em_lok / ".miniatury", film[0] if film else None)
@@ -188,7 +188,7 @@ def whatsapp():
                 if "youtu.be/" in url and opis != "calosc":  # z filmów: playlista + cały film, bez pojedynczych (userka 27.10.2026)
                     continue
                 pary.append(("Cały film" if opis == "calosc" else opis, url.strip()))
-        linki_sekcja("Linki", pary)
+        linki_sekcja(None, pary)  # bez nagłówka „Linki” (userka 27.10.2026)
     # rolki: link do Instagrama zamiast pliku mp4 (nazwa pliku RRRRMMDD-<shortcode>.mp4 z rolki.mjs)
     rolki = []
     for f in sorted((em_lok / "Rolki doTERRA").glob("*.mp4")):
