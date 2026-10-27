@@ -3,7 +3,8 @@
 
   python3 dropbox.py em                   → mój folder „BOGO Em/<MIESIAC>/”: wszystko, co ważne na koniec;
                                             składany w ~/MyProjects/doTERRA/BOGO Em/ (Finder), potem kopia na Dropbox
-  python3 dropbox.py whatsapp             → ten sam komplet co „em” (+ gotowe grafiki z kółeczkami BOGO z katalogu Canvy)
+  python3 dropbox.py whatsapp             → ten sam komplet co „em” (+ gotowe grafiki z kółeczkami BOGO PL z katalogu Canvy)
+                                            — linki i rolki (jako linki do Instagrama) każdy osobną wiadomością, z podglądem
                                             do grupy WhatsApp „BOGO od Claude”; Dropbox zostaje jako kopia (decyzja 27.10.2026).
                                             Wysyła tylko nowe/zmienione pliki (BOGO Em/<MIESIAC>/.wyslane-whatsapp.json, md5).
   python3 dropbox.py grafiki-ewy "<link>" → grafiki od Ewy (link dropbox.com/home/… albo ścieżka) do
@@ -98,7 +99,7 @@ FILMY = {".mp4", ".mov"}  # przez „Zdjęcia i filmy” WhatsApp Web nie robi p
 
 
 def grafiki_kolka():
-    """Gotowe grafiki z kółeczkami produktów bieżącej promocji (katalog Canvy), wszystkie gotowe języki."""
+    """Gotowe grafiki z kółeczkami produktów bieżącej promocji (katalog Canvy), tylko PL (userka 27.10: EN/DE/UK to za dużo)."""
     import canva as C
     slugi = {E.PRODUKTY[n]["slug"] for n in C.produkty_promocji()}
     try:
@@ -106,8 +107,38 @@ def grafiki_kolka():
     except Exception:
         return []
     kol = {"pl": 0, "en": 1, "de": 2, "uk": 3}
-    g = [x for x in kat if x["slug"] in slugi and x["stan"] == "gotowa" and (KAT / x["plik"]).exists()]
+    g = [x for x in kat if x["slug"] in slugi and x["jezyk"] == "pl" and x["stan"] == "gotowa" and (KAT / x["plik"]).exists()]
     return [KAT / x["plik"] for x in sorted(g, key=lambda x: (kol.get(x["jezyk"], 9), x["strona"]))]
+
+
+def miniatura(url, katalog, film=None):
+    """Obrazek do linku: WhatsApp Web (ego) nie wczytuje pełnego podglądu linku, więc link idzie jako podpis zdjęcia.
+    YouTube → okładka filmu, rolka → klatka z pobranego mp4, strona → jej og:image. Brak → None (sam tekst)."""
+    import re
+    import urllib.request
+    katalog.mkdir(exist_ok=True)
+    cel = katalog / (hashlib.md5(url.encode()).hexdigest()[:10] + ".jpg")
+    if cel.exists():
+        return cel
+    try:
+        if film:
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "1", "-i", str(film), "-frames:v", "1", "-vf", "scale=720:-2", str(cel)], check=True)
+            return cel
+        if re.search(r"youtu\.be/|youtube\.com/", url):  # film i playlista: okładka z oEmbed
+            from urllib.parse import quote
+            oe = json.loads(urllib.request.urlopen(f"https://www.youtube.com/oembed?format=json&url={quote(url, safe='')}", timeout=20).read())
+            obraz = oe["thumbnail_url"]
+        else:
+            strona = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read().decode("utf-8", "ignore")
+            m = re.search(r'<meta[^>]+og:image[^>]+content="([^"]+)"', strona) or re.search(r'<meta[^>]+content="([^"]+)"[^>]+og:image', strona)
+            if not m:
+                return None
+            obraz = m.group(1)
+        cel.write_bytes(urllib.request.urlopen(urllib.request.Request(obraz, headers={"User-Agent": "Mozilla/5.0"}), timeout=20).read())
+        return cel
+    except Exception as e:
+        print(f"  bez miniatury: {url} ({e})")
+        return None
 
 
 def whatsapp():
@@ -128,15 +159,40 @@ def whatsapp():
         ("Instagram", sorted((em_lok / "Instagram").glob("*"))),
         ("Grafiki Ewy", sorted((em_lok / "Grafiki Ewy (WhatsApp)").glob("*"))),
         ("Tła do Canvy", sorted((em_lok / "Tla do Canvy").glob("*"))),
-        ("Rolki doTERRA", sorted((em_lok / "Rolki doTERRA").glob("*"))),
     ]
     kroki, pliki_krokow = [], []
+    naglowki = set(stan.get("#naglowki", []))
+    wyslane_linki = set(stan.get("#linki", []))
+
+    def linki_sekcja(tytul, pary):
+        """Każdy link osobną wiadomością: miniatura z linkiem w podpisie (pełny podgląd linku w WhatsApp Web nie działa)."""
+        pary = [(opis, url, *film) for opis, url, *film in pary if url not in wyslane_linki]
+        if not pary:
+            return
+        if tytul not in naglowki:
+            kroki.append({"tekst": f"*{tytul}* · BOGO {E.OKRES}"}); pliki_krokow.append([("#naglowek", tytul)])
+        for opis, url, *film in pary:
+            obraz = miniatura(url, em_lok / ".miniatury", film[0] if film else None)
+            krok = {"zdjecia": [str(obraz)], "podpis": f"{opis}: {url}"} if obraz else {"tekst": f"{opis}: {url}", "podglad": True}
+            kroki.append(krok); pliki_krokow.append([("#link", url)])
+
     linki_p = em_lok / "Linki.txt"
-    if linki_p.exists() and linki_p in nowe([linki_p]):
-        kroki.append({"tekst": linki_p.read_text(encoding="utf-8").strip()}); pliki_krokow.append([linki_p])
+    if linki_p.exists():
+        pary = []
+        for l in linki_p.read_text(encoding="utf-8").splitlines():
+            if ": http" in l:
+                opis, url = l.split(": ", 1)
+                pary.append((opis.strip(), url.strip()))
+        linki_sekcja("Linki", pary)
+    # rolki: link do Instagrama zamiast pliku mp4 (nazwa pliku RRRRMMDD-<shortcode>.mp4 z rolki.mjs)
+    rolki = []
+    for f in sorted((em_lok / "Rolki doTERRA").glob("*.mp4")):
+        data, _, kod = f.stem.partition("-")
+        if kod:
+            rolki.append((f"Rolka doTERRA {data[6:8]}.{data[4:6]}", f"https://www.instagram.com/reel/{kod}/", f))
+    linki_sekcja("Rolki doTERRA", rolki)
     for pdf in nowe(sorted(em_lok.glob("*.pdf"))):
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
-    naglowki = set(stan.get("#naglowki", []))
     for tytul, pliki in sekcje:
         zdj = nowe([f for f in pliki if f.suffix.lower() in OBRAZY])
         filmy = nowe([f for f in pliki if f.suffix.lower() in FILMY])
@@ -160,11 +216,14 @@ def whatsapp():
     ok = sum(1 for l in out.splitlines() if l.startswith("KROK OK:"))
     for pl in pliki_krokow[:ok]:
         for f in pl:
-            if isinstance(f, tuple):
+            if isinstance(f, tuple) and f[0] == "#link":
+                wyslane_linki.add(f[1])
+            elif isinstance(f, tuple):
                 naglowki.add(f[1])
             else:
                 stan[str(f)] = md5(f)
     stan["#naglowki"] = sorted(naglowki)
+    stan["#linki"] = sorted(wyslane_linki)
     stan_p.write_text(json.dumps(stan, ensure_ascii=False, indent=1), encoding="utf-8")
     print("\n".join(l for l in out.strip().splitlines()[-25:]))
     if ok < len(kroki):
