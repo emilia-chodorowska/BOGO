@@ -4,7 +4,9 @@
   python3 dropbox.py em                   → mój folder „BOGO Em/<MIESIAC>/”: wszystko, co ważne na koniec;
                                             składany w ~/MyProjects/doTERRA/BOGO Em/ (Finder), potem kopia na Dropbox
   python3 dropbox.py whatsapp             → ten sam komplet co „em” (+ gotowe grafiki z kółeczkami BOGO PL z katalogu Canvy)
-                                            — linki i rolki (jako linki do Instagrama) każdy osobną wiadomością, z podglądem
+                                            — linki i rolki (jako linki do Instagrama) każdy osobno jako miniatura z linkiem;
+                                            bez zdjęć zestawów, EUR, huba i widoku zespołu; nagłówki sekcji bez dat;
+                                            grafiki na Instagram → prosto do Asi Piwowarczyk (nie do grupy)
                                             do grupy WhatsApp „BOGO od Claude”; Dropbox zostaje jako kopia (decyzja 27.10.2026).
                                             Wysyła tylko nowe/zmienione pliki (BOGO Em/<MIESIAC>/.wyslane-whatsapp.json, md5).
   python3 dropbox.py grafiki-ewy "<link>" → grafiki od Ewy (link dropbox.com/home/… albo ścieżka) do
@@ -151,12 +153,10 @@ def whatsapp():
     md5 = lambda f: hashlib.md5(Path(f).read_bytes()).hexdigest()
     nowe = lambda pliki: [f for f in pliki if stan.get(str(f)) != md5(f)]
     sekcje = [
-        ("Zdjęcia zestawów", sorted((em_lok / "Zdjecia zestawow").glob("*"))),
         ("Grafiki z kółeczkami", grafiki_kolka()),
         ("Screeny z maila", sorted((em_lok / "Screeny z maila").glob("*"))),
-        ("Screeny kart · PLN", sorted((em_lok / "Screeny kart/PLN").glob("*"))),
-        ("Screeny kart · EUR", sorted((em_lok / "Screeny kart/EUR").glob("*"))),
-        ("Instagram", sorted((em_lok / "Instagram").glob("*"))),
+        ("Screeny kart", sorted((em_lok / "Screeny kart/PLN").glob("*"), key=lambda f: ("pakiet" in f.name, f.name))),  # pakiet na koniec
+        # bez zdjęć zestawów i EUR (ewentualnie osobna grupa „BOGO ENG od Claude”); Instagram idzie do Asi, nie tu
         ("Grafiki Ewy", sorted((em_lok / "Grafiki Ewy (WhatsApp)").glob("*"))),
         ("Tła do Canvy", sorted((em_lok / "Tla do Canvy").glob("*"))),
     ]
@@ -170,7 +170,7 @@ def whatsapp():
         if not pary:
             return
         if tytul not in naglowki:
-            kroki.append({"tekst": f"*{tytul}* · BOGO {E.OKRES}"}); pliki_krokow.append([("#naglowek", tytul)])
+            kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
         for opis, url, *film in pary:
             obraz = miniatura(url, em_lok / ".miniatury", film[0] if film else None)
             krok = {"zdjecia": [str(obraz)], "podpis": f"{opis}: {url}"} if obraz else {"tekst": f"{opis}: {url}", "podglad": True}
@@ -183,6 +183,8 @@ def whatsapp():
             if ": http" in l:
                 opis, url = l.split(": ", 1)
                 opis = opis.strip()
+                if "(EUR)" in opis or "index-eur" in url or "doterra-hub" in url or "team=true" in url:  # bez EUR, huba, widoku zespołu
+                    continue
                 if "youtu.be/" in url and opis != "calosc":  # z filmów: playlista + cały film, bez pojedynczych (userka 27.10.2026)
                     continue
                 pary.append(("Cały film" if opis == "calosc" else opis, url.strip()))
@@ -202,7 +204,7 @@ def whatsapp():
         if not zdj and not filmy:
             continue
         if tytul not in naglowki:  # nagłówek sekcji raz na miesiąc, nie przy każdym dosłaniu
-            kroki.append({"tekst": f"*{tytul}* · BOGO {E.OKRES}"}); pliki_krokow.append([("#naglowek", tytul)])
+            kroki.append({"tekst": f"*{tytul}*"}); pliki_krokow.append([("#naglowek", tytul)])
         for i in range(0, len(zdj), 30):
             kroki.append({"zdjecia": [str(f) for f in zdj[i:i + 30]]}); pliki_krokow.append(zdj[i:i + 30])
         for f in filmy:
@@ -233,6 +235,32 @@ def whatsapp():
         sys.exit(1)
 
 
+INSTAGRAM_DO = "Asia Piwowarczyk"  # grafiki na Instagram idą prosto do Asi, nie do „BOGO od Claude” (userka 27.10.2026)
+
+
+def instagram_asia():
+    em_lok = LOKALNIE / E.MIESIAC
+    stan_p = em_lok / ".wyslane-instagram-asia.json"
+    stan = json.loads(stan_p.read_text(encoding="utf-8")) if stan_p.exists() else {}
+    md5 = lambda f: hashlib.md5(Path(f).read_bytes()).hexdigest()
+    pliki = [f for f in sorted((em_lok / "Instagram").glob("*.png")) if stan.get(str(f)) != md5(f)]
+    if not pliki:
+        print(f"  Instagram → {INSTAGRAM_DO}: nic nowego")
+        return
+    zad = {"grupa": INSTAGRAM_DO, "kroki": [{"zdjecia": [str(f) for f in pliki]}]}
+    r = subprocess.run([EGO_BIN, "nodejs"], input=f"const ZADANIE = {json.dumps(zad, ensure_ascii=False)};\n" + WA_SKRYPT.read_text(encoding="utf-8"),
+                       capture_output=True, text=True, timeout=900)
+    out = r.stdout + r.stderr
+    if "WYSŁANE: 1/1" in out:
+        for f in pliki:
+            stan[str(f)] = md5(f)
+        stan_p.write_text(json.dumps(stan, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"  Instagram → {INSTAGRAM_DO}: {len(pliki)} grafik")
+    else:
+        print(f"  Instagram → {INSTAGRAM_DO}: BŁĄD\n" + "\n".join(out.strip().splitlines()[-6:]))
+        sys.exit(1)
+
+
 def grafiki_ewy(link):
     """Proces zależny od Ewy: jej gotowe grafiki do mojego folderu, skąd wysyłam je na WhatsAppie."""
     from urllib.parse import unquote, urlparse
@@ -255,5 +283,6 @@ if __name__ == "__main__":
         em()
     elif len(sys.argv) >= 2 and sys.argv[1] == "whatsapp":
         whatsapp()
+        instagram_asia()
     else:
         print(__doc__)
