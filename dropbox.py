@@ -157,7 +157,8 @@ def whatsapp():
         ("Screeny z maila", sorted((em_lok / "Screeny z maila").glob("*"))),
         ("Screeny kart", sorted((em_lok / "Screeny kart/PLN").glob("*"), key=lambda f: ("pakiet" in f.name, f.name))),  # pakiet na koniec
         # bez zdjęć zestawów i EUR (ewentualnie osobna grupa „BOGO ENG od Claude”); Instagram idzie do Asi, nie tu
-        ("Grafiki", sorted((em_lok / "Grafiki Ewy (WhatsApp)").glob("*"))),  # nagłówek bez „Ewy” (userka 27.10.2026)
+        ("Grafiki", sorted((em_lok / "Grafiki Ewy (WhatsApp)").glob("*"),  # nagłówek bez „Ewy”; okładka z całym BOGO na końcu
+                           key=lambda f: ("okladka" in f.name.lower(), f.name))),
         ("Tła do Canvy", sorted((em_lok / "Tla do Canvy").glob("*"))),
     ]
     kroki, pliki_krokow = [], []
