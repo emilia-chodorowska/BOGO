@@ -1,11 +1,11 @@
-// Screeny kart zestawów (widok telefonu, 402 px × 3) i pakietu (układ 700 px × 2) z index.html i index-eur.html.
-// Uruchomienie: node screeny.cjs <folder-wyjściowy>   → <folder>/PLN/*.png i <folder>/EUR/*.png
+// Screeny kart zestawów (widok telefonu, 402 px × 3) i pakietu (układ 700 px × 2) z index.html, index-eur.html i index-en.html.
+// Uruchomienie: node screeny.cjs <folder-wyjściowy>   → <folder>/PLN/*.png, <folder>/EUR/*.png i <folder>/EN/*.png (EUR po angielsku)
 const path = require('path');
 const fs = require('fs');
 const puppeteer = require('/opt/homebrew/lib/node_modules/decktape/node_modules/puppeteer-core');
 
 const OUT = path.resolve(process.argv[2] || 'screeny');
-const STRONY = { PLN: 'index.html', EUR: 'index-eur.html' };
+const STRONY = { PLN: 'index.html', EUR: 'index-eur.html', EN: 'index-en.html' };
 
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l')
   .replace(/[™]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -36,7 +36,7 @@ const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').repla
     await p.goto(url, { waitUntil: 'networkidle0' });
     await p.evaluate(() => document.fonts.ready);
     const bx = await p.evaluate(() => {
-      const img = document.querySelector('img[alt^="Pakiet BOGO"]');
+      const img = document.querySelector('img[alt^="Pakiet BOGO"], img[alt^="BOGO bundle"]');
       img.parentElement.style.height = '300px';
       const q = img.closest('div[style*="border-radius:22px"]').getBoundingClientRect();
       return { x: q.x, y: q.y + scrollY, w: q.width, h: q.height };

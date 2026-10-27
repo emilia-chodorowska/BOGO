@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Wszystko poza stronami BOGO, z tych samych danych (edycja.py). Odpalane przez `python3 generuj.py`.
 
-1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO)
+1. og.html + images/bogo-social-preview-<MIESIAC>.jpg (podgląd linku strony BOGO),
+   og-en.html + …-<MIESIAC>-en.jpg (to samo po angielsku, dla index-en.html)
 2. ../new-client-offer/<OFERTA folder>/index.html + social-preview.html + social-preview.jpg
    (rejestracja z pakietem BOGO: pakiet = produkty kupowane, reszta to gratisy)
 3. teksty do sekcji BOGO w hubie doTERRA — na ekran
@@ -66,9 +67,11 @@ def renderuj(html, jpg):
     print(f"  render: {jpg.relative_to(TU.parent)} ({jpg.stat().st_size // 1024} KB)")
 
 
-# ---------- 1. podgląd linku strony BOGO ----------
-og = f'''<!DOCTYPE html>
-<html lang="pl">
+# ---------- 1. podgląd linku strony BOGO (PL i EN) ----------
+for en in (False, True):
+    L = lambda pl, ang: ang if en else pl
+    og = f'''<!DOCTYPE html>
+<html lang="{L('pl', 'en')}">
 <head>
 <meta charset="UTF-8">
 <title>og BOGO {E.MIESIAC}</title>
@@ -94,18 +97,19 @@ og = f'''<!DOCTYPE html>
   <div class="wrap">
     <div class="txt">
       <div class="marka">doTERRA</div>
-      <h1>Oferta BOGO</h1>
-      <div class="data">{E.OKRES}</div>
-      <div class="opis">{len(E.ZESTAWY)} zestawów: kupujesz jeden produkt, drugi dostajesz gratis.</div>
-      <div class="pill">Pakiet BOGO + {E.PREZENT_KROTKO} gratis</div>
+      <h1>{L('Oferta BOGO', 'BOGO Offer')}</h1>
+      <div class="data">{L(E.OKRES, E.EN['okres'])}</div>
+      <div class="opis">{L(f'{len(E.ZESTAWY)} zestawów: kupujesz jeden produkt, drugi dostajesz gratis.', f'{len(E.ZESTAWY)} sets: buy one product, get the second one free.')}</div>
+      <div class="pill">{L(f'Pakiet BOGO + {E.PREZENT_KROTKO} gratis', 'BOGO bundle + ' + E.EN['prezent_krotko'] + ' free')}</div>
     </div>
     <div class="foto"><img src="{E.FOTO_PAKIET}" alt=""></div>
   </div>
 </body>
 </html>
 '''
-zapisz(TU / "og.html", og)
-renderuj(TU / "og.html", TU / f"images/bogo-social-preview-{E.MIESIAC}.jpg")
+    sfx = "-en" if en else ""
+    zapisz(TU / f"og{sfx}.html", og)
+    renderuj(TU / f"og{sfx}.html", TU / f"images/bogo-social-preview-{E.MIESIAC}{sfx}.jpg")
 
 
 # ---------- 2. rejestracja z pakietem BOGO ----------

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generator BOGO z danych w edycja.py.
 
-`python3 generuj.py` robi wszystko: index.html (PLN), index-eur.html (EUR), og.html + render podglądu linku,
+`python3 generuj.py` robi wszystko: index.html (PLN), index-eur.html (EUR), index-en.html (EUR, po angielsku —
+dla grupy WhatsApp „BOGO ENG od Claude”), og.html / og-en.html + render podglądu linku,
 i stronę rejestracji z pakietem (../new-client-offer/<folder>/).
-`python3 generuj.py pln|eur` — tylko jedna strona BOGO.
+`python3 generuj.py pln|eur|en` — tylko jedna strona BOGO.
 
 Ceny PLN: hurtowe brutto PL (wholesale_gross) z bazy aroma-pricing (doterra-image.py --info).
 Ceny EUR: „EK-Preis” z kart produktów sklepu DE (shop.doterra.com/DE/de_DE/shop/<slug>/), czytane przez ego.
@@ -16,20 +17,38 @@ import sys
 from pathlib import Path
 
 if len(sys.argv) < 2:
-    for w in ("pln", "eur"):
+    for w in ("pln", "eur", "en"):
         subprocess.run([sys.executable, __file__, w], check=True)
     subprocess.run([sys.executable, str(Path(__file__).with_name("dodatki.py"))], check=True)
     sys.exit()
 WALUTA = sys.argv[1]
+EN = WALUTA == "en"  # index-en.html: ceny EUR, tekst po angielsku (teksty edycji: edycja.EN, edycja.NAZWY_EN)
+if EN:
+    WALUTA = "eur"
 
 from edycja import (OKRES, OKRES_KROTKO, OKRES_WARUNKI, KONIEC, POPRZEDNIA, PREZENT_NAZWA, WARUNKI_EXTRA,
                     SZACUNEK_DOPELNIACZ, SZACUNKOWE, FOTO_PAKIET, FOTO_PREZENT, MIESIAC, PRODUKTY)
 import edycja
 import liczenie
 
+if EN:
+    OKRES, OKRES_WARUNKI, KONIEC = edycja.EN["okres"], edycja.EN["okres_warunki"], edycja.EN["koniec"]
+    PREZENT_NAZWA, WARUNKI_EXTRA = edycja.EN["prezent_nazwa"], edycja.EN["warunki_extra"]
+    SZACUNEK_DOPELNIACZ, POPRZEDNIA = edycja.EN["szacunek"], edycja.EN["poprzednia"]
+
+
+def L(pl, en):
+    """Tekst strony w języku wersji."""
+    return en if EN else pl
+
+
+def nz(n):
+    """Nazwa produktu na stronie."""
+    return (edycja.NAZWY_EN.get(n) or PRODUKTY[n]["en"]) if EN else n
+
 DATA_CEN = edycja.DATA_CEN[WALUTA]
-ZRODLO_CEN = {"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA]
-OG_IMAGE = f"https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview-{MIESIAC}.jpg"
+ZRODLO_CEN = L({"pln": "cennika doTERRA Polska", "eur": "cennika doTERRA Niemcy (w euro)"}[WALUTA], "the doTERRA Germany price list (in euro)")
+OG_IMAGE = f"https://raw.githubusercontent.com/emilia-chodorowska/BOGO/main/images/bogo-social-preview-{MIESIAC}{"-en" if EN else ""}.jpg"
 
 
 def c(nazwa):
@@ -47,17 +66,17 @@ PREZENT = (edycja.PREZENT[0], edycja.PREZENT[1], c(edycja.PREZENT[0]))
 
 
 
-PLIK = "index.html" if WALUTA == "pln" else "index-eur.html"
+PLIK = "index-en.html" if EN else "index.html" if WALUTA == "pln" else "index-eur.html"
 SYMBOL = "zł" if WALUTA == "pln" else "€"
 
 
 def zl(x, waluta=True):
-    s = f"{x:,.2f}".replace(",", " ").replace(".", ",").replace(" ", "")
+    s = f"{x:.2f}" if EN else f"{x:,.2f}".replace(",", " ").replace(".", ",").replace(" ", "")
     return f"{s} {SYMBOL}" if waluta else s
 
 
 def pv(x):
-    return f"{x:.1f}".replace(".", ",")
+    return f"{x:.1f}" if EN else f"{x:.1f}".replace(".", ",")
 
 
 def wartosc(poz):
@@ -71,7 +90,7 @@ def podzial(cena_zestawu, pozycje):
 
 def nazwa_poz(p):
     n, r, _, _, ile = p
-    return f"{'2 × ' if ile == 2 else ''}{n} ({r})"
+    return f"{'2 × ' if ile == 2 else ''}{nz(n)} ({r})"
 
 
 # ---------- karty zestawów ----------
@@ -115,24 +134,24 @@ for i, z in enumerate(ZESTAWY, 1):
         </div>
         <div style="flex:1 1 340px; min-width:0;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-            <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">ZESTAW {i:02d}</span>
+            <span style="font-size:11px; font-weight:700; letter-spacing:.1em; color:#4d6a5e;">{L("ZESTAW", "SET")} {i:02d}</span>
             <span style="font-size:11px; font-weight:600; color:#78716c;">· {pv(kup[3])} PV</span>
           </div>
-          <h3 class="tytul-zestawu" style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 6px; line-height:1.25;">{z["tytul"]}</h3>
-          <div style="font-size:13px; color:#57534e; margin:0 0 14px; line-height:1.5;"><strong style="color:#4d6a5e;">Kupujesz:</strong> {nazwa_poz(kup)} · <strong style="color:#4d6a5e;">Gratis:</strong> {", ".join(nazwa_poz(p) for p in z["gratis"])}</div>
+          <h3 class="tytul-zestawu" style="font-size:20px; font-weight:600; color:#1c1917; margin:0 0 6px; line-height:1.25;">{z.get("tytul_en", z["tytul"]) if EN else z["tytul"]}</h3>
+          <div style="font-size:13px; color:#57534e; margin:0 0 14px; line-height:1.5;"><strong style="color:#4d6a5e;">{L("Kupujesz:", "You buy:")}</strong> {nazwa_poz(kup)} · <strong style="color:#4d6a5e;">{L("Gratis:", "Free:")}</strong> {", ".join(nazwa_poz(p) for p in z["gratis"])}</div>
           {dopisek}
           <div class="cena-row" style="display:flex; align-items:flex-end; gap:18px; flex-wrap:wrap;">
             <div>
-              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena zestawu przed</div>
+              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">{L("Cena zestawu przed", "Regular price")}</div>
               {przed_html}
             </div>
             <svg class="cena-strzalka" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d6cbb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 18px; margin-bottom:3px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             <div>
-              <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">Cena zestawu BOGO</div>
+              <div style="font-size:11px; color:#4d6a5e; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;">{L("Cena zestawu BOGO", "BOGO set price")}</div>
               <div style="font-size:26px; font-weight:700; color:#1c1917; line-height:1;">{zl(cena, False)} <span style="font-size:15px; font-weight:600;">{SYMBOL}</span></div>
             </div>
             <div class="cena-pill" style="margin-left:auto; max-width:100%; padding:10px 16px; background:#eef2f0; border-radius:12px; text-align:right;">
-              <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">Oszczędzasz</div>
+              <div style="font-size:11px; color:#4d6a5e; text-transform:uppercase; letter-spacing:.06em; font-weight:600;">{L("Oszczędzasz", "You save")}</div>
               <div style="font-size:{20 if znane else 14}px; font-weight:700; color:#4d6a5e;{"" if znane else " white-space:normal;"}">{pill}</div>
             </div>
           </div>
@@ -141,48 +160,61 @@ for i, z in enumerate(ZESTAWY, 1):
 
     # tabela kalkulacji
     sep = "#f0eadd" if i == 1 else "#ddd2ba"
-    wiersze.append(f'''          <tr style="border-top:1px solid {sep}; background:#faf9f6;"><td colspan="2" style="padding:10px 20px 9px; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#4d6a5e;"><span style="display:inline-flex; align-items:center; gap:8px;"><span style="width:5px; height:5px; border-radius:50%; background:#4d6a5e;"></span>Zestaw {i:02d}</span><span class="para-cena" style="display:none; font-weight:600; letter-spacing:.02em; text-transform:none; color:#78716c;"> · {zl(cena)}</span></td><td class="zestaw-prawa" style="padding:10px 20px 9px; text-align:right; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#78716c;">zestaw {zl(cena)}</td></tr>''')
+    wiersze.append(f'''          <tr style="border-top:1px solid {sep}; background:#faf9f6;"><td colspan="2" style="padding:10px 20px 9px; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#4d6a5e;"><span style="display:inline-flex; align-items:center; gap:8px;"><span style="width:5px; height:5px; border-radius:50%; background:#4d6a5e;"></span>{L("Zestaw", "Set")} {i:02d}</span><span class="para-cena" style="display:none; font-weight:600; letter-spacing:.02em; text-transform:none; color:#78716c;"> · {zl(cena)}</span></td><td class="zestaw-prawa" style="padding:10px 20px 9px; text-align:right; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#78716c;">{L("zestaw", "set")} {zl(cena)}</td></tr>''')
     for j, (p, w, d) in enumerate(zip(pozycje, wart, podzial(cena, pozycje))):
         border = "" if j == 0 else "border-top:1px solid #f6f1e6; "
-        poza = (zl(w, False) + ("*" if p[0] in SZACUNKOWE else "")) if w is not None else "brak ceny"
+        poza = (zl(w, False) + ("*" if p[0] in SZACUNKOWE else "")) if w is not None else L("brak ceny", "no price")
         wz = (zl(d, False) + gw) if d is not None else "—"
         wiersze.append(f'''          <tr style="{border}"><td style="padding:13px 20px 13px 34px;">{nazwa_poz(p)}</td><td style="padding:13px 16px; text-align:right; color:#78716c;">{poza}</td><td style="padding:13px 20px; text-align:right; font-weight:700; color:#4d6a5e;">{wz}</td></tr>''')
 
 suma_przed += PREZENT[2]
 suma_bogo = round(suma_bogo, 2)
 suma_przed = round(suma_przed, 2)
-wiersze.append(f'''          <tr style="border-top:1px solid #ddd2ba; background:#eef2f0;"><td style="padding:13px 20px;">{PREZENT[0]} ({PREZENT[1]}) — <strong style="color:#4d6a5e;">gratis do pakietu</strong></td><td style="padding:13px 16px; text-align:right; color:#78716c;">{zl(PREZENT[2], False)}</td><td style="padding:13px 20px; text-align:right; font-weight:700; color:#4d6a5e;">0,00</td></tr>''')
+wiersze.append(f'''          <tr style="border-top:1px solid #ddd2ba; background:#eef2f0;"><td style="padding:13px 20px;">{nz(PREZENT[0])} ({PREZENT[1]}) — <strong style="color:#4d6a5e;">{L("gratis do pakietu", "free with the bundle")}</strong></td><td style="padding:13px 16px; text-align:right; color:#78716c;">{zl(PREZENT[2], False)}</td><td style="padding:13px 20px; text-align:right; font-weight:700; color:#4d6a5e;">0,00</td></tr>''')
 
 dopisek_brak = (" + " + ", ".join(brakuje_przed)) if brakuje_przed else ""
 oszcz_pakiet = round(suma_przed - suma_bogo, 2)
 
 WARUNKI_HTML = "\n".join('            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{w}</span></li>'.format(w=w) for w in WARUNKI_EXTRA)
 
-nota = "Ceny hurtowe brutto z " + ZRODLO_CEN + " z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty."
+nota = L("Ceny hurtowe brutto z " + ZRODLO_CEN + " z " + DATA_CEN + ". Kolumna „W zestawie” rozdziela cenę zestawu proporcjonalnie na produkty.",
+         "Wholesale prices incl. VAT from " + ZRODLO_CEN + ", " + DATA_CEN + ". The “In the set” column splits the set price proportionally across the products.")
 gp = "*" if szac_pakiet else ""
 if szac_pakiet:
-    nota += "<br>* Cena przybliżona: " + SZACUNEK_DOPELNIACZ + " nie ma jeszcze w cenniku doTERRA, przyjęto ok. " + zl(c(next(iter(SZACUNKOWE)))) + " za sztukę."
+    nota += L("<br>* Cena przybliżona: " + SZACUNEK_DOPELNIACZ + " nie ma jeszcze w cenniku doTERRA, przyjęto ok. " + zl(c(next(iter(SZACUNKOWE)))) + " za sztukę.",
+              "<br>* Approximate price: " + SZACUNEK_DOPELNIACZ + " is not yet in the doTERRA price list, assumed at approx. " + zl(c(next(iter(SZACUNKOWE)))) + " each.")
 if brakuje_przed:
-    nota += " Olejku do kąpieli Adaptiv nie ma jeszcze w cenniku — sumy „przed” i oszczędność nie zawierają jego wartości."
+    nota += L(" Olejku do kąpieli Adaptiv nie ma jeszcze w cenniku — sumy „przed” i oszczędność nie zawierają jego wartości.",
+              " Adaptiv Calming Bath Oil is not yet in the price list, so the regular totals and savings do not include its value.")
+
+OPIS = L(f"5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO: dodatkowo gratis {PREZENT_NAZWA} ({PREZENT[1]}).",
+         f"5 sets: buy one product, get the second one free. BOGO bundle: {PREZENT_NAZWA} ({PREZENT[1]}) free on top.")
+PREZENT_TYTUL = PREZENT_NAZWA if EN else PREZENT_NAZWA.capitalize()
+HERO = L(f'Kupujesz jeden produkt, drugi dostajesz <strong style="color:#4d6a5e;">gratis</strong>. Do całego pakietu BOGO dochodzi {PREZENT_NAZWA} ({PREZENT[1]}).',
+         f'Buy one product, get the second one <strong style="color:#4d6a5e;">free</strong>. The full BOGO bundle also comes with {PREZENT_NAZWA} ({PREZENT[1]}).')
+PAKIET_OPIS = L(f'Wszystkie 5 zestawów w jednym zamówieniu, a do tego <strong style="color:#4d6a5e;">GRATIS</strong> {PREZENT_NAZWA} ({PREZENT[1]}).',
+                f'All 5 sets in one order, plus {PREZENT_NAZWA} ({PREZENT[1]}) <strong style="color:#4d6a5e;">FREE</strong>.')
+JAK_ZAMOWIC = (Path(__file__).parent / "szablony" / L("jak-zamowic-pl.html", "jak-zamowic-en.html")).read_text(encoding="utf-8").rstrip("\n")
+POPRZEDNIA_HTML = "" if not POPRZEDNIA else f'''<p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">{L("Poprzednia oferta", "Previous offer")}: <a href="{POPRZEDNIA[0]}/{"" if PLIK == "index.html" else PLIK}">{POPRZEDNIA[1]}</a></p>'''
 
 html = f'''<!DOCTYPE html>
-<html lang="pl">
+<html lang="{L("pl", "en")}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oferta BOGO | {OKRES}</title>
+    <title>{L("Oferta BOGO", "BOGO Offer")} | {OKRES}</title>
 
     <!-- === META TAGI OPEN GRAPH === -->
-    <meta property="og:title" content="Oferta BOGO | {OKRES}">
-    <meta property="og:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO: dodatkowo gratis {PREZENT_NAZWA} ({PREZENT[1]}).">
+    <meta property="og:title" content="{L("Oferta BOGO", "BOGO Offer")} | {OKRES}">
+    <meta property="og:description" content="{OPIS}">
     <meta property="og:image" content="{OG_IMAGE}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/{PLIK if WALUTA == "eur" else ""}">
+    <meta property="og:url" content="https://emilia-chodorowska.github.io/BOGO/{"" if PLIK == "index.html" else PLIK}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Oferta BOGO | {OKRES}">
-    <meta name="twitter:description" content="5 zestawów: kupujesz jeden produkt, drugi dostajesz gratis. Pakiet BOGO: dodatkowo gratis {PREZENT_NAZWA} ({PREZENT[1]}).">
+    <meta name="twitter:title" content="{L("Oferta BOGO", "BOGO Offer")} | {OKRES}">
+    <meta name="twitter:description" content="{OPIS}">
     <meta name="twitter:image" content="{OG_IMAGE}">
 
     <meta name="theme-color" content="#fcfbfa">
@@ -238,22 +270,22 @@ html = f'''<!DOCTYPE html>
       <img src="images/logobogo.png" alt="Logo BOGO doTERRA" style="width:120px; height:auto; margin:0 auto 26px; display:block;" onerror="this.style.display='none'">
       <div style="display:inline-flex; align-items:center; gap:10px; padding:7px 18px; border:1px solid #d6d3d1; border-radius:999px; color:#4d6a5e; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; margin-bottom:22px;">
         <span style="width:6px; height:6px; border-radius:50%; background:#4d6a5e;"></span>
-        Oferta limitowana
+        {L("Oferta limitowana", "Limited offer")}
       </div>
-      <h1 style="font-family:'Playfair Display',serif; font-weight:600; font-size:clamp(40px,8vw,64px); line-height:1.02; color:#1c1917; margin:0 0 6px; letter-spacing:.01em;">Oferta BOGO</h1>
+      <h1 style="font-family:'Playfair Display',serif; font-weight:600; font-size:clamp(40px,8vw,64px); line-height:1.02; color:#1c1917; margin:0 0 6px; letter-spacing:.01em;">{L("Oferta BOGO", "BOGO Offer")}</h1>
       <p style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:500; color:#4d6a5e; margin:0 0 20px;">{OKRES}</p>
-      <p style="max-width:520px; margin:0 auto; color:#57534e; font-size:15px; line-height:1.6;">Kupujesz jeden produkt, drugi dostajesz <strong style="color:#4d6a5e;">gratis</strong>. Do całego pakietu BOGO dochodzi {PREZENT_NAZWA} ({PREZENT[1]}).</p>
+      <p style="max-width:520px; margin:0 auto; color:#57534e; font-size:15px; line-height:1.6;">{HERO}</p>
       <div style="display:inline-flex; align-items:center; gap:10px; margin-top:24px; padding:12px 22px; background:#faf9f6; border-radius:14px; color:#57534e; font-size:13px; line-height:1.4;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4d6a5e" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
-        Oferta kończy się <strong style="color:#4d6a5e; margin:0 4px;">{KONIEC}</strong> lub gdy zabraknie zapasów
+        {L("Oferta kończy się", "Offer ends")} <strong style="color:#4d6a5e; margin:0 4px;">{KONIEC}</strong> {L("lub gdy zabraknie zapasów", "or while stocks last")}
       </div>
     </header>
 
     <!-- SECTION LABEL -->
     <div style="display:flex; align-items:center; gap:16px; margin-bottom:26px;">
-      <span style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; color:#1c1917;">Zestawy</span>
+      <span style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; color:#1c1917;">{L("Zestawy", "Sets")}</span>
       <span style="flex:1; height:1px; background:#ddd2ba;"></span>
-      <span style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#78716c;">5 zestawów</span>
+      <span style="font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#78716c;">{L("5 zestawów", "5 sets")}</span>
     </div>
 
     <!-- PRODUCT CARDS -->
@@ -265,24 +297,24 @@ html = f'''<!DOCTYPE html>
     <div style="background:#eef2f0; border:1px solid #dfe6e2; border-radius:22px; padding:clamp(20px,4vw,32px); margin-bottom:64px;">
       <div style="display:flex; gap:28px; align-items:center; flex-wrap:wrap;">
         <div style="flex:1 1 220px; min-width:200px; height:210px; border-radius:16px; overflow:hidden; background:#ffffff;">
-          <img src="{FOTO_PAKIET}" alt="Pakiet BOGO — wszystkie 5 zestawów" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
+          <img src="{FOTO_PAKIET}" alt="{L("Pakiet BOGO — wszystkie 5 zestawów", "BOGO bundle — all 5 sets")}" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
         <div style="flex:2 1 320px; min-width:260px;">
-          <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 15px; background:#4d6a5e; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#dbe4df; margin-bottom:14px;">Wszystkie zestawy + gratis</div>
-          <h3 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; margin:0 0 6px; line-height:1.12; color:#1c1917;">Pakiet BOGO</h3>
-          <p style="margin:0 0 20px; color:#57534e; font-size:14px; line-height:1.5;">Wszystkie 5 zestawów w jednym zamówieniu, a do tego <strong style="color:#4d6a5e;">GRATIS</strong> {PREZENT_NAZWA} ({PREZENT[1]}).</p>
+          <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 15px; background:#4d6a5e; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#dbe4df; margin-bottom:14px;">{L("Wszystkie zestawy + gratis", "All sets + free gift")}</div>
+          <h3 style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; margin:0 0 6px; line-height:1.12; color:#1c1917;">{L("Pakiet BOGO", "BOGO bundle")}</h3>
+          <p style="margin:0 0 20px; color:#57534e; font-size:14px; line-height:1.5;">{PAKIET_OPIS}</p>
           <div class="pakiet-kafle" style="display:flex; gap:12px; flex-wrap:wrap;">
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
-              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Płacisz</div>
+              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">{L("Płacisz", "You pay")}</div>
               <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#1c1917; line-height:1.15;">{zl(suma_bogo)}</div>
-              <div style="font-size:12px; color:#a8a29e; margin-top:2px;"><span style="text-decoration:line-through;">zamiast {zl(suma_przed)}{gp}</span>{dopisek_brak}</div>
+              <div style="font-size:12px; color:#a8a29e; margin-top:2px;"><span style="text-decoration:line-through;">{L("zamiast", "instead of")} {zl(suma_przed)}{gp}</span>{dopisek_brak}</div>
             </div>
             <div style="padding:14px 20px; background:#4d6a5e; border-radius:14px; flex:1 1 auto;">
-              <div style="font-size:11px; color:#9fb3a9; text-transform:uppercase; letter-spacing:.07em;">Oszczędzasz</div>
+              <div style="font-size:11px; color:#9fb3a9; text-transform:uppercase; letter-spacing:.07em;">{L("Oszczędzasz", "You save")}</div>
               <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#eaf0ec;">{"min. " if brakuje_przed else ""}{zl(oszcz_pakiet)}{gp}</div>
             </div>
             <div style="padding:14px 20px; background:#ffffff; border:1px solid #e7e5e4; border-radius:14px; flex:1 1 auto;">
-              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">Łącznie PV</div>
+              <div style="font-size:11px; color:#78716c; text-transform:uppercase; letter-spacing:.07em;">{L("Łącznie PV", "Total PV")}</div>
               <div style="font-size:clamp(22px,4vw,26px); font-weight:700; color:#1c1917;">{pv(suma_pv)}</div>
             </div>
           </div>
@@ -292,15 +324,15 @@ html = f'''<!DOCTYPE html>
       <!-- GRATIS -->
       <div style="display:flex; gap:18px; align-items:center; margin-top:22px; padding:16px; background:#ffffff; border:1px dashed #d8e0dc; border-radius:16px; flex-wrap:wrap;">
         <div class="gratis-foto" style="flex:0 0 108px; height:108px; border-radius:12px; overflow:hidden; background:#faf9f6;">
-          <img src="{FOTO_PREZENT}" alt="{PREZENT_NAZWA.capitalize()} gratis" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
+          <img src="{FOTO_PREZENT}" alt="{PREZENT_TYTUL} {L("gratis", "free")}" style="height:100%; width:100%; object-fit:cover;" onerror="this.style.opacity=.4">
         </div>
         <div style="flex:1 1 240px; min-width:220px;">
-          <div style="display:inline-block; padding:3px 11px; background:#eef2f0; color:#4d6a5e; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; margin-bottom:7px;">Gratis do pakietu</div>
-          <div style="font-size:16px; font-weight:700; color:#4d6a5e; line-height:1.25; margin-bottom:5px;">{PREZENT_NAZWA.capitalize()}</div>
-          <p style="margin:0; font-size:12px; color:#78716c; line-height:1.5;">Tylko przy zakupie całego pakietu BOGO, nie przy zestawach kupowanych pojedynczo.</p>
+          <div style="display:inline-block; padding:3px 11px; background:#eef2f0; color:#4d6a5e; border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; margin-bottom:7px;">{L("Gratis do pakietu", "Free with the bundle")}</div>
+          <div style="font-size:16px; font-weight:700; color:#4d6a5e; line-height:1.25; margin-bottom:5px;">{PREZENT_TYTUL}</div>
+          <p style="margin:0; font-size:12px; color:#78716c; line-height:1.5;">{L("Tylko przy zakupie całego pakietu BOGO, nie przy zestawach kupowanych pojedynczo.", "Only with the full BOGO bundle, not with sets bought separately.")}</p>
         </div>
         <div class="gratis-wartosc" style="text-align:right; padding-right:6px;">
-          <div style="font-size:10px; color:#a8a29e; text-transform:uppercase; letter-spacing:.06em;">Wartość</div>
+          <div style="font-size:10px; color:#a8a29e; text-transform:uppercase; letter-spacing:.06em;">{L("Wartość", "Value")}</div>
           <div style="font-size:16px; font-weight:700; color:#4d6a5e;">{zl(PREZENT[2])}</div>
         </div>
       </div>
@@ -308,23 +340,23 @@ html = f'''<!DOCTYPE html>
 
     <!-- CALCULATION TABLE -->
     <div style="display:flex; align-items:center; gap:16px; margin-bottom:22px;">
-      <span style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; color:#1c1917;">Szczegółowa kalkulacja</span>
+      <span style="font-family:'Playfair Display',serif; font-size:clamp(26px,5vw,34px); font-weight:600; color:#1c1917;">{L("Szczegółowa kalkulacja", "Detailed calculation")}</span>
       <span style="flex:1; height:1px; background:#ddd2ba;"></span>
     </div>
     <div style="border:1px solid #ece3d0; border-radius:18px; overflow-x:auto; margin-bottom:16px; background:#fff;">
       <table class="kalk" style="width:100%; border-collapse:collapse; font-size:14px;">
         <thead>
           <tr style="background:#faf9f6;">
-            <th style="text-align:left; padding:15px 20px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#78716c;">Produkt</th>
-            <th style="text-align:right; padding:15px 16px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#78716c;">Poza zestawem</th>
-            <th style="text-align:right; padding:15px 20px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#4d6a5e;">W zestawie</th>
+            <th style="text-align:left; padding:15px 20px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#78716c;">{L("Produkt", "Product")}</th>
+            <th style="text-align:right; padding:15px 16px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#78716c;">{L("Poza zestawem", "Regular price")}</th>
+            <th style="text-align:right; padding:15px 20px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#4d6a5e;">{L("W zestawie", "In the set")}</th>
           </tr>
         </thead>
         <tbody style="color:#292524;">
 {chr(10).join(wiersze)}
         </tbody>
         <tfoot>
-          <tr style="background:#4d6a5e; color:#f3efe4;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">Suma</td><td style="padding:18px 16px; text-align:right; color:#cdd6c9; text-decoration:line-through;">{zl(suma_przed, False)}{gp}</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px;">{zl(suma_bogo)}</td></tr>
+          <tr style="background:#4d6a5e; color:#f3efe4;"><td style="padding:18px 20px; font-weight:700; font-size:15px;">{L("Suma", "Total")}</td><td style="padding:18px 16px; text-align:right; color:#cdd6c9; text-decoration:line-through;">{zl(suma_przed, False)}{gp}</td><td style="padding:18px 20px; text-align:right; font-weight:700; font-size:17px;">{zl(suma_bogo)}</td></tr>
         </tfoot>
       </table>
     </div>
@@ -337,14 +369,14 @@ html = f'''<!DOCTYPE html>
 
       <section style="display:flex; flex-direction:column;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
-          <span style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:600; color:#1c1917;">Warunki promocji</span>
+          <span style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:600; color:#1c1917;">{L("Warunki promocji", "Promotion terms")}</span>
         </div>
         <div style="background:#fff; border:1px solid #ece3d0; border-radius:18px; padding:26px; flex:1;">
           <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px;">
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Promocja trwa od <strong style="color:#4d6a5e;">{OKRES_WARUNKI}</strong></span></li>
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Oferta obowiązuje <strong style="color:#4d6a5e;">do wyczerpania zapasów</strong> — może się skończyć wcześniej.</span></li>
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>Limit: maksymalnie <strong style="color:#4d6a5e;">5 zamówień na każdy zestaw</strong> oraz <strong style="color:#4d6a5e;">5 pakietów BOGO</strong> na jedno konto.</span></li>
-            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{PREZENT_NAZWA.capitalize()} ({PREZENT[1]}) gratis dostajesz <strong style="color:#4d6a5e;">wyłącznie przy zakupie pakietu BOGO</strong>, nie przy kupowaniu zestawów pojedynczo.</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{L("Promocja trwa od", "The promotion runs from")} <strong style="color:#4d6a5e;">{OKRES_WARUNKI}</strong>{L("", ".")}</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{L("Oferta obowiązuje", "The offer is valid")} <strong style="color:#4d6a5e;">{L("do wyczerpania zapasów", "while stocks last")}</strong> {L("— może się skończyć wcześniej.", "and may end earlier.")}</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{L("Limit: maksymalnie", "Limit: up to")} <strong style="color:#4d6a5e;">{L("5 zamówień na każdy zestaw", "5 orders of each set")}</strong> {L("oraz", "and")} <strong style="color:#4d6a5e;">{L("5 pakietów BOGO", "5 BOGO bundles")}</strong> {L("na jedno konto.", "per account.")}</span></li>
+            <li style="display:flex; gap:12px; font-size:13.5px; line-height:1.55; color:#292524;"><span style="flex:0 0 6px; height:6px; border-radius:50%; background:#4d6a5e; margin-top:7px;"></span><span>{PREZENT_TYTUL} ({PREZENT[1]}) {L("gratis dostajesz", "is free")} <strong style="color:#4d6a5e;">{L("wyłącznie przy zakupie pakietu BOGO", "only with the BOGO bundle")}</strong>{L(", nie przy kupowaniu zestawów pojedynczo.", ", not when buying sets separately.")}</span></li>
 {WARUNKI_HTML}
           </ul>
         </div>
@@ -352,42 +384,15 @@ html = f'''<!DOCTYPE html>
 
       <section style="display:flex; flex-direction:column;">
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
-          <span style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:600; color:#1c1917;">Jak zamówić</span>
+          <span style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,30px); font-weight:600; color:#1c1917;">{L("Jak zamówić", "How to order")}</span>
         </div>
         <div style="background:#fff; border:1px solid #ece3d0; border-radius:18px; padding:26px; flex:1;">
-          <p style="margin:0 0 6px; font-size:14px; font-weight:600; color:#1c1917;">Sposób 1: jednorazowe zamówienie lojalnościowe (z koszyka)</p>
-          <p style="margin:0 0 18px; font-size:12.5px; line-height:1.5; color:#57534e;">Dla osób, które przetworzyły i opłaciły zamówienie LRP w tym albo w poprzednim miesiącu. Comiesięczne LRP zostaje bez zmian.</p>
-          <ol style="list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:14px;">
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">1</span><span>Zaloguj się na <strong style="color:#4d6a5e;">shop.doterra.com</strong> i dodaj produkty BOGO przyciskiem <strong style="color:#4d6a5e;">„Dodaj do koszyka"</strong>.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">2</span><span>Najedź na ikonę koszyka i kliknij <strong style="color:#4d6a5e;">„Zobacz swój koszyk"</strong>. Pasek śledzenia PV na górze strony oznacza, że zamówienie przejdzie jako jednorazowe lojalnościowe.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">3</span><span>Kliknij <strong style="color:#4d6a5e;">„Przejdź do podsumowania"</strong>, a w okienku wybierz <strong style="color:#4d6a5e;">„Kontynuuj przetwarzanie jednorazowego zamówienia lojalnościowego"</strong>.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">4</span><span>Sprawdź płatność i adres dostawy, potem kliknij <strong style="color:#4d6a5e;">„Sfinalizuj zamówienie"</strong>.</span></li>
-          </ol>
-          <div style="background:#faf9f6; border-left:3px solid #4d6a5e; border-radius:10px; padding:16px; font-size:12.5px; line-height:1.55; color:#57534e;">
-            <p style="margin:0 0 10px;">Zamówienie może składać się <strong>wyłącznie z produktów BOGO</strong> — nie trzeba dokładać produktu ze standardowej oferty. Punkty lojalnościowe naliczają się od <strong>50 PV</strong>.</p>
-            <p style="margin:0 0 10px;">Działa tylko na <strong>shop.doterra.com</strong>, nie na mydoterra.com.</p>
-            <p style="margin:0;">Nie zastępuje comiesięcznego LRP 100 PV, które jest warunkiem prowizji (dotyczy konsultantów Wellness Advocate). Źródło: <a href="https://www.doterra.com/ME/pl_ME/faq-one-time-loyalty-order" target="_blank" rel="noopener" style="color:#4d6a5e;">FAQ doTERRA — jednorazowe zamówienia lojalnościowe</a>.</p>
-          </div>
-
-          <hr style="border:none; border-top:1px solid #ece3d0; margin:26px 0;">
-
-          <p style="margin:0 0 18px; font-size:14px; font-weight:600; color:#1c1917;">Sposób 2: dodanie produktów BOGO do zamówienia lojalnościowego (LRP)</p>
-          <ol style="list-style:none; margin:0 0 22px; padding:0; display:flex; flex-direction:column; gap:14px;">
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">1</span><span>Zaloguj się i kliknij ikonę <strong style="color:#4d6a5e;">„Konto"</strong> na górnym pasku strony.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">2</span><span>Z menu wybierz <strong style="color:#4d6a5e;">„Moje zamówienia lojalnościowe (LRP)"</strong>.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">3</span><span>Kliknij <strong style="color:#4d6a5e;">„Zarządzaj zamówieniem"</strong>, aby otworzyć edycję swojego LRP.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">4</span><span>Wyszukaj produkty BOGO — użyj wyszukiwarki lub przycisku <strong style="color:#4d6a5e;">„Przeglądaj"</strong>.</span></li>
-            <li style="display:flex; gap:14px; font-size:13.5px; line-height:1.5; color:#292524;"><span style="flex:0 0 26px; height:26px; border-radius:50%; background:#eef2f0; color:#4d6a5e; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;">5</span><span>Dodaj wybrane produkty do koszyka i kliknij <strong style="color:#4d6a5e;">„Kolejny krok"</strong>.</span></li>
-          </ol>
-          <div style="background:#faf9f6; border-left:3px solid #4d6a5e; border-radius:10px; padding:16px; font-size:12.5px; line-height:1.55; color:#57534e;">
-            <p style="margin:0 0 10px;"><strong style="color:#4d6a5e;">Pamiętaj:</strong> dodając artykuły BOGO do zamówienia lojalnościowego, <strong>musisz złożyć to zamówienie natychmiast</strong>, aby skorzystać z oferty.</p>
-            <p style="margin:0;"><strong style="color:#4d6a5e;">Pamiętaj:</strong> wybierając cały pakiet BOGO, dodaj do szablonu LRP przynajmniej <strong>jeden produkt ze standardowej oferty</strong>, aby zamówienie mogło zostać przetworzone.</p>
-          </div>
+{JAK_ZAMOWIC}
         </div>
       </section>
     </div>
 
-    <p style="margin:48px 0 0; text-align:center; font-size:12px; color:#a8a29e;">Poprzednia oferta: <a href="{POPRZEDNIA[0]}/{PLIK if WALUTA == "eur" else ""}">{POPRZEDNIA[1]}</a></p>
+    {POPRZEDNIA_HTML}
 
   </div>
 </div>

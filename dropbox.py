@@ -9,6 +9,10 @@
                                             grafiki na Instagram → prosto do Asi Piwowarczyk (nie do grupy)
                                             do grupy WhatsApp „BOGO od Claude”; Dropbox zostaje jako kopia (decyzja 27.10.2026).
                                             Wysyła tylko nowe/zmienione pliki (BOGO Em/<MIESIAC>/.wyslane-whatsapp.json, md5).
+  python3 dropbox.py whatsapp-eng         → wersja dla odbiorców spoza Polski do grupy „BOGO ENG od Claude”: strona BOGO EN
+                                            (index-en.html, ceny EUR), playlista + cały film, rolki, grafiki z kółeczkami EN,
+                                            screeny kart EN (pakiet na końcu); nagłówki po angielsku; osobny stan
+                                            .wyslane-whatsapp-eng.json. Instagramu do Asi nie rusza.
   python3 dropbox.py grafiki-ewy "<link>" → grafiki od Ewy (link dropbox.com/home/… albo ścieżka) do
                                             „BOGO Em/<MIESIAC>/Grafiki Ewy (WhatsApp)” — do wysyłania klientom
 
@@ -45,6 +49,7 @@ def linki():
     l = [f"BOGO {E.OKRES}", "",
          f"Strona BOGO (PLN): https://emilia-chodorowska.github.io/BOGO/",
          f"Strona BOGO (EUR): https://emilia-chodorowska.github.io/BOGO/index-eur.html",
+         f"Strona BOGO (EN, EUR): https://emilia-chodorowska.github.io/BOGO/index-en.html",
          f"Rejestracja z pakietem BOGO: {oferta}",
          f"Rejestracja, widok zespołu: {oferta}?team=true",
          "Hub doTERRA (sekcja BOGO): https://emilia-chodorowska.github.io/doterra-hub/"]
@@ -92,7 +97,13 @@ def em():
     kopiuj(lok, f"BOGO Em/{E.MIESIAC}")
 
 
-GRUPA_WA = "BOGO od Claude"
+# warianty wysyłki: grupa, plik stanu wysłanych, log (w BOGO Em/<MIESIAC>/)
+WARIANTY_WA = {
+    "pl": dict(grupa="BOGO od Claude", stan=".wyslane-whatsapp.json", log=".wyslane-whatsapp-log.json"),
+    "eng": dict(grupa="BOGO ENG od Claude", stan=".wyslane-whatsapp-eng.json", log=".wyslane-whatsapp-eng-log.json"),
+}
+# ENG: podpisy linków po angielsku (klucz = opis z Linki.txt)
+OPISY_ENG = {"Strona BOGO (EN, EUR)": "BOGO page", "Playlista": "Playlist", "calosc": "Full video"}
 EGO_BIN = str(Path.home() / ".local/bin/ego-browser")
 WA_SKRYPT = Path.home() / "MyProjects/canva/proces/automaty/ego/wyslij_whatsapp.mjs"
 KAT = Path.home() / "MyProjects/canva/materialy/_katalog-grafik"
@@ -100,8 +111,9 @@ OBRAZY = {".png", ".jpg", ".jpeg", ".webp"}
 FILMY = {".mp4", ".mov"}  # przez „Zdjęcia i filmy” WhatsApp Web nie robi podglądu rolek → idą jako dokument
 
 
-def grafiki_kolka():
-    """Gotowe grafiki z kółeczkami produktów bieżącej promocji (katalog Canvy), tylko PL (userka 27.10: EN/DE/UK to za dużo)."""
+def grafiki_kolka(jezyk="pl"):
+    """Gotowe grafiki z kółeczkami produktów bieżącej promocji (katalog Canvy) w jednym języku:
+    PL do „BOGO od Claude”, EN do „BOGO ENG od Claude” (userka 27.10: wszystkie języki naraz to za dużo)."""
     import canva as C
     kolejnosc = [E.PRODUKTY[n]["slug"] for n in C.produkty_promocji()]  # kolejność jak na stronie BOGO
     slugi = set(kolejnosc)
@@ -110,7 +122,7 @@ def grafiki_kolka():
     except Exception:
         return []
     kol = {"pl": 0, "en": 1, "de": 2, "uk": 3}
-    g = [x for x in kat if x["slug"] in slugi and x["jezyk"] == "pl" and x["stan"] == "gotowa" and (KAT / x["plik"]).exists()]
+    g = [x for x in kat if x["slug"] in slugi and x["jezyk"] == jezyk and x["stan"] == "gotowa" and (KAT / x["plik"]).exists()]
     return [KAT / x["plik"] for x in sorted(g, key=lambda x: (kol.get(x["jezyk"], 9), kolejnosc.index(x["slug"]), x["strona"]))]
 
 
@@ -144,16 +156,23 @@ def miniatura(url, katalog, film=None):
         return None
 
 
-def whatsapp():
-    """Komplet BOGO do grupy WhatsApp: nagłówek sekcji (tekst) + pliki; tylko to, czego jeszcze nie wysłano."""
+def whatsapp(wariant="pl"):
+    """Komplet BOGO do grupy WhatsApp: nagłówek sekcji (tekst) + pliki; tylko to, czego jeszcze nie wysłano.
+    wariant "pl" → „BOGO od Claude”, "eng" → „BOGO ENG od Claude” (materiały po angielsku, ceny EUR)."""
+    W = WARIANTY_WA[wariant]
+    eng = wariant == "eng"
     em_lok = LOKALNIE / E.MIESIAC
     if not em_lok.exists():
         sys.exit(f"Brak {em_lok} — najpierw python3 dropbox.py em")
-    stan_p = em_lok / ".wyslane-whatsapp.json"
+    stan_p = em_lok / W["stan"]
     stan = json.loads(stan_p.read_text(encoding="utf-8")) if stan_p.exists() else {}
     md5 = lambda f: hashlib.md5(Path(f).read_bytes()).hexdigest()
     nowe = lambda pliki: [f for f in pliki if stan.get(str(f)) != md5(f)]
-    sekcje = [
+    pakiet_na_koniec = lambda f: ("pakiet" in f.name, f.name)
+    sekcje = [  # ENG: tylko grafiki EN i screeny kart EN (bez broszury PL, maila, grafik Ewy i teł — userka 27.10.2026)
+        ("Graphics with circles", grafiki_kolka("en")),
+        ("Product cards", sorted((em_lok / "Screeny kart/EN").glob("*"), key=pakiet_na_koniec)),
+    ] if eng else [
         ("Grafiki z kółeczkami", grafiki_kolka()),
         ("Screeny z maila", sorted((em_lok / "Screeny z maila").glob("*"))),
         ("Screeny kart", sorted((em_lok / "Screeny kart/PLN").glob("*"), key=lambda f: ("pakiet" in f.name, f.name))),  # pakiet na koniec
@@ -186,9 +205,13 @@ def whatsapp():
             if ": http" in l:
                 opis, url = l.split(": ", 1)
                 opis = opis.strip()
-                if "(EUR)" in opis or "index-eur" in url or "doterra-hub" in url or "team=true" in url:  # bez EUR, huba, widoku zespołu
-                    continue
                 if "youtu.be/" in url and opis != "calosc":  # z filmów: playlista + cały film, bez pojedynczych (userka 27.10.2026)
+                    continue
+                if eng:  # ENG: strona EN, playlista, cały film
+                    if opis in OPISY_ENG:
+                        pary.append((OPISY_ENG[opis], url.strip()))
+                    continue
+                if "EUR)" in opis or "index-eur" in url or "index-en" in url or "doterra-hub" in url or "team=true" in url:  # bez EUR/EN, huba, widoku zespołu
                     continue
                 pary.append(("Cały film" if opis == "calosc" else opis, url.strip()))
         linki_sekcja(None, pary)  # bez nagłówka „Linki” (userka 27.10.2026)
@@ -199,7 +222,7 @@ def whatsapp():
         if kod:
             rolki.append(("", f"https://www.instagram.com/reel/{kod}/", f))
     linki_sekcja(None, rolki)  # bez nagłówka „Rolki doTERRA” (userka 27.10.2026)
-    for pdf in nowe(sorted(em_lok.glob("*.pdf"))):
+    for pdf in [] if eng else nowe(sorted(em_lok.glob("*.pdf"))):  # broszura tylko po polsku
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
     for tytul, pliki in sekcje:
         zdj = nowe([f for f in pliki if f.suffix.lower() in OBRAZY])
@@ -215,9 +238,13 @@ def whatsapp():
     if not kroki:
         print("  nic nowego do wysłania")
         return
-    print(f"  {len(kroki)} wiadomości do „{GRUPA_WA}”…", flush=True)
-    log = em_lok / ".wyslane-whatsapp-log.json"
-    zad = {"grupa": GRUPA_WA, "kroki": kroki, "log": str(log)}
+    if "--podglad" in sys.argv:  # lista kroków bez wysyłania
+        for k in kroki:
+            print("  ", k.get("tekst") or k.get("podpis") or k.get("dokument") or f"{len(k['zdjecia'])} zdjęć: " + ", ".join(Path(z).name for z in k["zdjecia"]))
+        return
+    print(f"  {len(kroki)} wiadomości do „{W['grupa']}”…", flush=True)
+    log = em_lok / W["log"]
+    zad = {"grupa": W["grupa"], "kroki": kroki, "log": str(log)}
     r = subprocess.run([EGO_BIN, "nodejs"], input=f"const ZADANIE = {json.dumps(zad, ensure_ascii=False)};\n" + WA_SKRYPT.read_text(encoding="utf-8"),
                        capture_output=True, text=True, timeout=3600)
     out = r.stdout + r.stderr
@@ -286,6 +313,9 @@ if __name__ == "__main__":
         em()
     elif len(sys.argv) >= 2 and sys.argv[1] == "whatsapp":
         whatsapp()
-        instagram_asia()
+        if "--podglad" not in sys.argv:
+            instagram_asia()
+    elif len(sys.argv) >= 2 and sys.argv[1] == "whatsapp-eng":
+        whatsapp("eng")
     else:
         print(__doc__)
