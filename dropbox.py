@@ -182,6 +182,8 @@ def whatsapp():
         for l in linki_p.read_text(encoding="utf-8").splitlines():
             if ": http" in l:
                 opis, url = l.split(": ", 1)
+                if "youtu.be/" in url:  # pojedyncze filmy nie — sama playlista (userka 27.10.2026)
+                    continue
                 pary.append((opis.strip(), url.strip()))
         linki_sekcja("Linki", pary)
     # rolki: link do Instagrama zamiast pliku mp4 (nazwa pliku RRRRMMDD-<shortcode>.mp4 z rolki.mjs)
