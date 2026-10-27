@@ -77,8 +77,8 @@ ZESTAWY = [
         "kup": ("Rumianek rzymski", "5 ml", 58.0, 1),
         "gratis": [("Olejek do kąpieli dōTERRA Adaptiv™", "118 ml", None, 2)],
         "tytul": "Rumianek rzymski <span>+</span> 2 × olejek do kąpieli Adaptiv™",
-        "tytul_en": "Roman Chamomile <span>+</span> 2 × Adaptiv™ Calming Bath Oil",
-        "tytul_de": "Roman Chamomile (Römische Kamille) <span>+</span> 2 × Adaptiv™ Beruhigendes Badeöl",
+        "tytul_en": "Roman Chamomile <span>+</span> 2 × dōTERRA Adaptiv™ Calming Bath Oil",
+        "tytul_de": "Roman Chamomile (Römische Kamille) <span>+</span> 2 × dōTERRA Adaptiv™ Beruhigendes Badeöl",
         "krotko": "2 × olejek do kąpieli Adaptiv",
     },
     {
@@ -106,7 +106,7 @@ EN = dict(
     okres="20–27 October 2026",
     okres_warunki="20 to 27 October 2026",
     koniec="27 October",
-    prezent_nazwa="Douglas Fir essential oil",
+    prezent_nazwa="Douglas Fir",
     prezent_krotko="Douglas Fir",
     poprzednia=None,  # (folder, podpis) poprzedniej edycji z index-en.html; None = bez linku
     warunki_extra=["Valerian (15 ml) and dōTERRA Adaptiv™ Calming Bath Oil are limited-time offer products."],
@@ -116,12 +116,12 @@ EN = dict(
     rzeczownik_kup="oils",
     gratisy_opis="6 oils and 2 Adaptiv bath oils (BOGO), Douglas Fir (with the bundle), Wild Orange and Balance (enrollment from 200 PV)",
 )
-NAZWY_EN = {
+NAZWY_EN = {  # jak w mailu doTERRA EN (zrodla-<MIESIAC>/mail/en-3.png); brak w mailu → pole `en`
     "dōTERRA Serenity™": "dōTERRA Serenity™",
-    "On Guard™": "dōTERRA On Guard™",
-    "Air-X™": "dōTERRA Air-X™",
+    "On Guard™": "On Guard™",
+    "Air-X™": "Air-X™",
     "Olejek do kąpieli dōTERRA Adaptiv™": "dōTERRA Adaptiv™ Calming Bath Oil",
-    "dōTERRA SuperMint™": "dōTERRA SuperMint™",
+    "dōTERRA SuperMint™": "SuperMint™",
     "dōTERRA Shinrin-Yoku™ Touch": "dōTERRA Shinrin-Yoku™ Touch",
     "dōTERRA Balance™": "dōTERRA Balance™",
 }
@@ -135,13 +135,13 @@ DE = dict(
     prezent_nazwa="Douglas Fir (Douglasie)",
     prezent_krotko="Douglas Fir (Douglasie)",
     poprzednia=None,
-    warunki_extra=["Valerian (Baldrian) (15 ml) und Adaptiv™ Beruhigendes Badeöl sind Produkte aus einem zeitlich begrenzten Angebot."],
-    szacunek="Adaptiv™ Beruhigendes Badeöl",
+    warunki_extra=["Valerian (Baldrian) (15 ml) und dōTERRA Adaptiv™ Beruhigendes Badeöl sind Produkte aus einem zeitlich begrenzten Angebot."],
+    szacunek="dōTERRA Adaptiv™ Beruhigendes Badeöl",
     miesiac="Oktober 2026",
     rzeczownik_kup="Öle",
     gratisy_opis="6 Öle und 2 Adaptiv Badeöle (BOGO), Douglas Fir (Douglasie) (zum Paket), Wild Orange und Balance (Einschreibung ab 200 PV)",
 )
-NAZWY_DE = {  # dokładnie jak w Aromagic: aroma_product_localizations, cennik DE (price_list_id 24) — nie skracać
+NAZWY_DE = {  # jak w mailu doTERRA DE (zrodla-<MIESIAC>/mail/de-3.png); brak w mailu → Aromagic, cennik DE (price_list_id 24)
     "Kozłek lekarski (waleriana)": "Valerian (Baldrian)",
     "dōTERRA Serenity™": "dōTERRA Serenity™",
     "On Guard™": "On Guard™",
@@ -149,7 +149,7 @@ NAZWY_DE = {  # dokładnie jak w Aromagic: aroma_product_localizations, cennik D
     "Air-X™": "Air-X™",
     "Eukaliptus": "Eucalyptus (Eukalyptus)",
     "Rumianek rzymski": "Roman Chamomile (Römische Kamille)",
-    "Olejek do kąpieli dōTERRA Adaptiv™": "Adaptiv™ Beruhigendes Badeöl",
+    "Olejek do kąpieli dōTERRA Adaptiv™": "dōTERRA Adaptiv™ Beruhigendes Badeöl",
     "Sandałowiec": "Sandalwood (Sandelholz)",
     "Grejpfrut": "Grapefruit",
     "dōTERRA SuperMint™": "SuperMint™",
