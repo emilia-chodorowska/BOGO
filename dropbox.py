@@ -93,7 +93,8 @@ GRUPA_WA = "BOGO od Claude"
 EGO_BIN = str(Path.home() / ".local/bin/ego-browser")
 WA_SKRYPT = Path.home() / "MyProjects/canva/proces/automaty/ego/wyslij_whatsapp.mjs"
 KAT = Path.home() / "MyProjects/canva/materialy/_katalog-grafik"
-OBRAZY = {".png", ".jpg", ".jpeg", ".webp", ".mp4", ".mov"}
+OBRAZY = {".png", ".jpg", ".jpeg", ".webp"}
+FILMY = {".mp4", ".mov"}  # przez „Zdjęcia i filmy” WhatsApp Web nie robi podglądu rolek → idą jako dokument
 
 
 def grafiki_kolka():
@@ -135,13 +136,18 @@ def whatsapp():
         kroki.append({"tekst": linki_p.read_text(encoding="utf-8").strip()}); pliki_krokow.append([linki_p])
     for pdf in nowe(sorted(em_lok.glob("*.pdf"))):
         kroki.append({"dokument": str(pdf)}); pliki_krokow.append([pdf])
+    naglowki = set(stan.get("#naglowki", []))
     for tytul, pliki in sekcje:
-        pliki = nowe([f for f in pliki if f.suffix.lower() in OBRAZY])
-        if not pliki:
+        zdj = nowe([f for f in pliki if f.suffix.lower() in OBRAZY])
+        filmy = nowe([f for f in pliki if f.suffix.lower() in FILMY])
+        if not zdj and not filmy:
             continue
-        kroki.append({"tekst": f"*{tytul}* · BOGO {E.OKRES}"}); pliki_krokow.append([])
-        for i in range(0, len(pliki), 30):
-            kroki.append({"zdjecia": [str(f) for f in pliki[i:i + 30]]}); pliki_krokow.append(pliki[i:i + 30])
+        if tytul not in naglowki:  # nagłówek sekcji raz na miesiąc, nie przy każdym dosłaniu
+            kroki.append({"tekst": f"*{tytul}* · BOGO {E.OKRES}"}); pliki_krokow.append([("#naglowek", tytul)])
+        for i in range(0, len(zdj), 30):
+            kroki.append({"zdjecia": [str(f) for f in zdj[i:i + 30]]}); pliki_krokow.append(zdj[i:i + 30])
+        for f in filmy:
+            kroki.append({"dokument": str(f)}); pliki_krokow.append([f])
     if not kroki:
         print("  nic nowego do wysłania")
         return
@@ -154,9 +160,13 @@ def whatsapp():
     ok = sum(1 for l in out.splitlines() if l.startswith("KROK OK:"))
     for pl in pliki_krokow[:ok]:
         for f in pl:
-            stan[str(f)] = md5(f)
+            if isinstance(f, tuple):
+                naglowki.add(f[1])
+            else:
+                stan[str(f)] = md5(f)
+    stan["#naglowki"] = sorted(naglowki)
     stan_p.write_text(json.dumps(stan, ensure_ascii=False, indent=1), encoding="utf-8")
-    print("\n".join(l for l in out.strip().splitlines()[-3:]))
+    print("\n".join(l for l in out.strip().splitlines()[-25:]))
     if ok < len(kroki):
         sys.exit(1)
 
