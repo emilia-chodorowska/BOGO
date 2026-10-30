@@ -99,7 +99,7 @@ for J in ("pl", "en", "de"):
   <div class="og">
     <div class="pill">BOGO</div>
     <div class="t">{L('Oferta BOGO', 'BOGO Offer', 'BOGO-Angebot')}</div>
-    <div class="s">{L(E.OKRES, X['okres'], X['okres'])} · {L('kupujesz jeden produkt, drugi gratis', 'buy one product, get the second one free', 'ein Produkt kaufen, das zweite gratis')}</div>
+    <div class="s">{L(E.OKRES, X['okres'], X['okres'])} · {L('kupujesz jeden produkt, drugi gratis', 'buy one product, get the second one free', 'Sie kaufen ein Produkt und erhalten das zweite gratis')}</div>
   </div>
 </body>
 </html>
