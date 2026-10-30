@@ -75,43 +75,35 @@ def renderuj(html, jpg):
 for J in ("pl", "en", "de"):
     L = lambda pl, en, de: {"pl": pl, "en": en, "de": de}[J]
     X = E.WERSJE.get(J, E.WERSJE["en"])  # dla PL nieużywany, ale L() liczy wszystkie argumenty
-    og = f'''<!DOCTYPE html>
+    og = f"""<!DOCTYPE html>
 <html lang="{L('pl', 'en', 'de')}">
 <head>
 <meta charset="UTF-8">
 <title>og BOGO {E.MIESIAC}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<!-- Podgląd linku w stylu em.naturalnie (kość słoniowa). Generowany przez dodatki.py — zmiany rób tam. -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;500&display=swap" rel="stylesheet">
 <style>
-  * {{ box-sizing: border-box; margin: 0; }}
-  body {{ width: 1200px; height: 630px; overflow: hidden; background: #fcfbfa; font-family: 'Inter', sans-serif; position: relative; }}
-  .lisc {{ position: absolute; width: 300px; opacity: .22; mix-blend-mode: multiply; }}
-  .wrap {{ position: absolute; inset: 0; display: flex; align-items: center; gap: 48px; padding: 0 64px 0 72px; }}
-  .txt {{ flex: 0 0 500px; }}
-  .marka {{ font-size: 18px; font-weight: 700; letter-spacing: .18em; color: #4d6a5e; text-transform: uppercase; margin-bottom: 14px; }}
-  h1 {{ font-family: 'Playfair Display', serif; font-size: 76px; font-weight: 600; line-height: 1; color: #1c1917; margin-bottom: 14px; }}
-  .data {{ font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 600; color: #4d6a5e; margin-bottom: 22px; }}
-  .opis {{ font-size: 22px; line-height: 1.45; color: #57534e; margin-bottom: 26px; }}
-  .pill {{ display: inline-block; padding: 12px 24px; border-radius: 999px; background: #eef2f0; border: 2px solid #c9d8d0; color: #3e554b; font-size: 20px; font-weight: 700; }}
-  .foto {{ flex: 1; height: 360px; border-radius: 22px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(47,58,51,.45); }}
-  .foto img {{ width: 100%; height: 100%; object-fit: cover; }}
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  html, body {{ width: 1200px; height: 630px; overflow: hidden; background: #FBFAF4; }}
+  body {{ line-height: 1.55; -webkit-font-smoothing: antialiased; }}
+  .og {{ width: 1200px; height: 630px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; gap: 26.4px; padding: 0 96px; color: #474C37; }}
+  .pill {{ display: inline-block; font: 500 19.2px 'Jost', sans-serif; letter-spacing: .18em; text-transform: uppercase;
+          padding: 7.2px 19.2px; border-radius: 99px; background: #EEF0E6; color: #5B6147; }}
+  .t {{ font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; text-transform: uppercase; letter-spacing: .06em;
+       line-height: 1.1; font-size: 76.8px; }}
+  .s {{ font: 300 28.8px 'Jost', sans-serif; color: #686B62; }}
 </style>
 </head>
 <body>
-  <img class="lisc" src="images/liscie-gora.jpg" style="top:0; left:0;" alt="">
-  <img class="lisc" src="images/liscie-dol.jpg" style="bottom:0; right:0;" alt="">
-  <div class="wrap">
-    <div class="txt">
-      <div class="marka">doTERRA</div>
-      <h1>{L('Oferta BOGO', 'BOGO Offer', 'BOGO-Angebot')}</h1>
-      <div class="data">{L(E.OKRES, X['okres'], X['okres'])}</div>
-      <div class="opis">{L(f'{len(E.ZESTAWY)} zestawów: kupujesz jeden produkt, drugi dostajesz gratis.', f'{len(E.ZESTAWY)} sets: buy one product, get the second one free.', f'{len(E.ZESTAWY)} Sets: Sie kaufen ein Produkt und erhalten das zweite gratis.')}</div>
-      <div class="pill">{L(f'Pakiet BOGO + {E.PREZENT_KROTKO} gratis', 'BOGO bundle + ' + X['prezent_krotko'] + ' free', 'BOGO-Paket + ' + X['prezent_krotko'] + ' gratis')}</div>
-    </div>
-    <div class="foto"><img src="{E.FOTO_PAKIET}" alt=""></div>
+  <div class="og">
+    <div class="pill">BOGO</div>
+    <div class="t">{L('Oferta BOGO', 'BOGO Offer', 'BOGO-Angebot')}</div>
+    <div class="s">{L(E.OKRES, X['okres'], X['okres'])} · {L('kupujesz jeden produkt, drugi gratis', 'buy one product, get the second one free', 'ein Produkt kaufen, das zweite gratis')}</div>
   </div>
 </body>
 </html>
-'''
+"""
     sfx = "" if J == "pl" else "-" + J
     zapisz(TU / f"og{sfx}.html", og)
     renderuj(TU / f"og{sfx}.html", TU / f"images/bogo-social-preview-{E.MIESIAC}{sfx}.jpg")

@@ -1,111 +1,44 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Preview - Rejestracja z pakietem BOGO</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f9fafb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .preview-container {
-            width: 1200px;
-            height: 630px;
-            background: white;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .leaves {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 400px;
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
-        .content {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            align-self: stretch;
-        }
-
-        .logo {
-            width: 240px;
-            margin-bottom: 28px;
-        }
-
-        .title {
-            font-size: 62px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 22px;
-            line-height: 1.2;
-        }
-
-        .subtitle {
-            font-size: 34px;
-            color: #6B7280;
-            font-weight: 400;
-        }
-
-        .badge {
-            display: block;
-            width: fit-content;
-            font-size: 20px;
-            font-weight: 600;
-            color: #7E57C2;
-            background: #F3EEFA;
-            padding: 8px 24px;
-            border-radius: 999px;
-            margin: 0 auto 28px auto;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>Podgląd linku – Einschreibung mit dem BOGO-Paket</title>
+<!--
+  Szablon dla BOGO/dodatki.py ({{BADGE}}, {{PODTYTUL}} wstawia skrypt).
+  Podgląd linku (og:image) w stylu em.naturalnie, kość słoniowa. Zmieniasz tylko teksty w <body>.
+  Render 1200×630 (z katalogu tego pliku):
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+      --force-device-scale-factor=1 --window-size=1200,630 --virtual-time-budget=6000 \
+      --screenshot=/tmp/og.png "file://$PWD/social-preview-de.html"
+    sips -s format jpeg -s formatOptions 90 /tmp/og.png --out social-preview-de.jpg
+  Po podmianie obrazka podbij ?v=N w og:image i twitter:image strony (Facebook trzyma stary obrazek po adresie).
+  Bez pigułki / podpisu: usuń dany <div>. Strona główna huba ma zamiast pigułki <div class="em">em.naturalnie</div>.
+-->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23FBFAF4' stroke='%235B6147' stroke-width='8'/%3E%3Crect x='26' y='44' width='48' height='12' rx='6' fill='%23EEF0E6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #FBFAF4; }
+  body { line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .og { width: 1200px; height: 630px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; gap: 26.4px; padding: 0 96px; color: #474C37; }
+  .em { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; letter-spacing: .12em; font-size: 31.2px; color: #5B6147; }
+  .pill { display: inline-block; font: 500 19.2px 'Jost', sans-serif; letter-spacing: .18em; text-transform: uppercase;
+          padding: 7.2px 19.2px; border-radius: 99px; background: #EEF0E6; color: #5B6147; }
+  .t { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; text-transform: uppercase; letter-spacing: .06em;
+       line-height: 1.1; font-size: 76.8px; }
+  .s { font: 300 28.8px 'Jost', sans-serif; color: #686B62; }
+  .mac { font-family: Futura, 'Jost', sans-serif; }  /* Jost ma zepsute ō/Ō (kreska obok litery) — w pigułce i podpisie „dōTERRA” pisz d<span class="mac">ō</span>TERRA */
+</style>
 </head>
 <body>
-    <div class="preview-container">
-        <img
-            src="images/liscie-gora.png"
-            alt=""
-            class="leaves"
-        >
-
-        <div class="content">
-            <img
-                src="images/doterralogo.png"
-                alt="dōTERRA Logo"
-                class="logo"
-            >
-            <div class="badge">{{BADGE}}</div>
-            <h1 class="title">Einschreibung mit dem BOGO-Paket</h1>
-            <p class="subtitle">{{PODTYTUL}}</p>
-        </div>
-    </div>
+  <div class="og">
+    <div class="pill">{{BADGE}}</div>
+    <div class="t">Einschreibung mit dem BOGO-Paket</div>
+    <div class="s">{{PODTYTUL}}</div>
+  </div>
 </body>
 </html>
